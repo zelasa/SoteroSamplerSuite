@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../Common/SoteroFormat.h"
+#include "../../SamplerPlayer/Source/SoteroSamplerVoice.h"
 #include <JuceHeader.h>
 #include <functional>
 #include <memory>
@@ -10,14 +11,25 @@ namespace sotero {
  * @class MainComponent
  * @brief The main workspace for SoteroBuilder.
  */
-class MainComponent : public juce::Component,
-                      public juce::FileDragAndDropTarget {
+class MainComponent : public juce::AudioAppComponent,
+                      public juce::FileDragAndDropTarget,
+                      public juce::MidiInputCallback {
 public:
   MainComponent();
   ~MainComponent() override;
 
   void paint(juce::Graphics &) override;
   void resized() override;
+
+  // --- AudioAppComponent Overrides ---
+  void prepareToPlay(int samplesPerBlockExpected, double sampleRate) override;
+  void
+  getNextAudioBlock(const juce::AudioSourceChannelInfo &bufferToFill) override;
+  void releaseResources() override;
+
+  // --- MidiInputCallback Overrides ---
+  void handleIncomingMidiMessage(juce::MidiInput *source,
+                                 const juce::MidiMessage &message) override;
 
   // --- FileDragAndDropTarget Overrides ---
   bool isInterestedInFileDrag(const juce::StringArray &files) override {
@@ -39,6 +51,7 @@ private:
     bool hasSample = false;
     juce::String fileName;
     std::function<void()> onFileChanged;
+    std::function<void()> onAudition;
 
     LayerSlot(int lIdx, int nIdx) : layerIndex(lIdx), noteIndex(nIdx) {}
 
@@ -63,9 +76,41 @@ private:
       }
     }
 
-    void mouseDown(const juce::MouseEvent &) override {
-      if (onFileChanged)
+    void mouseDown(const juce::MouseEvent &e) override {
+      if (hasSample && onAudition)
+        onAudition();
+      else if (onFileChanged)
         onFileChanged();
+    }
+  };
+
+  /**
+   * @class SoteroSynthesiser
+   * @brief Custom synth that supports Sotero velocity layers.
+   */
+  class SoteroSynthesiser : public juce::Synthesiser {
+  public:
+    void noteOn(int midiChannel, int midiNoteNumber, float velocity) override {
+      const int v = juce::jlimit(1, 127, (int)(velocity * 127.0f));
+      for (auto *sound : sounds) {
+        if (sound->appliesToNote(midiNoteNumber) &&
+            sound->appliesToChannel(midiChannel)) {
+          if (auto *ss =
+                  dynamic_cast<const sotero::SoteroSamplerSound *>(sound)) {
+            if (ss->appliesToVelocity(v)) {
+              for (auto *voice : voices) {
+                if (voice->canPlaySound(sound)) {
+                  if (!voice->isVoiceActive()) {
+                    startVoice(voice, sound, midiChannel, midiNoteNumber,
+                               velocity);
+                    return;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   };
 
@@ -79,28 +124,99 @@ private:
         addAndMakeVisible(layers.getLast());
       }
     }
+    void paint(juce::Graphics &g) override {
+      bool isBlack = juce::MidiMessage::isMidiNoteBlack(noteNumber);
+      g.setColour(isBlack ? juce::Colours::white.withAlpha(0.02f)
+                          : juce::Colours::transparentWhite);
+      g.fillAll();
+
+      if (isBlack) {
+        g.setColour(juce::Colours::white.withAlpha(0.05f));
+        g.drawRect(getLocalBounds(), 1.0f);
+      }
+    }
 
     void resized() override {
       auto r = getLocalBounds();
       int h = r.getHeight() / 5;
-      for (auto *l : layers)
-        l->setBounds(r.removeFromTop(h));
+      // Reverse UI: index 4 at Top (Forte), index 0 at Bottom (Piano)
+      for (int i = 4; i >= 0; --i)
+        layers[i]->setBounds(r.removeFromTop(h));
+    }
+  };
+
+  struct SemiToneKeyboard : public juce::Component {
+    std::function<void(int)> onKeyPress;
+
+    void paint(juce::Graphics &g) override {
+      auto r = getLocalBounds().toFloat();
+      float keyWidth = r.getWidth() / 12.0f;
+
+      for (int i = 0; i < 12; ++i) {
+        auto keyRect =
+            juce::Rectangle<float>(i * keyWidth, 0, keyWidth, r.getHeight())
+                .reduced(0.5f);
+        bool isBlack = juce::MidiMessage::isMidiNoteBlack(60 + i);
+
+        if (isBlack) {
+          // Background for the key slot
+          g.setColour(juce::Colours::white.withAlpha(0.8f));
+          g.fillRect(keyRect);
+
+          // The black key "cap" (shorter)
+          auto cap =
+              keyRect.withHeight(r.getHeight() * 0.65f).reduced(2.0f, 0.0f);
+          g.setColour(juce::Colours::black);
+          g.fillRoundedRectangle(cap, 2.0f);
+        } else {
+          g.setColour(juce::Colours::white);
+          g.fillRoundedRectangle(keyRect, 2.0f);
+        }
+
+        g.setColour(juce::Colours::grey.withAlpha(0.3f));
+        g.drawRoundedRectangle(keyRect, 2.0f, 1.0f);
+
+        // Note name
+        g.setColour(isBlack ? juce::Colours::grey : juce::Colours::black);
+        g.setFont(10.0f);
+        const juce::String noteNames[] = {"C",  "C#", "D",  "D#", "E",  "F",
+                                          "F#", "G",  "G#", "A",  "A#", "B"};
+        g.drawText(noteNames[i], keyRect.removeFromBottom(20),
+                   juce::Justification::centred);
+      }
+    }
+
+    void mouseDown(const juce::MouseEvent &e) override {
+      if (onKeyPress) {
+        int keyIndex = (int)(e.x / (getWidth() / 12.0f));
+        onKeyPress(60 + keyIndex);
+      }
     }
   };
 
   juce::OwnedArray<KeyColumn> keyColumns;
-  juce::MidiKeyboardState keyboardState;
-  std::unique_ptr<juce::MidiKeyboardComponent> keyboard;
+  std::unique_ptr<SemiToneKeyboard> keyboard;
 
   // --- Data ---
   LibraryMetadata libraryData;
   juce::File lastBrowseDirectory;
+  juce::File currentLibraryFile;
 
   void updateGridUI();
   void updateMetadataFromUI();
+  void rebuildSynth();
+  void auditionSample(const juce::String &path, int midiNote, int velocity);
 
   // --- Actions ---
   juce::TextButton exportButton{"GENERATE .SPSA"};
+  juce::TextButton importButton{"IMPORT .SPSA"};
+
+  // --- Audio ---
+  juce::AudioFormatManager formatManager;
+  SoteroSynthesiser synth;
+  juce::CriticalSection synthLock;
+  juce::MidiBuffer emptyMidi;
+  juce::MidiMessageCollector midiCollector;
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };

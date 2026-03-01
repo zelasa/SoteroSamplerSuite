@@ -1,9 +1,12 @@
 #include "MainComponent.h"
 #include "../../Common/SoteroArchive.h"
+#include "../../SamplerPlayer/Source/SoteroSamplerVoice.h"
 
 namespace sotero {
 MainComponent::MainComponent() {
   // 1. Initialize metadata for 12 keys (C to B), each with 5 velocity layers
+  // Index 0 = Piano (0-24), Index 4 = Forte (100-127)
+  // The UI (KeyColumn) will draw Index 4 at the TOP.
   for (int note = 0; note < 12; ++note) {
     for (int layer = 0; layer < 5; ++layer) {
       KeyMapping m;
@@ -11,6 +14,7 @@ MainComponent::MainComponent() {
       m.velocityLow = layer * 25;
       m.velocityHigh = (layer == 4) ? 127 : (layer * 25 + 24);
       m.samplePath = "";
+      m.fileName = "";
       m.chokeGroup = 0;
       libraryData.mappings.add(m);
     }
@@ -32,6 +36,14 @@ MainComponent::MainComponent() {
 
     for (int layer = 0; layer < 5; ++layer) {
       auto *slot = col->layers[layer];
+      slot->onAudition = [this, i, layer] {
+        int mappingIndex = i * 5 + layer;
+        auto &mapping = libraryData.mappings.getReference(mappingIndex);
+        if (mapping.samplePath.isNotEmpty())
+          // Now Layer 4 is Top (Forte), Layer 0 is Bottom (Piano)
+          auditionSample(mapping.samplePath, 60 + i, (layer * 25 + 12));
+      };
+
       slot->onFileChanged = [this, i, layer] {
         chooser = std::make_unique<juce::FileChooser>(
             "Select a WAV file...", lastBrowseDirectory, "*.wav;*.aif;*.aiff");
@@ -39,32 +51,64 @@ MainComponent::MainComponent() {
         auto chooserFlags = juce::FileBrowserComponent::openMode |
                             juce::FileBrowserComponent::canSelectFiles;
 
-        chooser->launchAsync(
-            chooserFlags, [this, i, layer](const juce::FileChooser &fc) {
-              auto file = fc.getResult();
-              if (file.existsAsFile()) {
-                lastBrowseDirectory = file.getParentDirectory();
-                int mappingIndex = i * 5 + layer;
-                libraryData.mappings.getReference(mappingIndex).samplePath =
-                    file.getFullPathName();
-                updateGridUI();
-              }
-            });
+        chooser->launchAsync(chooserFlags, [this, i, layer](
+                                               const juce::FileChooser &fc) {
+          auto file = fc.getResult();
+          if (file.existsAsFile()) {
+            lastBrowseDirectory = file.getParentDirectory();
+            int mappingIndex = i * 5 + layer;
+            auto &mapping = libraryData.mappings.getReference(mappingIndex);
+            mapping.samplePath = file.getFullPathName();
+            mapping.fileName = file.getFileName();
+            updateGridUI();
+            rebuildSynth(); // Update the audition engine
+
+            // Auto-audition the dropped file
+            auditionSample(file.getFullPathName(), 60 + i, (layer * 25 + 12));
+          }
+        });
       };
     }
-    // Note: We add them all but will manage Z-order in resized or by order of
-    // addition
     addAndMakeVisible(col);
   }
 
-  // 4. Standard Keyboard UI
-  keyboard = std::make_unique<juce::MidiKeyboardComponent>(
-      keyboardState, juce::MidiKeyboardComponent::horizontalKeyboard);
-  keyboard->setAvailableRange(60, 71);
-  keyboard->setScrollButtonsVisible(false);
+  // 4. Custom SemiTone Keyboard UI (Piano Roll Style)
+  keyboard = std::make_unique<SemiToneKeyboard>();
+  keyboard->onKeyPress = [this](int note) { synth.noteOn(1, note, 0.8f); };
   addAndMakeVisible(keyboard.get());
 
   // 5. Footer UI
+  importButton.onClick = [this] {
+    chooser = std::make_unique<juce::FileChooser>(
+        "Open Sotero Library...", lastBrowseDirectory, "*.spsa;*.sotero");
+
+    chooser->launchAsync(
+        juce::FileBrowserComponent::openMode |
+            juce::FileBrowserComponent::canSelectFiles,
+        [this](const juce::FileChooser &fc) {
+          auto file = fc.getResult();
+          if (file.existsAsFile()) {
+            auto imported = sotero::SoteroArchive::readMetadata(file);
+            if (imported.mappings.size() > 0) {
+              currentLibraryFile = file;
+              libraryData = imported;
+              nameEditor.setText(libraryData.name);
+              authorEditor.setText(libraryData.author);
+              updateGridUI();
+              rebuildSynth();
+              juce::NativeMessageBox::showMessageBoxAsync(
+                  juce::MessageBoxIconType::InfoIcon, "Success",
+                  "Library imported successfully!");
+            } else {
+              juce::NativeMessageBox::showMessageBoxAsync(
+                  juce::MessageBoxIconType::WarningIcon, "Error",
+                  "Failed to read library file (Invalid format?).");
+            }
+          }
+        });
+  };
+  addAndMakeVisible(importButton);
+
   exportButton.onClick = [this] {
     updateMetadataFromUI();
 
@@ -99,14 +143,103 @@ MainComponent::MainComponent() {
                          juce::Colours::white);
   addAndMakeVisible(exportButton);
 
+  // 6. Audio Initialization
+  formatManager.registerBasicFormats();
+  for (int i = 0; i < 8; ++i)
+    synth.addVoice(new juce::SamplerVoice()); // Basic audition voices
+
+  setAudioChannels(0, 2); // No inputs, 2 outputs
+
   lastBrowseDirectory =
       juce::File::getSpecialLocation(juce::File::userHomeDirectory);
 
   setSize(900, 700);
+
+  // Register as MIDI callback
+  auto midiInputs = juce::MidiInput::getAvailableDevices();
+  for (auto &device : midiInputs) {
+    if (deviceManager.isMidiInputDeviceEnabled(device.identifier))
+      deviceManager.addMidiInputDeviceCallback(device.identifier, this);
+  }
+
+  // Add voices for auditioning
+  for (int i = 0; i < 16; ++i) {
+    synth.addVoice(new sotero::SoteroSamplerVoice());
+  }
+
   updateGridUI();
 }
 
-MainComponent::~MainComponent() {}
+MainComponent::~MainComponent() {
+  deviceManager.removeMidiInputDeviceCallback({}, this);
+  shutdownAudio();
+}
+
+void MainComponent::prepareToPlay(int samplesPerBlockExpected,
+                                  double sampleRate) {
+  synth.setCurrentPlaybackSampleRate(sampleRate);
+  midiCollector.reset(sampleRate);
+}
+
+void MainComponent::getNextAudioBlock(
+    const juce::AudioSourceChannelInfo &bufferToFill) {
+  bufferToFill.clearActiveBufferRegion();
+
+  juce::MidiBuffer incomingMidi;
+  midiCollector.removeNextBlockOfMessages(incomingMidi,
+                                          bufferToFill.numSamples);
+
+  synth.renderNextBlock(*bufferToFill.buffer, incomingMidi,
+                        bufferToFill.startSample, bufferToFill.numSamples);
+}
+
+void MainComponent::handleIncomingMidiMessage(
+    juce::MidiInput *source, const juce::MidiMessage &message) {
+  midiCollector.addMessageToQueue(message);
+}
+
+void MainComponent::releaseResources() {}
+
+void MainComponent::rebuildSynth() {
+  const juce::ScopedLock sl(synthLock);
+  synth.clearSounds();
+
+  for (const auto &m : libraryData.mappings) {
+    if (m.samplePath.isNotEmpty()) {
+      std::unique_ptr<juce::AudioFormatReader> reader;
+
+      juce::File file(m.samplePath);
+      if (file.existsAsFile()) {
+        // It's a local file path
+        reader.reset(formatManager.createReaderFor(file));
+      } else if (currentLibraryFile.existsAsFile()) {
+        // Try to load as an internal archive reference
+        auto data = sotero::SoteroArchive::extractResource(currentLibraryFile,
+                                                           m.samplePath);
+        if (data.getSize() > 0) {
+          auto stream = std::make_unique<juce::MemoryInputStream>(data, true);
+          reader.reset(formatManager.createReaderFor(std::move(stream)));
+        }
+      }
+
+      if (reader != nullptr) {
+        juce::BigInteger range;
+        range.setBit(m.midiNote);
+
+        synth.addSound(new sotero::SoteroSamplerSound(
+            m.samplePath, *reader, range, m.midiNote, 0.01, 0.1, 10.0,
+            m.chokeGroup, m.velocityLow, m.velocityHigh));
+      }
+    }
+  }
+}
+
+void MainComponent::auditionSample(const juce::String &path, int midiNote,
+                                   int velocity) {
+  const juce::ScopedLock sl(synthLock);
+  // Synth note on will trigger the sounds already loaded in rebuildSynth
+  synth.noteOn(1, midiNote, (float)velocity / 127.0f);
+}
 
 void MainComponent::updateGridUI() {
   for (int i = 0; i < 12; ++i) {
@@ -114,9 +247,11 @@ void MainComponent::updateGridUI() {
     for (int layer = 0; layer < 5; ++layer) {
       auto &mapping = libraryData.mappings.getReference(i * 5 + layer);
       auto *slot = col->layers[layer];
-      slot->hasSample = !mapping.samplePath.isEmpty();
+      slot->hasSample = mapping.samplePath.isNotEmpty();
       if (slot->hasSample) {
-        slot->fileName = juce::File(mapping.samplePath).getFileName();
+        slot->fileName = mapping.fileName.isNotEmpty()
+                             ? mapping.fileName
+                             : juce::File(mapping.samplePath).getFileName();
       }
       slot->repaint();
     }
@@ -148,46 +283,33 @@ void MainComponent::resized() {
 
   // Footer First
   auto footerArea = r.removeFromBottom(80);
-  exportButton.setBounds(footerArea.withSizeKeepingCentre(200, 40));
+  auto buttonW = 150;
+  exportButton.setBounds(footerArea.removeFromRight(buttonW)
+                             .withSizeKeepingCentre(buttonW, 40)
+                             .reduced(5));
+  importButton.setBounds(footerArea.removeFromRight(buttonW)
+                             .withSizeKeepingCentre(buttonW, 40)
+                             .reduced(5));
 
-  keyboard->setBounds(r.removeFromBottom(100));
+  keyboard->setBounds(r.removeFromBottom(80));
 
   r.removeFromBottom(5);
 
-  // Grid Layout - Proportional Alignment with Standard Keyboard
-  // Note: We MUST use the keyboard's white key width to align
-  float whiteKeyWidth =
-      keyboard->getWidth() / 7.0f; // 7 white keys in an octave
+  // Grid Layout - Piano Roll Alignment
+  float colWidth = (float)r.getWidth() / 12.0f;
 
   for (int i = 0; i < 12; ++i) {
-    auto keyRect = keyboard->getRectangleForKey(60 + i);
-
-    // Position the column exactly over the key
-    keyColumns[i]->setBounds(keyboard->getX() + (int)keyRect.getX(), r.getY(),
-                             (int)keyRect.getWidth(), r.getHeight());
-  }
-
-  // Z-Order: Ensure black keys are on top of white keys for correct overlapping
-  // visualization
-  for (int i = 0; i < 12; ++i) {
-    if (juce::MidiMessage::isMidiNoteBlack(60 + i)) {
-      keyColumns[i]->toFront(false);
-    }
+    keyColumns[i]->setBounds((int)(r.getX() + i * colWidth), r.getY(),
+                             (int)colWidth, r.getHeight());
   }
 }
 
 void MainComponent::filesDropped(const juce::StringArray &files, int x, int y) {
   if (files.size() > 0) {
-    // Check black keys FIRST (higher Z-order/overlapping)
     for (int i = 0; i < keyColumns.size(); ++i) {
-      int idx = 11 - i; // Reverse check for simple top-down priority? No,
-                        // explicitly check blacks.
-    }
-
-    // Structured Priority: Black keys then White keys
-    auto checkIndex = [this, files, x, y](int i) -> bool {
       auto *col = keyColumns[i];
       auto colBounds = col->getBounds();
+
       if (colBounds.contains(x, y)) {
         int localY = y - colBounds.getY();
         for (int layer = 0; layer < 5; ++layer) {
@@ -195,29 +317,15 @@ void MainComponent::filesDropped(const juce::StringArray &files, int x, int y) {
           if (slot->getBounds().contains(x - colBounds.getX(), localY)) {
             for (int f = 0; f < files.size() && (layer + f) < 5; ++f) {
               int mappingIndex = i * 5 + (layer + f);
-              libraryData.mappings.getReference(mappingIndex).samplePath =
-                  files[f];
+              auto &mapping = libraryData.mappings.getReference(mappingIndex);
+              mapping.samplePath = files[f];
+              mapping.fileName = juce::File(files[f]).getFileName();
             }
             updateGridUI();
-            return true;
+            rebuildSynth();
+            return;
           }
         }
-      }
-      return false;
-    };
-
-    // 1. Check Blacks
-    for (int i = 0; i < 12; ++i) {
-      if (juce::MidiMessage::isMidiNoteBlack(60 + i)) {
-        if (checkIndex(i))
-          return;
-      }
-    }
-    // 2. Check Whites
-    for (int i = 0; i < 12; ++i) {
-      if (!juce::MidiMessage::isMidiNoteBlack(60 + i)) {
-        if (checkIndex(i))
-          return;
       }
     }
   }

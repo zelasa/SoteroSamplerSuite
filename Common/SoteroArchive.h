@@ -13,7 +13,7 @@ public:
   /**
    * @brief Writes a complete library to a file, including binary assets.
    */
-  static bool write(const juce::File &outputFile, LibraryMetadata &metadata) {
+  static bool write(const juce::File &outputFile, LibraryMetadata metadata) {
     juce::FileOutputStream stream(outputFile);
     if (!stream.openedOk())
       return false;

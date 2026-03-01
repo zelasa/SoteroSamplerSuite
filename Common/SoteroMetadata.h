@@ -29,6 +29,7 @@ public:
       auto m = mappings->createNewChildElement("Mapping");
       m->setAttribute("note", mapping.midiNote);
       m->setAttribute("sample", mapping.samplePath);
+      m->setAttribute("fileName", mapping.fileName);
       m->setAttribute("velLow", mapping.velocityLow);
       m->setAttribute("velHigh", mapping.velocityHigh);
       m->setAttribute("choke", mapping.chokeGroup);
@@ -57,6 +58,7 @@ public:
           KeyMapping mapping;
           mapping.midiNote = m->getIntAttribute("note");
           mapping.samplePath = m->getStringAttribute("sample");
+          mapping.fileName = m->getStringAttribute("fileName");
           mapping.velocityLow = m->getIntAttribute("velLow");
           mapping.velocityHigh = m->getIntAttribute("velHigh");
           mapping.chokeGroup = m->getIntAttribute("choke");

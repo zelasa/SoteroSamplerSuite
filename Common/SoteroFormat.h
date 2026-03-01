@@ -3,7 +3,6 @@
 #include <cstdint>
 #include <juce_core/juce_core.h>
 
-
 /**
  * @file SoteroFormat.h
  * @brief Core specification and structures for the .spsa / .sotero format.
@@ -44,6 +43,7 @@ struct SoteroHeader {
 struct KeyMapping {
   int midiNote;
   juce::String samplePath;
+  juce::String fileName;
   int velocityLow;
   int velocityHigh;
   int chokeGroup;
