@@ -13,24 +13,40 @@ public:
   /**
    * @brief Writes a complete library to a file, including binary assets.
    */
-  static bool write(const juce::File &outputFile, LibraryMetadata metadata) {
-    juce::FileOutputStream stream(outputFile);
-    if (!stream.openedOk())
-      return false;
-
-    stream.setPosition(0);
-    stream.truncate();
-
+  static bool write(const juce::File &outputFile, LibraryMetadata metadata,
+                    const juce::File &sourceArchive = juce::File{}) {
     // 1. Prepare Binary Payload & Update Offsets
     juce::MemoryBlock payload;
 
     // Handle Artwork
     if (!metadata.artworkPath.isEmpty()) {
-      juce::File artFile(metadata.artworkPath);
-      if (artFile.existsAsFile()) {
+      juce::MemoryBlock data;
+
+      bool isInternalArt = false;
+      if (metadata.artworkPath.contains(":")) {
+        auto parts =
+            juce::StringArray::fromTokens(metadata.artworkPath, ":", "");
+        if (parts.size() == 2 && parts[0].containsOnly("0123456789") &&
+            parts[1].containsOnly("0123456789")) {
+          isInternalArt = true;
+        }
+      }
+
+      if (isInternalArt) {
+        if (sourceArchive.existsAsFile()) {
+          data = extractResource(sourceArchive, metadata.artworkPath);
+        }
+      } else {
+        juce::File artFile(metadata.artworkPath);
+        if (artFile.existsAsFile()) {
+          artFile.loadFileAsData(data);
+        }
+      }
+
+      if (data.getSize() > 0) {
         size_t offset = payload.getSize();
-        size_t size = (size_t)artFile.getSize();
-        artFile.loadFileAsData(payload);
+        size_t size = data.getSize();
+        payload.append(data.getData(), data.getSize());
         metadata.artworkPath = juce::String(offset) + ":" +
                                juce::String(size); // Store as offset:size
       }
@@ -39,8 +55,30 @@ public:
     // Handle Samples
     for (auto &mapping : metadata.mappings) {
       if (!mapping.samplePath.isEmpty()) {
-        juce::File sFile(mapping.samplePath);
-        if (sFile.existsAsFile()) {
+        juce::MemoryBlock data;
+
+        bool isInternal = false;
+        if (mapping.samplePath.contains(":")) {
+          auto parts =
+              juce::StringArray::fromTokens(mapping.samplePath, ":", "");
+          if (parts.size() == 2 && parts[0].containsOnly("0123456789") &&
+              parts[1].containsOnly("0123456789")) {
+            isInternal = true;
+          }
+        }
+
+        if (isInternal) {
+          if (sourceArchive.existsAsFile()) {
+            data = extractResource(sourceArchive, mapping.samplePath);
+          }
+        } else {
+          juce::File sFile(mapping.samplePath);
+          if (sFile.existsAsFile()) {
+            sFile.loadFileAsData(data);
+          }
+        }
+
+        if (data.getSize() > 0) {
           // Ensure 8-byte alignment for ARM performance
           while (payload.getSize() % 8 != 0) {
             const char zero = 0;
@@ -48,15 +86,26 @@ public:
           }
 
           size_t offset = payload.getSize();
-          size_t size = (size_t)sFile.getSize();
-          sFile.loadFileAsData(payload);
+          size_t size = data.getSize();
+          payload.append(data.getData(), data.getSize());
 
           // Internal reference: "OFFSET:SIZE"
           mapping.samplePath = juce::String(offset) + ":" + juce::String(size);
+        } else {
+          // failed to locate asset
+          mapping.samplePath = "";
         }
       }
     }
 
+    // Now write the file securely (after reading from source archive is done in
+    // case they are the same file)
+    juce::FileOutputStream stream(outputFile);
+    if (!stream.openedOk())
+      return false;
+
+    stream.setPosition(0);
+    stream.truncate();
     // 2. Serialize Metadata with internal offsets
     juce::String xmlString = SoteroMetadataHandler::toXmlString(metadata);
     juce::MemoryBlock xmlData;
@@ -72,10 +121,12 @@ public:
     stream.write(&header, sizeof(SoteroHeader));
 
     // 4. Write XML Manifest
-    stream.write(xmlData.getData(), xmlData.getSize());
+    if (xmlData.getSize() > 0)
+      stream.write(xmlData.getData(), xmlData.getSize());
 
     // 5. Write Binary Payload
-    stream.write(payload.getData(), payload.getSize());
+    if (payload.getSize() > 0)
+      stream.write(payload.getData(), payload.getSize());
 
     stream.flush();
     return true;

@@ -127,23 +127,25 @@ MainComponent::MainComponent() {
             .getChildFile(libraryData.name + ".spsa"),
         "*.spsa;*.sotero");
 
-    chooser->launchAsync(
-        juce::FileBrowserComponent::saveMode |
-            juce::FileBrowserComponent::warnAboutOverwriting,
-        [this](const juce::FileChooser &fc) {
-          auto file = fc.getResult();
-          if (file != juce::File{}) {
-            if (sotero::SoteroArchive::write(file, libraryData)) {
-              juce::NativeMessageBox::showMessageBoxAsync(
-                  juce::MessageBoxIconType::InfoIcon, "Success",
-                  "Sotero Library generated successfully!");
-            } else {
-              juce::NativeMessageBox::showMessageBoxAsync(
-                  juce::MessageBoxIconType::WarningIcon, "Error",
-                  "Failed to generate library.");
-            }
-          }
-        });
+    chooser->launchAsync(juce::FileBrowserComponent::saveMode |
+                             juce::FileBrowserComponent::warnAboutOverwriting,
+                         [this](const juce::FileChooser &fc) {
+                           auto file = fc.getResult();
+                           if (file != juce::File{}) {
+                             if (sotero::SoteroArchive::write(
+                                     file, libraryData, currentLibraryFile)) {
+                               currentLibraryFile = file;
+                               juce::NativeMessageBox::showMessageBoxAsync(
+                                   juce::MessageBoxIconType::InfoIcon,
+                                   "Success",
+                                   "Sotero Library generated successfully!");
+                             } else {
+                               juce::NativeMessageBox::showMessageBoxAsync(
+                                   juce::MessageBoxIconType::WarningIcon,
+                                   "Error", "Failed to generate library.");
+                             }
+                           }
+                         });
   };
 
   exportButton.setColour(juce::TextButton::buttonColourId,
