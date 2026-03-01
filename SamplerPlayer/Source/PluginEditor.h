@@ -142,22 +142,21 @@ private:
       masterVolAtt;
 };
 
-// (TrackControl remains similar but updated visually)
-class TrackControl : public juce::Component, public juce::Timer {
+// (Unified Mixer and Library Info)
+class LibraryDashboard : public juce::Component, public juce::Timer {
 public:
-  TrackControl(SamplerPlayerAudioProcessor &p, int index,
-               const juce::String &name);
+  LibraryDashboard(SamplerPlayerAudioProcessor &p);
   void resized() override;
   void paint(juce::Graphics &g) override;
   void timerCallback() override;
 
 private:
   SamplerPlayerAudioProcessor &processor;
-  int trackIndex;
-  juce::Label titleLabel, nameLabel;
+  juce::Label titleLabel, authorLabel;
+  juce::Image artwork;
   HardwareKnob volSlider, panSlider;
   juce::TextButton loadBtn;
-  VUMeter vu;
+  VUMeter vuL, vuR;
   std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> volAtt,
       panAtt;
 };
@@ -170,12 +169,15 @@ public:
 private:
   SamplerPlayerAudioProcessor &processor;
   juce::GroupComponent globalGroup;
-  juce::Label chanLabel, noteLabel;
-  juce::ComboBox chanCombo, noteCombo;
+  juce::Label chanLabel;
+  juce::ComboBox chanCombo;
   std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment>
-      chanAtt, noteAtt;
+      chanAtt;
 
-  std::unique_ptr<TrackControl> trackControls[3];
+  std::unique_ptr<LibraryDashboard> dashboard;
+
+  juce::TextButton loadLibBtn{"LOAD SOTERO LIBRARY"};
+  std::unique_ptr<juce::FileChooser> chooser;
 };
 
 class SamplerPlayerAudioProcessorEditor : public juce::AudioProcessorEditor,

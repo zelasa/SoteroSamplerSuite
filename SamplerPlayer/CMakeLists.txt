@@ -30,6 +30,7 @@ target_sources(SamplerPlayer PRIVATE
 
 # 4. Links e Dependências
 target_link_libraries(SamplerPlayer PRIVATE
+    Common
     SamplerPlayerAssets
     juce::juce_audio_utils
     juce::juce_audio_processors

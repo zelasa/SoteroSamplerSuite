@@ -5,8 +5,8 @@ SamplerPlayerAudioProcessor::SamplerPlayerAudioProcessor()
     : AudioProcessor(BusesProperties().withOutput(
           "Output", juce::AudioChannelSet::stereo(), true)),
       apvts(*this, nullptr, "Parameters", createParameterLayout()) {
-  for (int i = 0; i < 3; ++i)
-    trackSampleNames[i] = "No Sample";
+  formatManager.registerBasicFormats();
+  currentLibraryName = "No Library Loaded";
 }
 
 SamplerPlayerAudioProcessor::~SamplerPlayerAudioProcessor() {}
@@ -36,11 +36,7 @@ void SamplerPlayerAudioProcessor::prepareToPlay(double sampleRate,
   spec.maximumBlockSize = samplesPerBlock;
   spec.numChannels = getTotalNumOutputChannels();
 
-  for (int i = 0; i < 3; ++i) {
-    tracks[i].prepareToPlay(sampleRate, samplesPerBlock);
-    smoothedGains[i].reset(sampleRate, 0.02);
-    smoothedPans[i].reset(sampleRate, 0.02);
-  }
+  synth.setCurrentPlaybackSampleRate(sampleRate);
 
   masterCompressor.prepare(spec);
   masterReverb.prepare(spec);
@@ -69,87 +65,40 @@ void SamplerPlayerAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
   for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
     buffer.clear(i, 0, buffer.getNumSamples());
 
-  int targetNote = (int)*apvts.getRawParameterValue("midiNote");
   int targetChannel = (int)*apvts.getRawParameterValue("midiChannel");
 
-  juce::MidiBuffer filteredMessages[3];
+  // Velocity Curve Processing
+  int curveType = (int)*apvts.getRawParameterValue("velocityCurve");
+  juce::MidiBuffer specializedMessages;
 
   for (const auto metadata : midiMessages) {
     auto msg = metadata.getMessage();
 
-    // Filtro de Canal (0 = All)
+    // Channel Filtering (0 = All)
     if (targetChannel != 0 && msg.getChannel() != targetChannel)
       continue;
 
     if (msg.isNoteOn()) {
       lastMidiNote.store(msg.getNoteNumber());
       lastMidiVelocity.store(msg.getVelocity());
-    }
 
-    if (msg.isNoteOn()) {
-      if (msg.getNoteNumber() == targetNote) {
-        float normalizedVel = (float)msg.getVelocity() / 127.0f;
-        int curveType = (int)*apvts.getRawParameterValue("velocityCurve");
+      float normalizedVel = (float)msg.getVelocity() / 127.0f;
+      if (curveType == 0) // Soft
+        normalizedVel = std::sqrt(normalizedVel);
+      else if (curveType == 2) // Hard
+        normalizedVel = std::pow(normalizedVel, 2.0f);
 
-        // Apply Curve
-        if (curveType == 0) // Soft
-          normalizedVel = std::sqrt(normalizedVel);
-        else if (curveType == 2) // Hard
-          normalizedVel = std::pow(normalizedVel, 2.0f);
-
-        int velocity = juce::jlimit(1, 127, (int)(normalizedVel * 127.0f));
-
-        // Create new message for safety
-        auto internalMsg = juce::MidiMessage::noteOn(msg.getChannel(), 60,
-                                                     (juce::uint8)velocity);
-
-        if (velocity <= 54)
-          filteredMessages[0].addEvent(internalMsg, metadata.samplePosition);
-        else if (velocity <= 104)
-          filteredMessages[1].addEvent(internalMsg, metadata.samplePosition);
-        else
-          filteredMessages[2].addEvent(internalMsg, metadata.samplePosition);
-      }
-    } else if (msg.isNoteOff()) {
-      if (msg.getNoteNumber() == targetNote) {
-        auto internalMsg = juce::MidiMessage::noteOff(msg.getChannel(), 60);
-        filteredMessages[0].addEvent(internalMsg, metadata.samplePosition);
-        filteredMessages[1].addEvent(internalMsg, metadata.samplePosition);
-        filteredMessages[2].addEvent(internalMsg, metadata.samplePosition);
-      }
+      int velocity = juce::jlimit(1, 127, (int)(normalizedVel * 127.0f));
+      auto transformedMsg = juce::MidiMessage::noteOn(
+          msg.getChannel(), msg.getNoteNumber(), (juce::uint8)velocity);
+      specializedMessages.addEvent(transformedMsg, metadata.samplePosition);
+    } else {
+      specializedMessages.addEvent(msg, metadata.samplePosition);
     }
   }
 
-  juce::AudioBuffer<float> trackBuffer(2, buffer.getNumSamples());
-  buffer.clear(); // Clear the main buffer before adding track audio
-
-  for (int i = 0; i < 3; ++i) {
-    trackBuffer.clear();
-    tracks[i].processBlock(trackBuffer, filteredMessages[i]);
-
-    // Update smoothed values
-    smoothedGains[i].setTargetValue(juce::Decibels::decibelsToGain(
-        (float)*apvts.getRawParameterValue("vol" + juce::String(i))));
-    smoothedPans[i].setTargetValue(
-        (float)*apvts.getRawParameterValue("pan" + juce::String(i)));
-
-    auto *channelL = trackBuffer.getWritePointer(0);
-    auto *channelR = trackBuffer.getWritePointer(1);
-
-    for (int s = 0; s < trackBuffer.getNumSamples(); ++s) {
-      float currentGain = smoothedGains[i].getNextValue();
-      float currentPan = smoothedPans[i].getNextValue();
-
-      float panL = (currentPan <= 0 ? 1.0f : 1.0f - currentPan);
-      float panR = (currentPan >= 0 ? 1.0f : 1.0f + currentPan);
-
-      channelL[s] *= currentGain * panL;
-      channelR[s] *= currentGain * panR;
-    }
-
-    buffer.addFrom(0, 0, trackBuffer.getReadPointer(0), buffer.getNumSamples());
-    buffer.addFrom(1, 0, trackBuffer.getReadPointer(1), buffer.getNumSamples());
-  }
+  // Render the unified synth
+  synth.renderNextBlock(buffer, specializedMessages, 0, buffer.getNumSamples());
 
   // Update and Apply Master Compressor
   int compType = (int)*apvts.getRawParameterValue("masterComp");
@@ -285,13 +234,53 @@ SamplerPlayerAudioProcessor::createParameterLayout() {
   return {params.begin(), params.end()};
 }
 
+bool SamplerPlayerAudioProcessor::loadSoteroLibrary(const juce::File &file) {
+  if (!file.existsAsFile())
+    return false;
+
+  currentLibraryFile = file;
+
+  sotero::LibraryMetadata metadata;
+  if (!sotero::SoteroArchive::readMetadata(file, metadata))
+    return false;
+
+  currentLibraryName = metadata.name;
+  currentLibraryAuthor = metadata.author;
+
+  synth.clearSounds();
+  synth.clearVoices();
+
+  // Add 16 voices for polyphony
+  for (int i = 0; i < 16; ++i)
+    synth.addVoice(new SoteroSamplerVoice());
+
+  for (const auto &mapping : metadata.mappings) {
+    juce::MemoryBlock sampleData;
+    if (sotero::SoteroArchive::extractResource(file, mapping.samplePath,
+                                               sampleData)) {
+      auto *reader = formatManager.createReaderFor(
+          std::make_unique<juce::MemoryInputStream>(sampleData, false));
+
+      if (reader != nullptr) {
+        juce::BigInteger range;
+        range.setBit(mapping.midiNote);
+
+        synth.addSound(new SoteroSamplerSound(
+            mapping.samplePath, *reader, range, mapping.midiNote, 0.01, 0.1,
+            10.0, mapping.chokeGroup, mapping.velocityLow,
+            mapping.velocityHigh));
+
+        delete reader;
+      }
+    }
+  }
+
+  return true;
+}
+
 bool SamplerPlayerAudioProcessor::loadTrackSample(int index,
                                                   const juce::File &file) {
-  if (tracks[index].loadSample(file)) {
-    trackSampleNames[index] = file.getFileName();
-    return true;
-  }
-  return false;
+  return false; // Deprecated
 }
 
 juce::AudioProcessor *JUCE_CALLTYPE createPluginFilter() {

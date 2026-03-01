@@ -22,5 +22,6 @@ endif()
 add_subdirectory("${JUCE_PATH}" "_juce" EXCLUDE_FROM_ALL)
 
 # 2. Adicionar os Subprojetos
+add_subdirectory(Common)
 add_subdirectory(SamplerPlayer)
 add_subdirectory(SoteroBuilder)

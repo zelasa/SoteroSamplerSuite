@@ -11,12 +11,15 @@ juce_add_binary_data(SoteroBuilderAssets
 
 juce_generate_juce_header(SoteroBuilder)
 
-# 3. Arquivos Fonte (Iniciando com Placeholder)
+# 3. Arquivos Fonte
 target_sources(SoteroBuilder PRIVATE
-    Source/Main.cpp)
+    Source/Main.cpp
+    Source/MainComponent.cpp
+    Source/MainComponent.h)
 
 # 4. Links e Dependências
 target_link_libraries(SoteroBuilder PRIVATE
+    Common
     SoteroBuilderAssets
     juce::juce_audio_utils
     juce::juce_gui_basics

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../../Common/SoteroArchive.h"
+#include "SoteroSamplerVoice.h"
 #include <JuceHeader.h>
 #include <juce_dsp/juce_dsp.h>
 
@@ -7,7 +9,7 @@ class SamplerTrack {
 public:
   SamplerTrack() {
     for (auto i = 0; i < 8; ++i)
-      synth.addVoice(new juce::SamplerVoice());
+      synth.addVoice(new sotero::SoteroSamplerVoice());
 
     formatManager.registerBasicFormats();
   }
@@ -18,10 +20,34 @@ public:
 
   void processBlock(juce::AudioBuffer<float> &buffer,
                     juce::MidiBuffer &midiMessages) {
-    // Aplicar volume e pan serão feitos na mixagem principal do processador
-    synth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
 
-    // VU Meter
+    // --- Choke Group Logic ---
+    for (const auto metadata : midiMessages) {
+      auto msg = metadata.getMessage();
+      if (msg.isNoteOn()) {
+        // Find which sound would be triggered to get its choke group
+        for (int i = 0; i < synth.getNumSounds(); ++i) {
+          if (auto *sound = dynamic_cast<sotero::SoteroSamplerSound *>(
+                  synth.getSound(i).get())) {
+            if (sound->appliesToNote(msg.getNoteNumber()) &&
+                sound->appliesToVelocity(msg.getVelocity())) {
+              int group = sound->chokeGroupId;
+              if (group != 0) {
+                for (int v = 0; v < synth.getNumVoices(); ++v) {
+                  if (auto *voice = dynamic_cast<sotero::SoteroSamplerVoice *>(
+                          synth.getVoice(v))) {
+                    voice->choke(group);
+                  }
+                }
+              }
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    synth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
     level.store(buffer.getMagnitude(0, buffer.getNumSamples()));
   }
 
@@ -33,16 +59,56 @@ public:
         formatManager.createReaderFor(file));
     if (reader != nullptr) {
       juce::BigInteger range;
-      range.setRange(0, 128,
-                     true); // Respond to all notes, we filter in processBlock
-
+      range.setRange(0, 128, true);
       synth.clearSounds();
-      // Use 60 as fixed root note for original pitch
-      synth.addSound(
-          new juce::SamplerSound("Sample", *reader, range, 60, 0.0, 0.1, 10.0));
+      synth.addSound(new juce::SamplerSound("Sample", *reader, range, 60, 0.005,
+                                            0.1, 10.0));
       return true;
     }
     return false;
+  }
+
+  /**
+   * @brief Loads a specific note from a .spsa archive.
+   */
+  bool loadArchiveNote(const juce::File &archiveFile, int midiNote) {
+    auto metadata = sotero::SoteroArchive::readMetadata(archiveFile);
+    if (metadata.name.isEmpty())
+      return false;
+
+    synth.clearSounds();
+    bool loadedAnything = false;
+
+    for (const auto &mapping : metadata.mappings) {
+      if (mapping.midiNote == midiNote && !mapping.samplePath.isEmpty()) {
+        auto data = sotero::SoteroArchive::extractResource(archiveFile,
+                                                           mapping.samplePath);
+        if (data.getSize() > 0) {
+          auto stream = std::make_unique<juce::MemoryInputStream>(data, false);
+          std::unique_ptr<juce::AudioFormatReader> reader(
+              formatManager.createReaderFor(std::move(stream)));
+
+          if (reader != nullptr) {
+            juce::BigInteger range;
+            range.setBit(midiNote);
+
+            juce::BigInteger velocityRange;
+            velocityRange.setRange(
+                mapping.velocityLow,
+                mapping.velocityHigh - mapping.velocityLow + 1, true);
+
+            // Use the target midiNote as the root note to maintain original
+            // pitch
+            synth.addSound(new sotero::SoteroSamplerSound(
+                "NoteLib", *reader, range, midiNote, 0.005, 0.1, 10.0,
+                mapping.chokeGroup, mapping.velocityLow, mapping.velocityHigh));
+
+            loadedAnything = true;
+          }
+        }
+      }
+    }
+    return loadedAnything;
   }
 
   float getLevel() const { return level.load(); }
@@ -86,11 +152,11 @@ public:
   void setStateInformation(const void *data, int sizeInBytes) override;
 
   juce::AudioProcessorValueTreeState apvts;
-  SamplerTrack tracks[3];
 
-  float getTrackLevel(int trackIndex) const {
-    return tracks[trackIndex].getLevel();
-  }
+  // Unified Sound Engine
+  juce::Synthesiser synth;
+  juce::AudioFormatManager formatManager;
+
   float getMasterLevelL() const { return lastMasterLevelL.load(); }
   float getMasterLevelR() const { return lastMasterLevelR.load(); }
   juce::String getTrackSampleName(int index) const {
@@ -105,11 +171,15 @@ public:
   void setView(int viewIndex) { currentView = viewIndex; }
 
   bool loadTrackSample(int index, const juce::File &file);
+  bool loadSoteroLibrary(const juce::File &file);
+  juce::File getCurrentLibraryFile() const { return currentLibraryFile; }
 
 private:
+  juce::File currentLibraryFile;
   juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
 
-  juce::String trackSampleNames[3];
+  juce::String currentLibraryName;
+  juce::String currentLibraryAuthor;
   std::atomic<int> lastMidiNote{-1};
   std::atomic<int> lastMidiVelocity{-1};
   std::atomic<int> currentView{0}; // 0: Performance, 1: Setup

@@ -196,58 +196,58 @@ void PerformanceView::resized() {
 
 SetupView::SetupView(SamplerPlayerAudioProcessor &p) : processor(p) {
   addAndMakeVisible(globalGroup);
-  globalGroup.setText("GLOBAL MIDI SETTINGS");
+  globalGroup.setText("LIBRARY SETUP");
 
   addAndMakeVisible(chanLabel);
-  chanLabel.setText("Channel:", juce::dontSendNotification);
+  chanLabel.setText("MIDI CHANNEL:", juce::dontSendNotification);
   addAndMakeVisible(chanCombo);
-  chanCombo.addItem("All Channels", 1);
+  chanCombo.addItem("ALL", 1);
   for (int i = 1; i <= 16; ++i)
-    chanCombo.addItem("Channel " + juce::String(i), i + 1);
+    chanCombo.addItem(juce::String(i), i + 1);
   chanAtt =
       std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(
-          p.apvts, "midiChannel", chanCombo);
+          processor.apvts, "midiChannel", chanCombo);
 
-  addAndMakeVisible(noteLabel);
-  noteLabel.setText("Trigger Note:", juce::dontSendNotification);
-  addAndMakeVisible(noteCombo);
-  for (int i = 0; i <= 127; ++i)
-    noteCombo.addItem(juce::MidiMessage::getMidiNoteName(i, true, true, 3) +
-                          " (" + juce::String(i) + ")",
-                      i + 1);
-  noteAtt =
-      std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(
-          p.apvts, "midiNote", noteCombo);
+  dashboard = std::make_unique<LibraryDashboard>(p);
+  addAndMakeVisible(*dashboard);
 
-  const juce::String names[] = {"LOW (Note < 55)", "MID (Note 55-104)",
-                                "HIGH (Note > 104)"};
-  for (int i = 0; i < 3; ++i) {
-    trackControls[i] = std::make_unique<TrackControl>(p, i, names[i]);
-    addAndMakeVisible(*trackControls[i]);
-  }
+  addAndMakeVisible(loadLibBtn);
+  loadLibBtn.setColour(juce::TextButton::buttonColourId,
+                       juce::Colours::darkgreen);
+  loadLibBtn.onClick = [this]() {
+    chooser = std::make_unique<juce::FileChooser>(
+        "Select a Sotero Library (.spsa)...",
+        juce::File::getSpecialLocation(juce::File::userHomeDirectory),
+        "*.spsa;*.sotero");
+
+    auto chooserFlags = juce::FileBrowserComponent::openMode |
+                        juce::FileBrowserComponent::canSelectFiles;
+
+    chooser->launchAsync(chooserFlags, [this](const juce::FileChooser &fc) {
+      auto file = fc.getResult();
+      if (file.existsAsFile()) {
+        processor.loadSoteroLibrary(file);
+      }
+    });
+  };
 }
 
 void SetupView::resized() {
-  auto area = getLocalBounds().reduced(30);
+  auto area = getLocalBounds().reduced(20);
+  globalGroup.setBounds(area);
 
-  auto gArea = area.removeFromTop(100);
-  globalGroup.setBounds(gArea);
-  auto gInner = gArea.reduced(30, 20);
+  auto content = area.reduced(20);
+  auto topBar = content.removeFromTop(60);
 
-  int unitW = gInner.getWidth() / 2;
-  auto chanArea = gInner.removeFromLeft(unitW);
+  topBar.removeFromLeft(20);
   chanLabel.setFont(juce::Font(16.0f, juce::Font::bold));
-  chanLabel.setBounds(chanArea.removeFromLeft(100));
-  chanCombo.setBounds(chanArea.reduced(0, 10));
+  chanLabel.setBounds(topBar.removeFromLeft(125).reduced(5));
+  chanCombo.setBounds(topBar.removeFromLeft(100).reduced(10));
 
-  noteLabel.setFont(juce::Font(16.0f, juce::Font::bold));
-  noteLabel.setBounds(gInner.removeFromLeft(125));
-  noteCombo.setBounds(gInner.reduced(0, 10));
+  loadLibBtn.setBounds(content.removeFromBottom(50).reduced(100, 0));
 
-  area.removeFromTop(30); // huge spacer
-  int tW = area.getWidth() / 3;
-  for (int i = 0; i < 3; ++i)
-    trackControls[i]->setBounds(area.removeFromLeft(tW).reduced(12));
+  content.removeFromBottom(20);
+  dashboard->setBounds(content);
 }
 
 // --- TrackControl Implementation ---

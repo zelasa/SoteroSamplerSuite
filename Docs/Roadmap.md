@@ -7,51 +7,62 @@ O SamplerPlayer não será um sampler aberto para qualquer WAV. Ele será um rep
 
 ## Próximas Implementações (Curto Prazo)
 
-### 1. Novo Motor de Velocities (5 Níveis)
-- [ ] Implementar suporte interno para 5 camadas de velocity por timbre.
-- [ ] Transição dinâmica e invisível para o usuário.
+### 5. Articulação Avançada (Envelope ADSR)
+- [ ] Implementar controles globais de Attack, Decay, Sustain e Release.
+- [ ] Moldagem dinâmica do som da livraria por nota.
 
-### 2. Compressor de Precisão (VCA Moderno)
-- [ ] Threshold: -60 dB a 0 dB.
-- [ ] Ratios: 2:1, 3:1, 4:1, 6:1 e INF (Limiter).
-- [ ] Attack: 5, 10, 15, 25, 35 ms.
-- [ ] Release: 20, 40, 60, 90, 120 ms.
+### 6. Filtro Mestre Profissional
+- [ ] Filtros Low-pass e High-pass com controles de Cutoff e Resonance.
 
-### 3. Reverb Algorítmico Customizado
-- [ ] Tipos: Room, Hall, Plate e Stadium.
-- [ ] Controles: On/Off, Size (Tamanho da sala), Pre-delay e Wet/Dry (Mix).
+### 7. Motor de Realismo (Round Robin)
+- [ ] Implementar alternância inteligente de samples para a mesma nota/velocity.
+- [ ] Evitar o efeito "metralhadora" em instrumentos percussivos.
 
-### 4. Mecanismo de Choke Groups (Cancelamento)
-- [ ] Implementar lógica de "Exclusive Groups" (Ex: Tecla X corta Tecla Y).
-- [ ] Configuração embutida nos metadados da biblioteca.
+### 8. Gestão de Livrarias (Library Browser)
+- [ ] Barra lateral visual para navegação rápida entre arquivos `.spsa`.
+- [ ] Carregamento visual com exibição da capa/artwork da biblioteca.
+
+### 9. Modulação e Vida (LFO)
+- [ ] LFO para modulação de Volume, Pitch (Vibrato) e Cutoff.
+
+### 10. Feedback Visual e Performance
+- [ ] Visualizador de Waveform em tempo real com indicador de playhead.
+- [ ] Suporte a Keyswitches para troca de articulações em tempo real.
 
 ## Ferramentas de Desenvolvedor (Internal Tooling) - App Independente
-- [ ] **SoteroBuilder / SSA-Export**: Desenvolver um software **standalone e separado do player** para criação de livrarias.
-    - [ ] Interface focada em importação de WAVs e mapeamento de camadas.
-    - [ ] Conversão e empacotamento em um único arquivo de **Soundbank (.SSA)**.
-    - [ ] Empacotamento de todos os samples em um único arquivo binário.
-    - [ ] Compressão interna (ex: FLAC/Ogg) para reduzir tamanho sem perder qualidade.
+- [x] **SoteroBuilder / Exportador**: Software **standalone** para criação de livrarias.
+    - [x] Interface focada em importação de WAVs e mapeamento de camadas.
+    - [x] Suporte a metadados em **XML** e inclusão de **Artes/Capa**.
+    - [x] Conversão e empacotamento em um arquivo de **Soundbank (.spsa)**.
+    - [x] Empacotamento de todos os samples em um único arquivo binário.
+    - [ ] Compressão interna (ex: FLAC/Ogg) para reduzir tamanho.
     - [ ] Criptografia de DNA para impedir abertura por players externos.
-    - [ ] Mapeamento de 12 teclas (Dó a Si) com suporte às 5 camadas de velocity.
+    - [x] Registro oficial do tipo de arquivo (IANA/MIME) para conformidade internacional.
+    - [x] Mapeamento de 12 teclas (Dó a Si) com suporte às 5 camadas de velocity.
 
 ## Estratégia de Desenvolvimento: Monorepo
-Para garantir que o **Player** e o **Builder** falem a mesma língua (formato .SSA), utilizaremos uma estrutura de projeto unificada:
+Para garantir que o **Player** e o **Builder** falem a mesma língua (formato .SPSA), utilizamos uma estrutura de projeto unificada:
 
 - **SoteroSamplerSuite/** (Raiz)
-    - **Common/**: Código compartilhado (Lógica do formato .SSA, Criptografia, Estruturas de Áudio).
-    - **SamplerPlayer/**: O motor de reprodução (Plugin VST3/AU/Standalone).
+    - **Common/**: Código compartilhado (Lógica do formato .SPSA, Estruturas de Áudio).
+    - **SamplerPlayer/**: O motor de reprodução unificado (Plugin VST3/AU/Standalone).
     - **SoteroBuilder/**: A ferramenta de criação de livrarias (App Standalone).
     - **Assets/**: Logos, fontes e recursos visuais comuns.
 
-## Ideias de Médio/Longo Prazo
-- [ ] **Interface de Performance**: Foco total em 12 pads/teclas visuais com medidores de pico (dB) e indicadores de clip.
+## Cronograma de Desenvolvimento
+O desenvolvimento será realizado em fases focadas em UX e Profissionalismo.
+- **Fase 3**: Redesenho do Player (Unified Library View) + ADSR e Filtro Mestre.
+- **Fase 4**: Motor de Realismo (Round Robin) + Browser de Livrarias e Keyswitches.
+- **Ver detalhes em**: [Sotero_Suite_Development_Phases.md](file:///d:/Luis/OneDrive/Juce/Projetos/SoteroSamplerSuite/Docs/Sotero_Suite_Development_Phases.md)
+
+## Ideias de Longo Prazo
 - [ ] **Multi-saída**: Roteamento individual para DAW.
-- [ ] **Host de Plugins**: Carregamento de VSTs externos (conforme `Future Ideas`).
+- [ ] **Host de Plugins**: Carregamento de VSTs externos.
 
 ## Estratégia de Versionamento (SemVer)
 Adotaremos o padrão **x.y.z** para controle de qualidade:
-- **Major (x)**: Mudanças estruturais ou quebras de compatibilidade (ex: Novo formato .SSA).
-- **Minor (y)**: Novas funcionalidades (ex: Adição de Reverb ou novos filtros).
+- **Major (x)**: Mudanças estruturais ou redesenho total (ex: Versão 1.0.0 com Player Unificado).
+- **Minor (y)**: Novas funcionalidades (ex: Adição de Round Robin ou LFO).
 - **Patch (z)**: Correções de bugs e melhorias de performance.
 
 ---
