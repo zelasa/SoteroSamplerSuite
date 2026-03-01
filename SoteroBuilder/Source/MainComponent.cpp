@@ -44,6 +44,15 @@ MainComponent::MainComponent() {
           auditionSample(mapping.samplePath, 60 + i, (layer * 25 + 12));
       };
 
+      slot->onClear = [this, i, layer] {
+        int mappingIndex = i * 5 + layer;
+        auto &mapping = libraryData.mappings.getReference(mappingIndex);
+        mapping.samplePath = "";
+        mapping.fileName = "";
+        updateGridUI();
+        rebuildSynth(); // Update the audition engine
+      };
+
       slot->onFileChanged = [this, i, layer] {
         chooser = std::make_unique<juce::FileChooser>(
             "Select a WAV file...", lastBrowseDirectory, "*.wav;*.aif;*.aiff");

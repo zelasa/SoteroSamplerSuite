@@ -52,6 +52,7 @@ private:
     juce::String fileName;
     std::function<void()> onFileChanged;
     std::function<void()> onAudition;
+    std::function<void()> onClear;
 
     LayerSlot(int lIdx, int nIdx) : layerIndex(lIdx), noteIndex(nIdx) {}
 
@@ -77,10 +78,14 @@ private:
     }
 
     void mouseDown(const juce::MouseEvent &e) override {
-      if (hasSample && onAudition)
+      if (e.mods.isRightButtonDown() || e.mods.isAltDown()) {
+        if (onClear)
+          onClear();
+      } else if (hasSample && onAudition) {
         onAudition();
-      else if (onFileChanged)
+      } else if (onFileChanged) {
         onFileChanged();
+      }
     }
   };
 
