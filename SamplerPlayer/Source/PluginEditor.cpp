@@ -250,86 +250,71 @@ void SetupView::resized() {
   dashboard->setBounds(content);
 }
 
-// --- TrackControl Implementation ---
-
-TrackControl::TrackControl(SamplerPlayerAudioProcessor &p, int index,
-                           const juce::String &name)
-    : processor(p), trackIndex(index), volSlider("VOL"), panSlider("PAN") {
+// --- LibraryDashboard Implementation ---
+LibraryDashboard::LibraryDashboard(SamplerPlayerAudioProcessor &p)
+    : processor(p), volSlider("VOLUME"), panSlider("PAN") {
   addAndMakeVisible(titleLabel);
-  titleLabel.setText(name, juce::dontSendNotification);
+  titleLabel.setFont(juce::Font(28.0f, juce::Font::bold));
   titleLabel.setJustificationType(juce::Justification::centred);
-  titleLabel.setFont(juce::Font(14.0f, juce::Font::bold));
+  titleLabel.setColour(juce::Label::textColourId, juce::Colours::yellow);
 
-  addAndMakeVisible(nameLabel);
-  nameLabel.setText("NO SAMPLE", juce::dontSendNotification);
-  nameLabel.setJustificationType(juce::Justification::centred);
-  nameLabel.setColour(juce::Label::textColourId, juce::Colours::orange);
+  addAndMakeVisible(authorLabel);
+  authorLabel.setFont(juce::Font(18.0f, juce::Font::plain));
+  authorLabel.setJustificationType(juce::Justification::centred);
+  authorLabel.setColour(juce::Label::textColourId, juce::Colours::lightgrey);
 
   addAndMakeVisible(volSlider);
+  volSlider.getSlider().setRange(-60.0, 6.0);
   volAtt =
       std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
-          processor.apvts, "vol" + juce::String(index), volSlider.getSlider());
+          processor.apvts, "masterVol", volSlider.getSlider());
 
   addAndMakeVisible(panSlider);
+  panSlider.getSlider().setRange(-1.0, 1.0);
   panAtt =
       std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
-          processor.apvts, "pan" + juce::String(index), panSlider.getSlider());
+          processor.apvts, "pan0", panSlider.getSlider());
 
-  addAndMakeVisible(loadBtn);
-  loadBtn.setButtonText("LOAD");
-  loadBtn.onClick = [this] {
-    auto chooser = std::make_shared<juce::FileChooser>("Select", juce::File{},
-                                                       "*.wav;*.aif;*.mp3");
-    chooser->launchAsync(juce::FileBrowserComponent::openMode,
-                         [this, chooser](const juce::FileChooser &fc) {
-                           auto file = fc.getResult();
-                           if (file.existsAsFile())
-                             processor.loadTrackSample(trackIndex, file);
-                         });
-  };
+  addAndMakeVisible(vuL);
+  addAndMakeVisible(vuR);
 
-  addAndMakeVisible(vu);
   startTimerHz(30);
 }
 
-void TrackControl::paint(juce::Graphics &g) {
+void LibraryDashboard::paint(juce::Graphics &g) {
   g.setColour(juce::Colour(0xFF1E1E1E));
-  g.fillRoundedRectangle(getLocalBounds().toFloat().reduced(2), 10.0f);
-  g.setColour(juce::Colours::white.withAlpha(0.15f));
-  g.drawRoundedRectangle(getLocalBounds().toFloat().reduced(2), 10.0f, 1.5f);
+  g.fillRoundedRectangle(getLocalBounds().toFloat().reduced(2), 15.0f);
+  g.setColour(juce::Colours::white.withAlpha(0.1f));
+  g.drawRoundedRectangle(getLocalBounds().toFloat().reduced(2), 15.0f, 1.5f);
 }
 
-void TrackControl::resized() {
-  auto area = getLocalBounds().reduced(15);
+void LibraryDashboard::resized() {
+  auto area = getLocalBounds().reduced(20);
 
-  // 1. Header (Bold Title + Professional Load)
-  auto header = area.removeFromTop(60);
-  titleLabel.setFont(juce::Font(24.0f, juce::Font::bold));
-  loadBtn.setBounds(header.removeFromRight(100).reduced(5));
-  titleLabel.setBounds(header);
+  auto topArea = area.removeFromTop(120);
+  titleLabel.setBounds(topArea.removeFromTop(50));
+  authorLabel.setBounds(topArea);
 
-  // 2. Info area - Large Bold Text
-  area.removeFromTop(10);
-  nameLabel.setFont(juce::Font(18.0f, juce::Font::bold));
-  nameLabel.setBounds(area.removeFromTop(35));
-  area.removeFromTop(10);
+  area.removeFromTop(20); // Spacer
 
-  // 3. Bottom controls (Volume and Pan)
-  auto bottom = area.removeFromBottom(150);
-  auto knobsRow = bottom.removeFromTop(120);
-  int kw = knobsRow.getWidth() / 2;
-  volSlider.setBounds(knobsRow.removeFromLeft(kw).reduced(5, 0));
-  panSlider.setBounds(knobsRow.reduced(5, 0));
+  auto controlArea = area.removeFromBottom(180);
+  int kw = controlArea.getWidth() / 2;
+  volSlider.setBounds(controlArea.removeFromLeft(kw).reduced(20));
+  panSlider.setBounds(controlArea.reduced(20));
 
-  // 4. Massive VU Meter in the middle
-  area.removeFromBottom(10); // spacer
-  vu.setBounds(area.reduced(2, 0));
+  auto vuArea = area.reduced(100, 20);
+  vuL.setBounds(vuArea.removeFromLeft(40));
+  vuArea.removeFromLeft(20);
+  vuR.setBounds(vuArea.removeFromLeft(40));
 }
 
-void TrackControl::timerCallback() {
-  nameLabel.setText(processor.getTrackSampleName(trackIndex).toUpperCase(),
-                    juce::dontSendNotification);
-  vu.setLevel(processor.getTrackLevel(trackIndex));
+void LibraryDashboard::timerCallback() {
+  titleLabel.setText(processor.getLibraryName(), juce::dontSendNotification);
+  authorLabel.setText("by " + processor.getLibraryAuthor(),
+                      juce::dontSendNotification);
+
+  vuL.setLevel(processor.getMasterLevelL());
+  vuR.setLevel(processor.getMasterLevelR());
 }
 
 // --- Editor Implementation ---

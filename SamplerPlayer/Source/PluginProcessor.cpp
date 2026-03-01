@@ -240,8 +240,8 @@ bool SamplerPlayerAudioProcessor::loadSoteroLibrary(const juce::File &file) {
 
   currentLibraryFile = file;
 
-  sotero::LibraryMetadata metadata;
-  if (!sotero::SoteroArchive::readMetadata(file, metadata))
+  auto metadata = sotero::SoteroArchive::readMetadata(file);
+  if (metadata.name.isEmpty())
     return false;
 
   currentLibraryName = metadata.name;
@@ -252,20 +252,20 @@ bool SamplerPlayerAudioProcessor::loadSoteroLibrary(const juce::File &file) {
 
   // Add 16 voices for polyphony
   for (int i = 0; i < 16; ++i)
-    synth.addVoice(new SoteroSamplerVoice());
+    synth.addVoice(new sotero::SoteroSamplerVoice());
 
   for (const auto &mapping : metadata.mappings) {
-    juce::MemoryBlock sampleData;
-    if (sotero::SoteroArchive::extractResource(file, mapping.samplePath,
-                                               sampleData)) {
-      auto *reader = formatManager.createReaderFor(
+    auto sampleData =
+        sotero::SoteroArchive::extractResource(file, mapping.samplePath);
+    if (sampleData.getSize() > 0) {
+      auto reader = formatManager.createReaderFor(
           std::make_unique<juce::MemoryInputStream>(sampleData, false));
 
       if (reader != nullptr) {
         juce::BigInteger range;
         range.setBit(mapping.midiNote);
 
-        synth.addSound(new SoteroSamplerSound(
+        synth.addSound(new sotero::SoteroSamplerSound(
             mapping.samplePath, *reader, range, mapping.midiNote, 0.01, 0.1,
             10.0, mapping.chokeGroup, mapping.velocityLow,
             mapping.velocityHigh));

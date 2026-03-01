@@ -2,6 +2,7 @@
 
 #include "../../Common/SoteroFormat.h"
 #include <JuceHeader.h>
+#include <functional>
 #include <memory>
 
 namespace sotero {
@@ -31,49 +32,72 @@ private:
   juce::TextEditor nameEditor;
   juce::TextEditor authorEditor;
 
-  // --- Key Selector Section ---
-  juce::OwnedArray<juce::TextButton> keyButtons;
-  int selectedKeyIndex = 0;
-
-  // --- Layer Mapper Section ---
+  // --- Grid Mapper Section ---
   struct LayerSlot : public juce::Component {
-    juce::Label layerLabel;
-    juce::Label pathLabel;
-    juce::TextButton browseButton{"BROWSE"};
-    juce::ComboBox chokeCombo;
+    int layerIndex = 0;
+    int noteIndex = 0;
+    bool hasSample = false;
+    juce::String fileName;
+    std::function<void()> onFileChanged;
 
-    LayerSlot(int index) {
-      layerLabel.setText("LAYER " + juce::String(index + 1),
-                         juce::dontSendNotification);
-      pathLabel.setText("No file selected...", juce::dontSendNotification);
-      addAndMakeVisible(layerLabel);
-      addAndMakeVisible(pathLabel);
-      addAndMakeVisible(browseButton);
+    LayerSlot(int lIdx, int nIdx) : layerIndex(lIdx), noteIndex(nIdx) {}
 
-      chokeCombo.addItem("No Choke", 1);
-      for (int i = 1; i <= 8; ++i)
-        chokeCombo.addItem("Choke Group " + juce::String(i), i + 1);
-      chokeCombo.setSelectedId(1);
-      addAndMakeVisible(chokeCombo);
+    void paint(juce::Graphics &g) override {
+      auto bounds = getLocalBounds().reduced(1).toFloat();
+      g.setColour(hasSample ? juce::Colours::cyan.withAlpha(0.6f)
+                            : juce::Colours::white.withAlpha(0.05f));
+      g.fillRoundedRectangle(bounds, 3.0f);
+
+      g.setColour(juce::Colours::white.withAlpha(hasSample ? 0.8f : 0.2f));
+      g.drawRoundedRectangle(bounds, 3.0f, 1.0f);
+
+      if (hasSample) {
+        g.setColour(juce::Colours::white);
+        g.setFont(10.0f);
+        g.drawFittedText(fileName, getLocalBounds().reduced(2),
+                         juce::Justification::centred, 2);
+      } else {
+        g.setColour(juce::Colours::white.withAlpha(0.1f));
+        g.setFont(14.0f);
+        g.drawText("+", getLocalBounds(), juce::Justification::centred);
+      }
     }
 
-    void resized() override {
-      auto r = getLocalBounds().reduced(5);
-      layerLabel.setBounds(r.removeFromLeft(80));
-      browseButton.setBounds(r.removeFromRight(80));
-      chokeCombo.setBounds(r.removeFromRight(120).reduced(2));
-      pathLabel.setBounds(r);
+    void mouseDown(const juce::MouseEvent &) override {
+      if (onFileChanged)
+        onFileChanged();
     }
   };
 
-  juce::OwnedArray<LayerSlot> layerSlots;
+  struct KeyColumn : public juce::Component {
+    juce::OwnedArray<LayerSlot> layers;
+    int noteNumber = 60;
+
+    KeyColumn(int note) : noteNumber(note) {
+      for (int i = 0; i < 5; ++i) {
+        layers.add(new LayerSlot(i, note - 60));
+        addAndMakeVisible(layers.getLast());
+      }
+    }
+
+    void resized() override {
+      auto r = getLocalBounds();
+      int h = r.getHeight() / 5;
+      for (auto *l : layers)
+        l->setBounds(r.removeFromTop(h));
+    }
+  };
+
+  juce::OwnedArray<KeyColumn> keyColumns;
+  juce::MidiKeyboardState keyboardState;
+  std::unique_ptr<juce::MidiKeyboardComponent> keyboard;
 
   // --- Data ---
   LibraryMetadata libraryData;
+  juce::File lastBrowseDirectory;
 
-  void updateLayerUI();
+  void updateGridUI();
   void updateMetadataFromUI();
-  void selectKey(int index);
 
   // --- Actions ---
   juce::TextButton exportButton{"GENERATE .SPSA"};

@@ -3,11 +3,11 @@
 
 namespace sotero {
 MainComponent::MainComponent() {
-  // Initialize metadata for 12 keys (C to B), each with 5 velocity layers
+  // 1. Initialize metadata for 12 keys (C to B), each with 5 velocity layers
   for (int note = 0; note < 12; ++note) {
     for (int layer = 0; layer < 5; ++layer) {
       KeyMapping m;
-      m.midiNote = 60 + note; // Middle C onwards for now
+      m.midiNote = 60 + note;
       m.velocityLow = layer * 25;
       m.velocityHigh = (layer == 4) ? 127 : (layer * 25 + 24);
       m.samplePath = "";
@@ -16,66 +16,55 @@ MainComponent::MainComponent() {
     }
   }
 
-  // Styling Label
+  // 2. Header UI
   titleLabel.setFont(juce::Font(24.0f, juce::Font::bold));
   titleLabel.setJustificationType(juce::Justification::centred);
   addAndMakeVisible(titleLabel);
 
-  // Name & Author Setup
   nameEditor.setTextToShowWhenEmpty("Library Name", juce::Colours::grey);
   authorEditor.setTextToShowWhenEmpty("Author Name", juce::Colours::grey);
   addAndMakeVisible(nameEditor);
   addAndMakeVisible(authorEditor);
 
-  // Key Selector (12 buttons)
-  const juce::StringArray noteNames = {"C",  "C#", "D",  "D#", "E",  "F",
-                                       "F#", "G",  "G#", "A",  "A#", "B"};
+  // 3. Grid Columns (12 notes)
   for (int i = 0; i < 12; ++i) {
-    auto *b = keyButtons.add(new juce::TextButton(noteNames[i]));
-    b->setRadioGroupId(100);
-    b->setClickingTogglesState(true);
-    if (i == 0)
-      b->setToggleState(true, juce::dontSendNotification);
+    auto *col = keyColumns.add(new KeyColumn(60 + i));
 
-    b->onClick = [this, i] { selectKey(i); };
-    addAndMakeVisible(b);
+    for (int layer = 0; layer < 5; ++layer) {
+      auto *slot = col->layers[layer];
+      slot->onFileChanged = [this, i, layer] {
+        chooser = std::make_unique<juce::FileChooser>(
+            "Select a WAV file...", lastBrowseDirectory, "*.wav;*.aif;*.aiff");
+
+        auto chooserFlags = juce::FileBrowserComponent::openMode |
+                            juce::FileBrowserComponent::canSelectFiles;
+
+        chooser->launchAsync(
+            chooserFlags, [this, i, layer](const juce::FileChooser &fc) {
+              auto file = fc.getResult();
+              if (file.existsAsFile()) {
+                lastBrowseDirectory = file.getParentDirectory();
+                int mappingIndex = i * 5 + layer;
+                libraryData.mappings.getReference(mappingIndex).samplePath =
+                    file.getFullPathName();
+                updateGridUI();
+              }
+            });
+      };
+    }
+    // Note: We add them all but will manage Z-order in resized or by order of
+    // addition
+    addAndMakeVisible(col);
   }
 
-  // Layer Slots (5 layers)
-  for (int i = 0; i < 5; ++i) {
-    auto *slot = layerSlots.add(new LayerSlot(i));
+  // 4. Standard Keyboard UI
+  keyboard = std::make_unique<juce::MidiKeyboardComponent>(
+      keyboardState, juce::MidiKeyboardComponent::horizontalKeyboard);
+  keyboard->setAvailableRange(60, 71);
+  keyboard->setScrollButtonsVisible(false);
+  addAndMakeVisible(keyboard.get());
 
-    slot->browseButton.onClick = [this, i] {
-      chooser = std::make_unique<juce::FileChooser>(
-          "Select a WAV file...",
-          juce::File::getSpecialLocation(juce::File::userHomeDirectory),
-          "*.wav;*.aif;*.aiff");
-
-      auto chooserFlags = juce::FileBrowserComponent::openMode |
-                          juce::FileBrowserComponent::canSelectFiles;
-
-      chooser->launchAsync(
-          chooserFlags, [this, i](const juce::FileChooser &fc) {
-            auto file = fc.getResult();
-            if (file.existsAsFile()) {
-              int mappingIndex = selectedKeyIndex * 5 + i;
-              libraryData.mappings.getReference(mappingIndex).samplePath =
-                  file.getFullPathName();
-              updateLayerUI();
-            }
-          });
-    };
-
-    slot->chokeCombo.onChange = [this, i] {
-      int mappingIndex = selectedKeyIndex * 5 + i;
-      libraryData.mappings.getReference(mappingIndex).chokeGroup =
-          layerSlots[i]->chokeCombo.getSelectedId() - 1;
-    };
-
-    addAndMakeVisible(slot);
-  }
-
-  // Export Button
+  // 5. Footer UI
   exportButton.onClick = [this] {
     updateMetadataFromUI();
 
@@ -110,28 +99,27 @@ MainComponent::MainComponent() {
                          juce::Colours::white);
   addAndMakeVisible(exportButton);
 
-  setSize(800, 600);
-  updateLayerUI();
+  lastBrowseDirectory =
+      juce::File::getSpecialLocation(juce::File::userHomeDirectory);
+
+  setSize(900, 700);
+  updateGridUI();
 }
 
 MainComponent::~MainComponent() {}
 
-void MainComponent::selectKey(int index) {
-  selectedKeyIndex = index;
-  updateLayerUI();
-}
-
-void MainComponent::updateLayerUI() {
-  // Update the 5 slots with the data for the currently selected key
-  int startIndex = selectedKeyIndex * 5;
-  for (int i = 0; i < 5; ++i) {
-    auto &mapping = libraryData.mappings.getReference(startIndex + i);
-    layerSlots[i]->pathLabel.setText(mapping.samplePath.isEmpty()
-                                         ? "No file selected..."
-                                         : mapping.samplePath,
-                                     juce::dontSendNotification);
-    layerSlots[i]->chokeCombo.setSelectedId(mapping.chokeGroup + 1,
-                                            juce::dontSendNotification);
+void MainComponent::updateGridUI() {
+  for (int i = 0; i < 12; ++i) {
+    auto *col = keyColumns[i];
+    for (int layer = 0; layer < 5; ++layer) {
+      auto &mapping = libraryData.mappings.getReference(i * 5 + layer);
+      auto *slot = col->layers[layer];
+      slot->hasSample = !mapping.samplePath.isEmpty();
+      if (slot->hasSample) {
+        slot->fileName = juce::File(mapping.samplePath).getFileName();
+      }
+      slot->repaint();
+    }
   }
 }
 
@@ -141,10 +129,9 @@ void MainComponent::updateMetadataFromUI() {
 }
 
 void MainComponent::paint(juce::Graphics &g) {
-  g.fillAll(juce::Colour(0xff121212)); // Premium Dark Background
-
+  g.fillAll(juce::Colour(0xff121212));
   g.setColour(juce::Colours::white.withAlpha(0.1f));
-  g.drawRect(getLocalBounds().reduced(10), 2.0f);
+  g.drawRect(getLocalBounds().reduced(5), 1.0f);
 }
 
 void MainComponent::resized() {
@@ -152,37 +139,87 @@ void MainComponent::resized() {
 
   // Header
   titleLabel.setBounds(r.removeFromTop(40));
-  r.removeFromTop(10);
 
   auto infoArea = r.removeFromTop(40);
   nameEditor.setBounds(infoArea.removeFromLeft(r.getWidth() / 2).reduced(5));
   authorEditor.setBounds(infoArea.reduced(5));
 
-  r.removeFromTop(20);
+  r.removeFromTop(10);
 
-  // Key Selector
-  auto keyArea = r.removeFromTop(50);
-  int btnWidth = keyArea.getWidth() / 12;
-  for (auto *b : keyButtons)
-    b->setBounds(keyArea.removeFromLeft(btnWidth).reduced(2));
+  // Footer First
+  auto footerArea = r.removeFromBottom(80);
+  exportButton.setBounds(footerArea.withSizeKeepingCentre(200, 40));
 
-  r.removeFromTop(20);
+  keyboard->setBounds(r.removeFromBottom(100));
 
-  // Layer Mapper
-  for (auto *slot : layerSlots) {
-    slot->setBounds(r.removeFromTop(50).reduced(2));
+  r.removeFromBottom(5);
+
+  // Grid Layout - Proportional Alignment with Standard Keyboard
+  // Note: We MUST use the keyboard's white key width to align
+  float whiteKeyWidth =
+      keyboard->getWidth() / 7.0f; // 7 white keys in an octave
+
+  for (int i = 0; i < 12; ++i) {
+    auto keyRect = keyboard->getRectangleForKey(60 + i);
+
+    // Position the column exactly over the key
+    keyColumns[i]->setBounds(keyboard->getX() + (int)keyRect.getX(), r.getY(),
+                             (int)keyRect.getWidth(), r.getHeight());
   }
 
-  // Footer
-  r.removeFromTop(20);
-  exportButton.setBounds(r.removeFromBottom(50).withSizeKeepingCentre(200, 50));
+  // Z-Order: Ensure black keys are on top of white keys for correct overlapping
+  // visualization
+  for (int i = 0; i < 12; ++i) {
+    if (juce::MidiMessage::isMidiNoteBlack(60 + i)) {
+      keyColumns[i]->toFront(false);
+    }
+  }
 }
+
 void MainComponent::filesDropped(const juce::StringArray &files, int x, int y) {
   if (files.size() > 0) {
-    // For now, map the first dropped file to Layer 1 of the selected key
-    int mappingIndex = selectedKeyIndex * 5;
-    libraryData.mappings.getReference(mappingIndex).samplePath = files[0];
-    updateLayerUI();
+    // Check black keys FIRST (higher Z-order/overlapping)
+    for (int i = 0; i < keyColumns.size(); ++i) {
+      int idx = 11 - i; // Reverse check for simple top-down priority? No,
+                        // explicitly check blacks.
+    }
+
+    // Structured Priority: Black keys then White keys
+    auto checkIndex = [this, files, x, y](int i) -> bool {
+      auto *col = keyColumns[i];
+      auto colBounds = col->getBounds();
+      if (colBounds.contains(x, y)) {
+        int localY = y - colBounds.getY();
+        for (int layer = 0; layer < 5; ++layer) {
+          auto *slot = col->layers[layer];
+          if (slot->getBounds().contains(x - colBounds.getX(), localY)) {
+            for (int f = 0; f < files.size() && (layer + f) < 5; ++f) {
+              int mappingIndex = i * 5 + (layer + f);
+              libraryData.mappings.getReference(mappingIndex).samplePath =
+                  files[f];
+            }
+            updateGridUI();
+            return true;
+          }
+        }
+      }
+      return false;
+    };
+
+    // 1. Check Blacks
+    for (int i = 0; i < 12; ++i) {
+      if (juce::MidiMessage::isMidiNoteBlack(60 + i)) {
+        if (checkIndex(i))
+          return;
+      }
+    }
+    // 2. Check Whites
+    for (int i = 0; i < 12; ++i) {
+      if (!juce::MidiMessage::isMidiNoteBlack(60 + i)) {
+        if (checkIndex(i))
+          return;
+      }
+    }
   }
 }
 
