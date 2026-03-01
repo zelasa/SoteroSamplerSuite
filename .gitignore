@@ -1,0 +1,21 @@
+# JUCE / Visual Studio / CMake ignores
+build/
+bin/
+obj/
+out/
+_juce/
+.vs/
+*.user
+*.sln
+*.vcxproj
+*.filters
+*.user
+*.suo
+
+# OS ignores
+.DS_Store
+Thumbs.db
+
+# Project specific
+Docs/GitHub_pass.md
+Backups/
