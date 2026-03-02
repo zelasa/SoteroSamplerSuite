@@ -1,0 +1,46 @@
+#pragma once
+#include "../../Common/SoteroFormat.h"
+#include <JuceHeader.h>
+
+namespace sotero {
+
+class SampleRegion : public juce::Component {
+public:
+  SampleRegion(const KeyMapping &mapping, int noteIndex);
+  ~SampleRegion() override = default;
+
+  void paint(juce::Graphics &g) override;
+  void resized() override;
+  void mouseEnter(const juce::MouseEvent &e) override;
+  void mouseMove(const juce::MouseEvent &e) override;
+  void mouseExit(const juce::MouseEvent &e) override;
+  void mouseDown(const juce::MouseEvent &e) override;
+  void mouseDrag(const juce::MouseEvent &e) override;
+  void mouseUp(const juce::MouseEvent &e) override;
+  void mouseDoubleClick(const juce::MouseEvent &e) override;
+
+  const KeyMapping &getMapping() const { return currentMapping; }
+
+  std::function<void(const KeyMapping &)> onBoundsChanged;
+  std::function<void(const KeyMapping &)> onDragFinished;
+  std::function<void(const KeyMapping &)> onClear;
+  std::function<void(const KeyMapping &)> onAudition;
+
+private:
+  KeyMapping currentMapping;
+  int parentNoteIndex;
+
+  bool isHovering = false;
+  enum class DragMode { None, TopHandle, BottomHandle, Body };
+  DragMode currentDragMode = DragMode::None;
+  int dragStartY = 0;
+  int initialVelHigh = 127;
+  int initialVelLow = 0;
+
+  juce::Rectangle<int> getTopHandleBounds() const;
+  juce::Rectangle<int> getBottomHandleBounds() const;
+
+  JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SampleRegion)
+};
+
+} // namespace sotero
