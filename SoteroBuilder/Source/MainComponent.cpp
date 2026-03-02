@@ -236,15 +236,24 @@ void MainComponent::updateGridUI() {
         });
       };
 
-      region->onBoundsChanged = [this, mIndex, col](const KeyMapping &m) {
-        libraryData.mappings.getReference(mIndex).velocityLow = m.velocityLow;
-        libraryData.mappings.getReference(mIndex).velocityHigh = m.velocityHigh;
-        col->resized(); // Liquid smooth UI update
+      juce::Component::SafePointer<KeyColumn> safeCol(col);
+      region->onBoundsChanged = [this, mIndex, safeCol](const KeyMapping &m) {
+        if (mIndex >= 0 && mIndex < libraryData.mappings.size()) {
+          auto &ref = libraryData.mappings.getReference(mIndex);
+          ref.velocityLow = m.velocityLow;
+          ref.velocityHigh = m.velocityHigh;
+          ref.samplePath = m.samplePath; // Sync path for live eraser support
+
+          if (safeCol != nullptr)
+            safeCol->resized(); // Liquid smooth UI update with safety
+        }
       };
 
       region->onDragFinished = [this](const KeyMapping &m) {
-        updateGridUI(); // Ensure all components reflect the resolved bounds
-        rebuildSynth(); // Heavy work only when interaction ends
+        juce::MessageManager::callAsync([this]() {
+          updateGridUI(); // Ensure all components reflect the resolved bounds
+          rebuildSynth(); // Heavy work only when interaction ends
+        });
       };
     }
   }

@@ -31,7 +31,7 @@ private:
   int parentNoteIndex;
 
   bool isHovering = false;
-  enum class DragMode { None, TopHandle, BottomHandle, Body };
+  enum class DragMode { None, TopHandle, BottomHandle, Body, Eraser };
   DragMode currentDragMode = DragMode::None;
   int dragStartY = 0;
   int initialVelHigh = 127;

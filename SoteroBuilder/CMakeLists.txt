@@ -15,7 +15,9 @@ juce_generate_juce_header(SoteroBuilder)
 target_sources(SoteroBuilder PRIVATE
     Source/Main.cpp
     Source/MainComponent.cpp
-    Source/MainComponent.h)
+    Source/MainComponent.h
+    Source/SampleRegion.cpp
+    Source/SampleRegion.h)
 
 # 4. Links e Dependências
 target_link_libraries(SoteroBuilder PRIVATE

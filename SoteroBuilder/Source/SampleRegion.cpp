@@ -8,6 +8,9 @@ SampleRegion::SampleRegion(const KeyMapping &mapping, int nIdx)
 }
 
 void SampleRegion::paint(juce::Graphics &g) {
+  if (currentMapping.samplePath.isEmpty())
+    return;
+
   auto bounds = getLocalBounds().toFloat();
 
   // Base color
@@ -105,8 +108,8 @@ void SampleRegion::mouseDown(const juce::MouseEvent &e) {
                  // overlapping regions
 
   if (e.mods.isRightButtonDown() || e.mods.isAltDown()) {
-    if (onClear)
-      onClear(currentMapping);
+    currentDragMode = DragMode::Eraser;
+    dragStartY = e.getScreenY();
     return;
   }
 
@@ -124,7 +127,30 @@ void SampleRegion::mouseDown(const juce::MouseEvent &e) {
 }
 
 void SampleRegion::mouseDrag(const juce::MouseEvent &e) {
-  if (currentDragMode == DragMode::None || e.mods.isRightButtonDown())
+  if (currentDragMode == DragMode::None)
+    return;
+
+  if (currentDragMode == DragMode::Eraser) {
+    if (auto *parent = getParentComponent()) {
+      auto screenPos = e.getScreenPosition();
+      for (auto *sibling : parent->getChildren()) {
+        if (auto *other = dynamic_cast<SampleRegion *>(sibling)) {
+          if (other != this &&
+              other->getScreenBounds().contains(screenPos.toInt())) {
+            if (other->currentMapping.samplePath.isNotEmpty()) {
+              other->currentMapping.samplePath = "";
+              other->repaint();
+              if (other->onBoundsChanged)
+                other->onBoundsChanged(other->currentMapping);
+            }
+          }
+        }
+      }
+    }
+    return;
+  }
+
+  if (e.mods.isRightButtonDown())
     return;
 
   // We need to know the height of the parent column to calculate velocity
@@ -195,7 +221,15 @@ void SampleRegion::mouseDrag(const juce::MouseEvent &e) {
 }
 
 void SampleRegion::mouseUp(const juce::MouseEvent &e) {
-  if (currentDragMode == DragMode::Body && !e.mouseWasDraggedSinceMouseDown()) {
+  if (currentDragMode == DragMode::Eraser) {
+    // Clear the source component itself
+    currentMapping.samplePath = "";
+    if (onClear)
+      onClear(currentMapping);
+    // onClear in MainComponent calls updateGridUI and rebuildSynth
+    // asynchronously
+  } else if (currentDragMode == DragMode::Body &&
+             !e.mouseWasDraggedSinceMouseDown()) {
     // It was a click!
     if (onAudition && (e.mods.isCtrlDown() || e.mods.isCommandDown()))
       onAudition(currentMapping);

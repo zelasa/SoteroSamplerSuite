@@ -96,6 +96,8 @@ private:
   class SoteroSynthesiser : public juce::Synthesiser {
   public:
     void noteOn(int midiChannel, int midiNoteNumber, float velocity) override {
+      const juce::ScopedLock sl(
+          lock); // Lock for thread-safety during iteration
       const int v = juce::jlimit(1, 127, (int)(velocity * 127.0f));
       for (auto *sound : sounds) {
         if (sound->appliesToNote(midiNoteNumber) &&
