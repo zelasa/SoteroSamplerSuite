@@ -30,6 +30,9 @@ private:
   KeyMapping currentMapping;
   int parentNoteIndex;
 
+  SampleRegion *gluedTopNeighbor = nullptr;
+  SampleRegion *gluedBottomNeighbor = nullptr;
+
   bool isHovering = false;
   enum class DragMode { None, TopHandle, BottomHandle, Body, Eraser };
   DragMode currentDragMode = DragMode::None;

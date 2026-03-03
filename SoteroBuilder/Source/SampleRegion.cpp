@@ -124,6 +124,28 @@ void SampleRegion::mouseDown(const juce::MouseEvent &e) {
   dragStartY = e.getScreenY();
   initialVelLow = currentMapping.velocityLow;
   initialVelHigh = currentMapping.velocityHigh;
+
+  // Find glued neighbors
+  gluedTopNeighbor = nullptr;
+  gluedBottomNeighbor = nullptr;
+
+  if (auto *parent = getParentComponent()) {
+    for (auto *sibling : parent->getChildren()) {
+      if (auto *otherRegion = dynamic_cast<SampleRegion *>(sibling)) {
+        if (otherRegion != this &&
+            otherRegion->currentMapping.samplePath.isNotEmpty()) {
+          // If sibling's bottom edge touches our top edge
+          if (otherRegion->currentMapping.velocityLow == initialVelHigh + 1) {
+            gluedTopNeighbor = otherRegion;
+          }
+          // If sibling's top edge touches our bottom edge
+          if (otherRegion->currentMapping.velocityHigh == initialVelLow - 1) {
+            gluedBottomNeighbor = otherRegion;
+          }
+        }
+      }
+    }
+  }
 }
 
 void SampleRegion::mouseDrag(const juce::MouseEvent &e) {
@@ -166,21 +188,82 @@ void SampleRegion::mouseDrag(const juce::MouseEvent &e) {
     // Negative Y is up (higher velocity), Positive Y is down (lower velocity)
     int velocityDelta = juce::roundToInt(-dragDeltaY / pixelsPerVelocity);
 
+    int limitLow = 0;
+    int limitHigh = 127;
+
+    if (currentDragMode == DragMode::TopHandle ||
+        currentDragMode == DragMode::BottomHandle) {
+      for (auto *sibling : parent->getChildren()) {
+        if (auto *otherRegion = dynamic_cast<SampleRegion *>(sibling)) {
+          if (otherRegion != this &&
+              otherRegion->currentMapping.samplePath.isNotEmpty()) {
+
+            // Ignore glued neighbors for hard collision limits since we are
+            // moving them together
+            if (currentDragMode == DragMode::TopHandle &&
+                otherRegion == gluedTopNeighbor)
+              continue;
+            if (currentDragMode == DragMode::BottomHandle &&
+                otherRegion == gluedBottomNeighbor)
+              continue;
+
+            const auto &otherMap = otherRegion->currentMapping;
+            if (otherMap.velocityHigh < initialVelLow) {
+              limitLow = juce::jmax(limitLow, otherMap.velocityHigh + 1);
+            }
+            if (otherMap.velocityLow > initialVelHigh) {
+              limitHigh = juce::jmin(limitHigh, otherMap.velocityLow - 1);
+            }
+          }
+        }
+      }
+
+      // If we have glued neighbors, their opposite edge becomes the absolute
+      // limit
+      if (currentDragMode == DragMode::TopHandle &&
+          gluedTopNeighbor != nullptr) {
+        limitHigh = juce::jmin(
+            limitHigh, gluedTopNeighbor->currentMapping.velocityHigh - 1);
+      }
+      if (currentDragMode == DragMode::BottomHandle &&
+          gluedBottomNeighbor != nullptr) {
+        limitLow = juce::jmax(
+            limitLow, gluedBottomNeighbor->currentMapping.velocityLow + 1);
+      }
+    }
+
     bool boundsChanged = false;
 
     if (currentDragMode == DragMode::TopHandle) {
-      int newHigh = juce::jlimit(currentMapping.velocityLow + 1, 127,
+      int newHigh = juce::jlimit(currentMapping.velocityLow + 1, limitHigh,
                                  initialVelHigh + velocityDelta);
       if (currentMapping.velocityHigh != newHigh) {
         currentMapping.velocityHigh = newHigh;
         boundsChanged = true;
+
+        if (gluedTopNeighbor != nullptr) {
+          gluedTopNeighbor->currentMapping.velocityLow =
+              currentMapping.velocityHigh + 1;
+          if (gluedTopNeighbor->onBoundsChanged)
+            gluedTopNeighbor->onBoundsChanged(gluedTopNeighbor->currentMapping);
+          gluedTopNeighbor->repaint();
+        }
       }
     } else if (currentDragMode == DragMode::BottomHandle) {
-      int newLow = juce::jlimit(0, currentMapping.velocityHigh - 1,
+      int newLow = juce::jlimit(limitLow, currentMapping.velocityHigh - 1,
                                 initialVelLow + velocityDelta);
       if (currentMapping.velocityLow != newLow) {
         currentMapping.velocityLow = newLow;
         boundsChanged = true;
+
+        if (gluedBottomNeighbor != nullptr) {
+          gluedBottomNeighbor->currentMapping.velocityHigh =
+              currentMapping.velocityLow - 1;
+          if (gluedBottomNeighbor->onBoundsChanged)
+            gluedBottomNeighbor->onBoundsChanged(
+                gluedBottomNeighbor->currentMapping);
+          gluedBottomNeighbor->repaint();
+        }
       }
     } else if (currentDragMode == DragMode::Body) {
       int range = initialVelHigh - initialVelLow;
@@ -201,11 +284,13 @@ void SampleRegion::mouseDrag(const juce::MouseEvent &e) {
     if (boundsChanged) {
       // Apply global limits only - allowing "pass through" behavior during drag
       if (currentDragMode == DragMode::TopHandle) {
-        currentMapping.velocityHigh = juce::jlimit(
-            currentMapping.velocityLow + 1, 127, currentMapping.velocityHigh);
+        currentMapping.velocityHigh =
+            juce::jlimit(currentMapping.velocityLow + 1, limitHigh,
+                         currentMapping.velocityHigh);
       } else if (currentDragMode == DragMode::BottomHandle) {
-        currentMapping.velocityLow = juce::jlimit(
-            0, currentMapping.velocityHigh - 1, currentMapping.velocityLow);
+        currentMapping.velocityLow =
+            juce::jlimit(limitLow, currentMapping.velocityHigh - 1,
+                         currentMapping.velocityLow);
       } else if (currentDragMode == DragMode::Body) {
         int range = initialVelHigh - initialVelLow;
         currentMapping.velocityLow =
