@@ -19,6 +19,10 @@ target_sources(SoteroBuilder PRIVATE
     Source/SampleRegion.cpp
     Source/SampleRegion.h)
 
+target_include_directories(SoteroBuilder PRIVATE 
+    Source
+    ../SamplerPlayer/Source)
+
 # 4. Links e Dependências
 target_link_libraries(SoteroBuilder PRIVATE
     Common
@@ -26,4 +30,5 @@ target_link_libraries(SoteroBuilder PRIVATE
     juce::juce_audio_utils
     juce::juce_gui_basics
     juce::juce_audio_formats
-    juce::juce_audio_basics)
+    juce::juce_audio_basics
+    juce::juce_dsp)

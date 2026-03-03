@@ -3,19 +3,19 @@
 
 // --- PerformanceView Implementation ---
 
-PerformanceView::PerformanceView(SamplerPlayerAudioProcessor &p)
-    : processor(p), threshKnob("THRESH"), ratioKnob("RATIO"),
-      attackKnob("ATTACK"), releaseKnob("RELEASE"), revSizeKnob("SIZE"),
-      revMixKnob("MIX"), masterVolKnob("MASTER") {
+PerformanceView::PerformanceView(sotero::ISoteroAudioEngine &e)
+    : engine(e), threshKnob("THRESH"), ratioKnob("RATIO"), attackKnob("ATTACK"),
+      releaseKnob("RELEASE"), revSizeKnob("SIZE"), revMixKnob("MIX"),
+      masterVolKnob("MASTER") {
   // Velocity Curve
   addAndMakeVisible(velocityGroup);
   velocityGroup.setText("VELOCITY CURVE");
   const juce::String curveNames[] = {"SOFT", "LINEAR", "HARD"};
   for (int i = 0; i < 3; ++i) {
-    curveButtons[i] = std::make_unique<CurveButton>(curveNames[i], i);
+    curveButtons[i] = std::make_unique<sotero::CurveButton>(curveNames[i], i);
     addAndMakeVisible(*curveButtons[i]);
     curveButtons[i]->onClick = [this, i] {
-      auto *param = processor.apvts.getParameter("velocityCurve");
+      auto *param = engine.getAPVTS().getParameter("velocityCurve");
       if (param)
         param->setValueNotifyingHost(i / 2.0f);
     };
@@ -26,10 +26,10 @@ PerformanceView::PerformanceView(SamplerPlayerAudioProcessor &p)
   dynamicsGroup.setText("MASTER COMPRESSOR");
   const juce::String compNames[] = {"OFF", "LIGHT", "MID", "HARD"};
   for (int i = 0; i < 4; ++i) {
-    compModes[i] = std::make_unique<ModeButton>(compNames[i], 2002);
+    compModes[i] = std::make_unique<sotero::ModeButton>(compNames[i], 2002);
     addAndMakeVisible(*compModes[i]);
     compModes[i]->onClick = [this, i] {
-      auto *param = processor.apvts.getParameter("masterComp");
+      auto *param = engine.getAPVTS().getParameter("masterComp");
       if (param)
         param->setValueNotifyingHost(i / 3.0f);
     };
@@ -38,22 +38,22 @@ PerformanceView::PerformanceView(SamplerPlayerAudioProcessor &p)
   addAndMakeVisible(threshKnob);
   threshAtt =
       std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
-          processor.apvts, "compThresh", threshKnob.getSlider());
+          engine.getAPVTS(), "compThresh", threshKnob.getSlider());
 
   addAndMakeVisible(ratioKnob);
   ratioAtt =
       std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
-          processor.apvts, "compRatio", ratioKnob.getSlider());
+          engine.getAPVTS(), "compRatio", ratioKnob.getSlider());
 
   addAndMakeVisible(attackKnob);
   attackAtt =
       std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
-          processor.apvts, "compAttack", attackKnob.getSlider());
+          engine.getAPVTS(), "compAttack", attackKnob.getSlider());
 
   addAndMakeVisible(releaseKnob);
   releaseAtt =
       std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
-          processor.apvts, "compRelease", releaseKnob.getSlider());
+          engine.getAPVTS(), "compRelease", releaseKnob.getSlider());
 
   // Spatial (Reverb)
   addAndMakeVisible(spatialGroup);
@@ -63,14 +63,14 @@ PerformanceView::PerformanceView(SamplerPlayerAudioProcessor &p)
   revToggle.setButtonText("ENABLE");
   revEnableAtt =
       std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(
-          processor.apvts, "revEnable", revToggle);
+          engine.getAPVTS(), "revEnable", revToggle);
 
   const juce::String revNames[] = {"ROOM", "HALL", "PLATE", "STAD"};
   for (int i = 0; i < 4; ++i) {
-    revModes[i] = std::make_unique<ModeButton>(revNames[i], 2003);
+    revModes[i] = std::make_unique<sotero::ModeButton>(revNames[i], 2003);
     addAndMakeVisible(*revModes[i]);
     revModes[i]->onClick = [this, i] {
-      auto *param = processor.apvts.getParameter("revType");
+      auto *param = engine.getAPVTS().getParameter("revType");
       if (param)
         param->setValueNotifyingHost(i / 3.0f);
     };
@@ -79,12 +79,12 @@ PerformanceView::PerformanceView(SamplerPlayerAudioProcessor &p)
   addAndMakeVisible(revSizeKnob);
   revSizeAtt =
       std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
-          processor.apvts, "revSize", revSizeKnob.getSlider());
+          engine.getAPVTS(), "revSize", revSizeKnob.getSlider());
 
   addAndMakeVisible(revMixKnob);
   revMixAtt =
       std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
-          processor.apvts, "revMix", revMixKnob.getSlider());
+          engine.getAPVTS(), "revMix", revMixKnob.getSlider());
 
   // Master Area
   addAndMakeVisible(masterGroup);
@@ -93,7 +93,7 @@ PerformanceView::PerformanceView(SamplerPlayerAudioProcessor &p)
   addAndMakeVisible(masterVolKnob);
   masterVolAtt =
       std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
-          processor.apvts, "masterVol", masterVolKnob.getSlider());
+          engine.getAPVTS(), "masterVol", masterVolKnob.getSlider());
 
   addAndMakeVisible(masterVU_L);
   addAndMakeVisible(masterVU_R);
@@ -101,27 +101,29 @@ PerformanceView::PerformanceView(SamplerPlayerAudioProcessor &p)
   startTimerHz(30);
 }
 
+PerformanceView::~PerformanceView() { stopTimer(); }
+
 void PerformanceView::paint(juce::Graphics &g) {}
 
 void PerformanceView::timerCallback() {
   // Sync Radio buttons for Curve
-  int curveType = (int)*processor.apvts.getRawParameterValue("velocityCurve");
+  int curveType = (int)*engine.getAPVTS().getRawParameterValue("velocityCurve");
   for (int i = 0; i < 3; ++i)
     curveButtons[i]->setToggleState(i == curveType, juce::dontSendNotification);
 
   // Sync Radio buttons for Compressor Mode
-  int compType = (int)*processor.apvts.getRawParameterValue("masterComp");
+  int compType = (int)*engine.getAPVTS().getRawParameterValue("masterComp");
   for (int i = 0; i < 4; ++i)
     compModes[i]->setToggleState(i == compType, juce::dontSendNotification);
 
   // Sync Radio buttons for Reverb Type
-  int revType = (int)*processor.apvts.getRawParameterValue("revType");
+  int revType = (int)*engine.getAPVTS().getRawParameterValue("revType");
   for (int i = 0; i < 4; ++i)
     revModes[i]->setToggleState(i == revType, juce::dontSendNotification);
 
   // Update Master VU
-  masterVU_L.setLevel(processor.getMasterLevelL());
-  masterVU_R.setLevel(processor.getMasterLevelR());
+  masterVU_L.setLevel(engine.getLevelL());
+  masterVU_R.setLevel(engine.getLevelR());
 }
 
 void PerformanceView::resized() {
@@ -194,7 +196,7 @@ void PerformanceView::resized() {
 
 // --- SetupView Implementation ---
 
-SetupView::SetupView(SamplerPlayerAudioProcessor &p) : processor(p) {
+SetupView::SetupView(sotero::ISoteroAudioEngine &e) : engine(e) {
   addAndMakeVisible(globalGroup);
   globalGroup.setText("LIBRARY SETUP");
 
@@ -206,12 +208,13 @@ SetupView::SetupView(SamplerPlayerAudioProcessor &p) : processor(p) {
     chanCombo.addItem(juce::String(i), i + 1);
   chanAtt =
       std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(
-          processor.apvts, "midiChannel", chanCombo);
+          engine.getAPVTS(), "midiChannel", chanCombo);
 
-  dashboard = std::make_unique<LibraryDashboard>(p);
+  dashboard = std::make_unique<LibraryDashboard>(e);
   addAndMakeVisible(*dashboard);
 
   addAndMakeVisible(loadLibBtn);
+  loadLibBtn.setButtonText("LOAD SOTERO LIBRARY");
   loadLibBtn.setColour(juce::TextButton::buttonColourId,
                        juce::Colours::darkgreen);
   loadLibBtn.onClick = [this]() {
@@ -226,7 +229,7 @@ SetupView::SetupView(SamplerPlayerAudioProcessor &p) : processor(p) {
     chooser->launchAsync(chooserFlags, [this](const juce::FileChooser &fc) {
       auto file = fc.getResult();
       if (file.existsAsFile()) {
-        processor.loadSoteroLibrary(file);
+        engine.loadSoteroLibrary(file);
       }
     });
   };
@@ -251,8 +254,8 @@ void SetupView::resized() {
 }
 
 // --- LibraryDashboard Implementation ---
-LibraryDashboard::LibraryDashboard(SamplerPlayerAudioProcessor &p)
-    : processor(p), volSlider("VOLUME"), panSlider("PAN") {
+LibraryDashboard::LibraryDashboard(sotero::ISoteroAudioEngine &e)
+    : engine(e), volSlider("VOLUME"), panSlider("PAN") {
   addAndMakeVisible(titleLabel);
   titleLabel.setFont(juce::Font(28.0f, juce::Font::bold));
   titleLabel.setJustificationType(juce::Justification::centred);
@@ -267,13 +270,13 @@ LibraryDashboard::LibraryDashboard(SamplerPlayerAudioProcessor &p)
   volSlider.getSlider().setRange(-60.0, 6.0);
   volAtt =
       std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
-          processor.apvts, "masterVol", volSlider.getSlider());
+          engine.getAPVTS(), "masterVol", volSlider.getSlider());
 
   addAndMakeVisible(panSlider);
   panSlider.getSlider().setRange(-1.0, 1.0);
   panAtt =
       std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
-          processor.apvts, "pan0", panSlider.getSlider());
+          engine.getAPVTS(), "pan0", panSlider.getSlider());
 
   addAndMakeVisible(vuL);
   addAndMakeVisible(vuR);
@@ -309,12 +312,12 @@ void LibraryDashboard::resized() {
 }
 
 void LibraryDashboard::timerCallback() {
-  titleLabel.setText(processor.getLibraryName(), juce::dontSendNotification);
-  authorLabel.setText("by " + processor.getLibraryAuthor(),
+  titleLabel.setText(engine.getLibraryName(), juce::dontSendNotification);
+  authorLabel.setText("by " + engine.getLibraryAuthor(),
                       juce::dontSendNotification);
 
-  vuL.setLevel(processor.getMasterLevelL());
-  vuR.setLevel(processor.getMasterLevelR());
+  vuL.setLevel(engine.getLevelL());
+  vuR.setLevel(engine.getLevelR());
 }
 
 // --- Editor Implementation ---
@@ -424,3 +427,4 @@ void SamplerPlayerAudioProcessorEditor::timerCallback() {
     midiVelocityLabel.setText("VELOCITY: ---", juce::dontSendNotification);
   }
 }
+```

@@ -25,8 +25,7 @@ target_sources(SamplerPlayer PRIVATE
     Source/PluginProcessor.cpp
     Source/PluginProcessor.h
     Source/PluginEditor.cpp
-    Source/PluginEditor.h
-    Source/VUMeter.h)
+    Source/PluginEditor.h)
 
 # 4. Links e Dependências
 target_link_libraries(SamplerPlayer PRIVATE

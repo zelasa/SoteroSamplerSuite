@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(SoteroSamplerSuite VERSION 0.1.0)
+project(SoteroSamplerSuite VERSION 0.4.0)
 
 if(APPLE)
     set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "")

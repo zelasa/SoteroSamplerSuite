@@ -1,14 +1,14 @@
 #pragma once
 
 #include "../../Common/SoteroArchive.h"
+#include "../../Common/SoteroEngineInterface.h"
 #include "SoteroSamplerVoice.h"
 #include <JuceHeader.h>
-#include <atomic>
-#include <juce_dsp/juce_dsp.h>
 
 // Unified Sound Engine Components
 
-class SamplerPlayerAudioProcessor : public juce::AudioProcessor {
+class SamplerPlayerAudioProcessor : public juce::AudioProcessor,
+                                    public sotero::ISoteroAudioEngine {
 public:
   SamplerPlayerAudioProcessor();
   ~SamplerPlayerAudioProcessor() override;
@@ -39,26 +39,29 @@ public:
   void getStateInformation(juce::MemoryBlock &destData) override;
   void setStateInformation(const void *data, int sizeInBytes) override;
 
+  juce::AudioProcessorValueTreeState &getAPVTS() override { return apvts; }
   juce::AudioProcessorValueTreeState apvts;
 
   // Unified Sound Engine
   juce::Synthesiser synth;
   juce::AudioFormatManager formatManager;
 
-  float getMasterLevelL() const { return lastMasterLevelL.load(); }
-  float getMasterLevelR() const { return lastMasterLevelR.load(); }
-  juce::String getLibraryName() const { return currentLibraryName; }
-  juce::String getLibraryAuthor() const { return currentLibraryAuthor; }
-  int getLastMidiNote() const { return lastMidiNote.load(); }
-  int getLastMidiVelocity() const { return lastMidiVelocity.load(); }
-  juce::MidiKeyboardState &getKeyboardState() { return keyboardState; }
+  float getLevelL() const override { return lastMasterLevelL.load(); }
+  float getLevelR() const override { return lastMasterLevelR.load(); }
+  juce::String getLibraryName() const override { return currentLibraryName; }
+  juce::String getLibraryAuthor() const override {
+    return currentLibraryAuthor;
+  }
+  int getLastMidiNote() const override { return lastMidiNote.load(); }
+  int getLastMidiVelocity() const override { return lastMidiVelocity.load(); }
+  juce::MidiKeyboardState &getKeyboardState() override { return keyboardState; }
 
   // View management
   bool isPerformanceView() const { return currentView == 0; }
   void setView(int viewIndex) { currentView = viewIndex; }
 
   bool loadTrackSample(int index, const juce::File &file);
-  bool loadSoteroLibrary(const juce::File &file);
+  void loadSoteroLibrary(const juce::File &file) override;
   juce::File getCurrentLibraryFile() const { return currentLibraryFile; }
 
 private:

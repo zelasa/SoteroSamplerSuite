@@ -1,9 +1,13 @@
 #pragma once
 
+#include "../../Common/SoteroEngineInterface.h"
 #include "../../Common/SoteroFormat.h"
+#include "../../SamplerPlayer/Source/PluginEditor.h"
 #include "../../SamplerPlayer/Source/SoteroSamplerVoice.h"
 #include "SampleRegion.h"
-#include <JuceHeader.h>
+#include <juce_audio_utils/juce_audio_utils.h>
+#include <juce_dsp/juce_dsp.h>
+#include <juce_gui_basics/juce_gui_basics.h>
 #include <memory>
 
 namespace sotero {
@@ -13,7 +17,8 @@ namespace sotero {
  */
 class MainComponent : public juce::AudioAppComponent,
                       public juce::FileDragAndDropTarget,
-                      public juce::MidiInputCallback {
+                      public juce::MidiInputCallback,
+                      public ISoteroAudioEngine {
 public:
   MainComponent();
   ~MainComponent() override;
@@ -37,12 +42,17 @@ public:
   }
   void filesDropped(const juce::StringArray &files, int x, int y) override;
 
+  // --- ISoteroAudioEngine Implementation ---
+  void loadSoteroLibrary(const juce::File &file) override;
+
 private:
   std::unique_ptr<juce::FileChooser> chooser;
   // --- Library Info Section ---
   juce::Label titleLabel{"BuilderTitle", "SOTERO BUILDER"};
   juce::TextEditor nameEditor;
   juce::TextEditor authorEditor;
+  juce::TextButton importButton{"IMPORT"};
+  juce::TextButton exportButton{"EXPORT"};
 
   // --- Grid Mapper Section ---
   struct LayerSlot : public juce::Component {
@@ -239,9 +249,21 @@ private:
   void rebuildSynth();
   void auditionSample(const juce::String &path, int midiNote, int velocity);
 
-  // --- Actions ---
-  juce::TextButton exportButton{"GENERATE .SPSA"};
-  juce::TextButton importButton{"IMPORT .SPSA"};
+  // --- ISoteroAudioEngine Implementation ---
+  juce::AudioProcessorValueTreeState &getAPVTS() override { return *apvts; }
+  juce::MidiKeyboardState &getKeyboardState() override { return keyboardState; }
+  float getLevelL() const override { return lastLevelL.load(); }
+  float getLevelR() const override { return lastLevelR.load(); }
+  juce::String getLibraryName() const override { return libraryData.name; }
+  juce::String getLibraryAuthor() const override { return libraryData.author; }
+  int getLastMidiNote() const override { return lastMidiNote.load(); }
+  int getLastMidiVelocity() const override { return lastMidiVelocity.load(); }
+
+  // --- UI ---
+  juce::TabbedComponent tabs{juce::TabbedButtonBar::TabsAtTop};
+  std::unique_ptr<juce::Component> editView;
+  std::unique_ptr<PerformanceView> playerPerformanceView;
+  std::unique_ptr<SetupView> playerSetupView;
 
   // --- Audio ---
   juce::AudioFormatManager formatManager;
@@ -249,6 +271,42 @@ private:
   juce::CriticalSection synthLock;
   juce::MidiBuffer emptyMidi;
   juce::MidiMessageCollector midiCollector;
+  juce::MidiKeyboardState keyboardState;
+
+  // Parameters & Effects (Player Mode)
+  std::unique_ptr<juce::AudioProcessorValueTreeState> apvts;
+  juce::dsp::Compressor<float> masterCompressor;
+  juce::dsp::Reverb masterReverb;
+  juce::dsp::Reverb::Parameters reverbParams;
+
+  std::atomic<float> lastLevelL{0.0f}, lastLevelR{0.0f};
+  std::atomic<int> lastMidiNote{-1}, lastMidiVelocity{-1};
+
+  // Internal AudioProcessor dummy for APVTS
+  struct DummyProcessor : public juce::AudioProcessor {
+    DummyProcessor()
+        : AudioProcessor(BusesProperties().withOutput(
+              "Output", juce::AudioChannelSet::stereo(), true)) {}
+    void prepareToPlay(double, int) override {}
+    void releaseResources() override {}
+    void processBlock(juce::AudioBuffer<float> &, juce::MidiBuffer &) override {
+    }
+    juce::AudioProcessorEditor *createEditor() override { return nullptr; }
+    bool hasEditor() const override { return false; }
+    const juce::String getName() const override { return "Dummy"; }
+    bool acceptsMidi() const override { return true; }
+    bool producesMidi() const override { return false; }
+    double getTailLengthSeconds() const override { return 0.0; }
+    int getNumPrograms() override { return 0; }
+    int getCurrentProgram() override { return 0; }
+    void setCurrentProgram(int) override {}
+    const juce::String getProgramName(int) override { return ""; }
+    void changeProgramName(int, const juce::String &) override {}
+    void getStateInformation(juce::MemoryBlock &) override {}
+    void setStateInformation(const void *, int) override {}
+  } dummyProcessor;
+
+  juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };
