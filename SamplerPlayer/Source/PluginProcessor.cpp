@@ -274,8 +274,6 @@ void SamplerPlayerAudioProcessor::loadSoteroLibrary(const juce::File &file) {
       }
     }
   }
-
-  return true;
 }
 
 bool SamplerPlayerAudioProcessor::loadTrackSample(int index,
