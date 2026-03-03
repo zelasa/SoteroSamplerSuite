@@ -427,4 +427,3 @@ void SamplerPlayerAudioProcessorEditor::timerCallback() {
     midiVelocityLabel.setText("VELOCITY: ---", juce::dontSendNotification);
   }
 }
-```

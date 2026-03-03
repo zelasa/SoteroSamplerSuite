@@ -234,15 +234,15 @@ SamplerPlayerAudioProcessor::createParameterLayout() {
   return {params.begin(), params.end()};
 }
 
-bool SamplerPlayerAudioProcessor::loadSoteroLibrary(const juce::File &file) {
+void SamplerPlayerAudioProcessor::loadSoteroLibrary(const juce::File &file) {
   if (!file.existsAsFile())
-    return false;
+    return;
 
   currentLibraryFile = file;
 
   auto metadata = sotero::SoteroArchive::readMetadata(file);
   if (metadata.name.isEmpty())
-    return false;
+    return;
 
   currentLibraryName = metadata.name;
   currentLibraryAuthor = metadata.author;
