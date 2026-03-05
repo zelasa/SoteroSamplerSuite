@@ -40,6 +40,11 @@ void SamplerPlayerAudioProcessor::prepareToPlay(double sampleRate,
 
   masterCompressor.prepare(spec);
   masterReverb.prepare(spec);
+
+  for (int i = 0; i < synth.getNumVoices(); ++i) {
+    if (auto *v = dynamic_cast<sotero::SoteroSamplerVoice *>(synth.getVoice(i)))
+      v->prepare(spec);
+  }
 }
 
 void SamplerPlayerAudioProcessor::releaseResources() {}
@@ -86,7 +91,7 @@ void SamplerPlayerAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
       if (curveType == 0) // Soft
         normalizedVel = std::sqrt(normalizedVel);
       else if (curveType == 2) // Hard
-        normalizedVel = std::pow(normalizedVel, 2.0f);
+        normalizedVel = normalizedVel * normalizedVel;
 
       int velocity = juce::jlimit(1, 127, (int)(normalizedVel * 127.0f));
       auto transformedMsg = juce::MidiMessage::noteOn(
@@ -254,9 +259,13 @@ void SamplerPlayerAudioProcessor::loadSoteroLibrary(const juce::File &file) {
   for (int i = 0; i < 16; ++i)
     synth.addVoice(new sotero::SoteroSamplerVoice());
 
+  juce::FileInputStream stream(file);
+  if (!stream.openedOk())
+    return;
+
   for (const auto &mapping : metadata.mappings) {
     auto sampleData =
-        sotero::SoteroArchive::extractResource(file, mapping.samplePath);
+        sotero::SoteroArchive::extractResource(stream, mapping.samplePath);
     if (sampleData.getSize() > 0) {
       auto reader = formatManager.createReaderFor(
           std::make_unique<juce::MemoryInputStream>(sampleData, false));

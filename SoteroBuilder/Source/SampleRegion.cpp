@@ -14,8 +14,21 @@ void SampleRegion::paint(juce::Graphics &g) {
   auto bounds = getLocalBounds().toFloat();
 
   // Base color
-  juce::Colour baseColor = juce::Colours::cyan;
-  g.setColour(baseColor.withAlpha(isHovering ? 0.8f : 0.6f));
+  juce::Colour activeColor(255, 180, 50);
+  juce::Colour baseColor = isActive ? activeColor : juce::Colours::cyan;
+
+  if (isActive) {
+    // Premium glow for active sample
+    auto glow = g.getClipBounds().toFloat();
+    juce::Graphics::ScopedSaveState ss(g);
+    g.setGradientFill(juce::ColourGradient(
+        baseColor.withAlpha(0.8f), bounds.getCentreX(), bounds.getCentreY(),
+        baseColor.withAlpha(0.2f), 0, 0, true));
+    g.fillRoundedRectangle(bounds.reduced(1.0f), 3.0f);
+  }
+
+  g.setColour(
+      baseColor.withAlpha(isActive ? 0.85f : (isHovering ? 0.8f : 0.6f)));
   g.fillRoundedRectangle(bounds.reduced(1.0f), 3.0f);
 
   // Border
@@ -107,9 +120,16 @@ void SampleRegion::mouseDown(const juce::MouseEvent &e) {
   toFront(true); // Bring to front when clicked so it's not hidden by
                  // overlapping regions
 
-  if (e.mods.isRightButtonDown() || e.mods.isAltDown()) {
+  if (onSelect)
+    onSelect();
+
+  setActive(true);
+
+  if (e.mods.isRightButtonDown() && e.mods.isShiftDown()) {
     currentDragMode = DragMode::Eraser;
     dragStartY = e.getScreenY();
+    currentMapping.samplePath = ""; // Clear immediately for visual feedback
+    repaint();
     return;
   }
 
@@ -172,7 +192,7 @@ void SampleRegion::mouseDrag(const juce::MouseEvent &e) {
     return;
   }
 
-  if (e.mods.isRightButtonDown())
+  if (e.mods.isRightButtonDown() && !e.mods.isShiftDown())
     return;
 
   // We need to know the height of the parent column to calculate velocity
@@ -198,37 +218,19 @@ void SampleRegion::mouseDrag(const juce::MouseEvent &e) {
           if (otherRegion != this &&
               otherRegion->currentMapping.samplePath.isNotEmpty()) {
 
-            // Ignore glued neighbors for hard collision limits since we are
-            // moving them together
-            if (currentDragMode == DragMode::TopHandle &&
-                otherRegion == gluedTopNeighbor)
-              continue;
-            if (currentDragMode == DragMode::BottomHandle &&
-                otherRegion == gluedBottomNeighbor)
-              continue;
-
             const auto &otherMap = otherRegion->currentMapping;
             if (otherMap.velocityHigh < initialVelLow) {
-              limitLow = juce::jmax(limitLow, otherMap.velocityHigh + 1);
+              // Only limit by the neighbor's BOTTOM edge if we want to allow
+              // pushing it
+              limitLow = juce::jmax(limitLow, otherMap.velocityLow + 1);
             }
             if (otherMap.velocityLow > initialVelHigh) {
-              limitHigh = juce::jmin(limitHigh, otherMap.velocityLow - 1);
+              // Only limit by the neighbor's TOP edge if we want to allow
+              // pushing it
+              limitHigh = juce::jmin(limitHigh, otherMap.velocityHigh - 1);
             }
           }
         }
-      }
-
-      // If we have glued neighbors, their opposite edge becomes the absolute
-      // limit
-      if (currentDragMode == DragMode::TopHandle &&
-          gluedTopNeighbor != nullptr) {
-        limitHigh = juce::jmin(
-            limitHigh, gluedTopNeighbor->currentMapping.velocityHigh - 1);
-      }
-      if (currentDragMode == DragMode::BottomHandle &&
-          gluedBottomNeighbor != nullptr) {
-        limitLow = juce::jmax(
-            limitLow, gluedBottomNeighbor->currentMapping.velocityLow + 1);
       }
     }
 
@@ -240,6 +242,22 @@ void SampleRegion::mouseDrag(const juce::MouseEvent &e) {
       if (currentMapping.velocityHigh != newHigh) {
         currentMapping.velocityHigh = newHigh;
         boundsChanged = true;
+
+        // Dynamic gluing: if we hit a neighbor's bottom edge, glue to it
+        if (gluedTopNeighbor == nullptr) {
+          for (auto *sibling : parent->getChildren()) {
+            if (auto *other = dynamic_cast<SampleRegion *>(sibling)) {
+              if (other != this &&
+                  other->currentMapping.samplePath.isNotEmpty()) {
+                if (other->currentMapping.velocityLow ==
+                    currentMapping.velocityHigh + 1) {
+                  gluedTopNeighbor = other;
+                  break;
+                }
+              }
+            }
+          }
+        }
 
         if (gluedTopNeighbor != nullptr) {
           gluedTopNeighbor->currentMapping.velocityLow =
@@ -255,6 +273,22 @@ void SampleRegion::mouseDrag(const juce::MouseEvent &e) {
       if (currentMapping.velocityLow != newLow) {
         currentMapping.velocityLow = newLow;
         boundsChanged = true;
+
+        // Dynamic gluing: if we hit a neighbor's top edge, glue to it
+        if (gluedBottomNeighbor == nullptr) {
+          for (auto *sibling : parent->getChildren()) {
+            if (auto *other = dynamic_cast<SampleRegion *>(sibling)) {
+              if (other != this &&
+                  other->currentMapping.samplePath.isNotEmpty()) {
+                if (other->currentMapping.velocityHigh ==
+                    currentMapping.velocityLow - 1) {
+                  gluedBottomNeighbor = other;
+                  break;
+                }
+              }
+            }
+          }
+        }
 
         if (gluedBottomNeighbor != nullptr) {
           gluedBottomNeighbor->currentMapping.velocityHigh =

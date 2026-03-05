@@ -6,6 +6,10 @@ if(APPLE)
     set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "")
 endif()
 
+if(MSVC)
+    add_compile_options(/FS)
+endif()
+
 # 1. Encontrar o JUCE
 if(WIN32 OR MSVC)
     set(JUCE_PATH_DEFAULT "D:/Luis/OneDrive/Juce")

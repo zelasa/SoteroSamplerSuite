@@ -1,6 +1,8 @@
 #include "MainComponent.h"
 #include "../../Common/SoteroArchive.h"
 #include "../../SamplerPlayer/Source/SoteroSamplerVoice.h"
+#include "BinaryData.h"
+#include <thread>
 
 namespace sotero {
 MainComponent::MainComponent()
@@ -8,7 +10,10 @@ MainComponent::MainComponent()
           dummyProcessor, nullptr, "Parameters", createParameterLayout())) {
   libraryData.mappings.clear();
 
-  editView = std::make_unique<juce::Component>();
+  editView = std::make_unique<BuilderView>();
+  static_cast<BuilderView *>(editView.get())->onBackgroundClick = [this] {
+    deselectAllRegions();
+  };
 
   // --- BUILDERUI (Edit View) ---
   editView->addAndMakeVisible(titleLabel);
@@ -22,11 +27,13 @@ MainComponent::MainComponent()
 
   for (int i = 0; i < 12; ++i) {
     auto *col = keyColumns.add(new KeyColumn(60 + i));
+    col->onBackgroundClick = [this] { deselectAllRegions(); };
     editView->addAndMakeVisible(col);
   }
 
   keyboard = std::make_unique<SemiToneKeyboard>();
   keyboard->onKeyPress = [this](int note) { synth.noteOn(1, note, 0.8f); };
+  keyboard->onBackgroundClick = [this] { deselectAllRegions(); }; // Added line
   editView->addAndMakeVisible(keyboard.get());
 
   importButton.onClick = [this] {
@@ -67,15 +74,15 @@ MainComponent::MainComponent()
   editView->addAndMakeVisible(exportButton);
 
   // --- PLAYER UI ---
-  playerPerformanceView = std::make_unique<PerformanceView>(*this);
-  playerSetupView = std::make_unique<SetupView>(*this);
+  playerUI = std::make_unique<SoteroPlayerUI>(*this);
+  auto logoImg = juce::ImageFileFormat::loadFrom(BinaryData::logo_png,
+                                                 BinaryData::logo_pngSize);
+  playerUI->setLogo(logoImg);
 
   // --- TABS ---
   addAndMakeVisible(tabs);
-  tabs.addTab("EDIT", juce::Colours::darkgrey, editView.get(), false);
-  tabs.addTab("PERFORMANCE", juce::Colours::darkgrey,
-              playerPerformanceView.get(), false);
-  tabs.addTab("SETUP", juce::Colours::darkgrey, playerSetupView.get(), false);
+  tabs.addTab("EDIT", juce::Colour(0xff121212), editView.get(), false);
+  tabs.addTab("PLAYER", juce::Colour(0xff121212), playerUI.get(), false);
 
   // Audio Initialization
   formatManager.registerBasicFormats();
@@ -98,6 +105,7 @@ MainComponent::MainComponent()
 }
 
 MainComponent::~MainComponent() {
+  playerUI.reset();
   deviceManager.removeMidiInputDeviceCallback({}, this);
   shutdownAudio();
 }
@@ -114,6 +122,11 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected,
 
   masterCompressor.prepare(spec);
   masterReverb.prepare(spec);
+
+  for (int i = 0; i < synth.getNumVoices(); ++i) {
+    if (auto *v = dynamic_cast<sotero::SoteroSamplerVoice *>(synth.getVoice(i)))
+      v->prepare(spec);
+  }
 }
 
 void MainComponent::getNextAudioBlock(
@@ -141,7 +154,7 @@ void MainComponent::getNextAudioBlock(
       if (curveType == 0)
         normalizedVel = std::sqrt(normalizedVel);
       else if (curveType == 2)
-        normalizedVel = std::pow(normalizedVel, 2.0f);
+        normalizedVel = normalizedVel * normalizedVel;
 
       int velocity = juce::jlimit(1, 127, (int)(normalizedVel * 127.0f));
       specializedMessages.addEvent(
@@ -207,42 +220,54 @@ void MainComponent::handleIncomingMidiMessage(
 void MainComponent::releaseResources() {}
 
 void MainComponent::rebuildSynth() {
-  // 1. Prepare all readers and sounds OFF-LOCK
-  // We'll collect the sounds first, then swap them into the synth
-  juce::ReferenceCountedArray<juce::SynthesiserSound> newSounds;
+  // 1. Prepare all readers and sounds OFF-LOCK in a background thread
+  // We use a lambda to do the heavy lifting
+  auto buildTask = [this]() {
+    juce::ReferenceCountedArray<juce::SynthesiserSound> newSounds;
 
-  for (const auto &m : libraryData.mappings) {
-    if (m.samplePath.isNotEmpty()) {
-      std::unique_ptr<juce::AudioFormatReader> reader;
+    std::unique_ptr<juce::FileInputStream> stream;
+    if (currentLibraryFile.existsAsFile())
+      stream = std::make_unique<juce::FileInputStream>(currentLibraryFile);
 
-      juce::File file(m.samplePath);
-      if (file.existsAsFile()) {
-        reader.reset(formatManager.createReaderFor(file));
-      } else if (currentLibraryFile.existsAsFile()) {
-        auto data = sotero::SoteroArchive::extractResource(currentLibraryFile,
-                                                           m.samplePath);
-        if (data.getSize() > 0) {
-          auto stream = std::make_unique<juce::MemoryInputStream>(data, true);
-          reader.reset(formatManager.createReaderFor(std::move(stream)));
+    for (const auto &m : libraryData.mappings) {
+      if (m.samplePath.isNotEmpty()) {
+        std::unique_ptr<juce::AudioFormatReader> reader;
+
+        juce::File file(m.samplePath);
+        if (file.existsAsFile()) {
+          reader.reset(formatManager.createReaderFor(file));
+        } else if (stream != nullptr && stream->openedOk()) {
+          auto data =
+              sotero::SoteroArchive::extractResource(*stream, m.samplePath);
+          if (data.getSize() > 0) {
+            auto memStream =
+                std::make_unique<juce::MemoryInputStream>(data, true);
+            reader.reset(formatManager.createReaderFor(std::move(memStream)));
+          }
+        }
+
+        if (reader != nullptr) {
+          juce::BigInteger range;
+          range.setBit(m.midiNote);
+
+          newSounds.add(new sotero::SoteroSamplerSound(
+              m.samplePath, *reader, range, m.midiNote, 0.01, 0.1, 10.0,
+              m.chokeGroup, m.velocityLow, m.velocityHigh));
         }
       }
-
-      if (reader != nullptr) {
-        juce::BigInteger range;
-        range.setBit(m.midiNote);
-
-        newSounds.add(new sotero::SoteroSamplerSound(
-            m.samplePath, *reader, range, m.midiNote, 0.01, 0.1, 10.0,
-            m.chokeGroup, m.velocityLow, m.velocityHigh));
-      }
     }
-  }
 
-  // 2. Quickly swap sounds inside the lock
-  const juce::ScopedLock sl(synthLock);
-  synth.clearSounds();
-  for (auto *s : newSounds)
-    synth.addSound(s);
+    // 2. Quickly swap sounds inside the lock on the Message Thread
+    juce::MessageManager::callAsync([this, newSounds]() {
+      const juce::ScopedLock sl(synthLock);
+      synth.clearSounds();
+      for (auto *s : newSounds)
+        synth.addSound(s);
+    });
+  };
+
+  // Launch the task on a background thread
+  std::thread(buildTask).detach();
 }
 
 void MainComponent::auditionSample(const juce::String &path, int midiNote,
@@ -272,6 +297,14 @@ void MainComponent::updateGridUI() {
       region->onAudition = [this, mIndex](const KeyMapping &m) {
         auditionSample(m.samplePath, m.midiNote,
                        (m.velocityLow + m.velocityHigh) / 2);
+      };
+
+      if (mIndex == activeMappingIndex)
+        region->setActive(true);
+
+      region->onSelect = [this, mIndex]() {
+        deselectAllRegions();
+        activeMappingIndex = mIndex;
       };
 
       region->onClear = [this, mIndex](const KeyMapping &) {
@@ -319,6 +352,15 @@ void MainComponent::paint(juce::Graphics &g) {
   g.fillAll(juce::Colour(0xff121212));
   g.setColour(juce::Colours::white.withAlpha(0.1f));
   g.drawRect(getLocalBounds().reduced(5), 1.0f);
+}
+
+void MainComponent::deselectAllRegions() {
+  activeMappingIndex = -1;
+  for (auto *col : keyColumns) {
+    for (auto *region : col->regions) {
+      region->setActive(false);
+    }
+  }
 }
 
 void MainComponent::loadSoteroLibrary(const juce::File &file) {

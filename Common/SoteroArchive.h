@@ -133,9 +133,9 @@ public:
   }
 
   /**
-   * @brief Extracts a binary resource from an archive.
+   * @brief Extracts a binary resource from an archive using an existing stream.
    */
-  static juce::MemoryBlock extractResource(const juce::File &archiveFile,
+  static juce::MemoryBlock extractResource(juce::InputStream &stream,
                                            const juce::String &internalPath) {
     auto parts = juce::StringArray::fromTokens(internalPath, ":", "");
     if (parts.size() < 2)
@@ -144,12 +144,10 @@ public:
     size_t offset = (size_t)parts[0].getLargeIntValue();
     size_t size = (size_t)parts[1].getLargeIntValue();
 
-    juce::FileInputStream stream(archiveFile);
-    if (!stream.openedOk())
-      return {};
-
+    stream.setPosition(0);
     SoteroHeader header;
-    stream.read(&header, sizeof(SoteroHeader));
+    if (stream.read(&header, sizeof(SoteroHeader)) < sizeof(SoteroHeader))
+      return {};
 
     // Byte offset in file = Header + XML + internal offset
     int64_t absoluteOffset =
@@ -159,6 +157,18 @@ public:
     juce::MemoryBlock data;
     stream.readIntoMemoryBlock(data, (int)size);
     return data;
+  }
+
+  /**
+   * @brief Extracts a binary resource from an archive.
+   */
+  static juce::MemoryBlock extractResource(const juce::File &archiveFile,
+                                           const juce::String &internalPath) {
+    juce::FileInputStream stream(archiveFile);
+    if (!stream.openedOk())
+      return {};
+
+    return extractResource(stream, internalPath);
   }
 
   /**

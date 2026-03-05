@@ -221,4 +221,74 @@ private:
   juce::Slider slider;
 };
 
+/**
+    Minimalist arrow button for navigation.
+*/
+class SoteroArrowButton : public juce::Button, private juce::Timer {
+public:
+  SoteroArrowButton(bool pointsLeft)
+      : juce::Button(pointsLeft ? "left" : "right"), isLeft(pointsLeft) {
+    setTriggeredOnMouseDown(true);
+  }
+
+  void mouseDown(const juce::MouseEvent &e) override {
+    juce::Button::mouseDown(e);
+    startTimer(350); // Initial delay before repeating
+  }
+
+  void mouseUp(const juce::MouseEvent &e) override {
+    juce::Button::mouseUp(e);
+    stopTimer();
+  }
+
+  void mouseExit(const juce::MouseEvent &e) override {
+    juce::Button::mouseExit(e);
+    stopTimer();
+  }
+
+  void timerCallback() override {
+    startTimer(80); // Speed up repeats
+    triggerClick();
+  }
+
+  void paintButton(juce::Graphics &g, bool isMouseOver,
+                   bool isButtonDown) override {
+    auto bounds = getLocalBounds().toFloat();
+
+    if (isMouseOver) {
+      g.setColour(juce::Colours::white.withAlpha(0.05f));
+      g.fillRect(bounds);
+    }
+
+    g.setColour(isButtonDown ? juce::Colours::yellow
+                             : juce::Colours::white.withAlpha(0.6f));
+
+    juce::Path p;
+    float w = bounds.getWidth();
+    float h = bounds.getHeight();
+    float arrowW = 6.0f;  // Thinner as requested
+    float arrowH = 14.0f; // Aspect ratio for elegance
+
+    float x = (w - arrowW) / 2.0f;
+    float y = (h - arrowH) / 2.0f;
+
+    if (isLeft) {
+      p.startNewSubPath(x + arrowW, y);
+      p.lineTo(x, y + arrowH / 2.0f);
+      p.lineTo(x + arrowW, y + arrowH);
+    } else {
+      p.startNewSubPath(x, y);
+      p.lineTo(x + arrowW, y + arrowH / 2.0f);
+      p.lineTo(x, y + arrowH);
+    }
+
+    g.strokePath(p, juce::PathStrokeType(
+                        1.5f, juce::PathStrokeType::mitered,
+                        juce::PathStrokeType::rounded)); // Thinner stroke
+  }
+
+private:
+  bool isLeft;
+};
+
 } // namespace sotero

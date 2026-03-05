@@ -19,12 +19,19 @@ public:
   void mouseUp(const juce::MouseEvent &e) override;
   void mouseDoubleClick(const juce::MouseEvent &e) override;
 
+  void setActive(bool active) {
+    isActive = active;
+    repaint();
+  }
+  bool getActive() const { return isActive; }
+
   const KeyMapping &getMapping() const { return currentMapping; }
 
   std::function<void(const KeyMapping &)> onBoundsChanged;
   std::function<void(const KeyMapping &)> onDragFinished;
   std::function<void(const KeyMapping &)> onClear;
   std::function<void(const KeyMapping &)> onAudition;
+  std::function<void()> onSelect;
 
 private:
   KeyMapping currentMapping;
@@ -34,6 +41,7 @@ private:
   SampleRegion *gluedBottomNeighbor = nullptr;
 
   bool isHovering = false;
+  bool isActive = false;
   enum class DragMode { None, TopHandle, BottomHandle, Body, Eraser };
   DragMode currentDragMode = DragMode::None;
   int dragStartY = 0;
