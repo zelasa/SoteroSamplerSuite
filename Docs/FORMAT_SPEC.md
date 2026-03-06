@@ -27,7 +27,23 @@ O arquivo é composto por três segmentos principais obrigatoriamente ordenados 
 ### 3.2. Manifesto (Metadata XML)
 Localizado imediatamente após o cabeçalho.
 - **Formato**: XML (UTF-8).
-- **Conteúdo**: Definições de mapping MIDI, grupos de Choke, atribuição de velocity layers e referências (offsets) para o Bloco de Dados Binários.
+- **Estrutura de Amostras (One-Shots)**:
+    - **Layers de Microfonação**: Suporte nativo a `Layer 1` e `Layer 2`.
+    - **Mapeamento MIDI**: Visualização vertical (V0 a V127).
+    - **Parâmetros por Região**: 
+        - `sampleStart`, `sampleEnd`, `fadeIn`, `fadeOut` (int64).
+        - `volume`, `tune`, `fineTune` (knobs dedicados).
+        - `adsr` (A, D, S, R numéricos).
+- **Curva de Velocity**:
+    - `velocityCurveType`, `velocityFilterSens`.
+- **Estrutura de Loops (MIDI clips)**:
+    - **Abas**: A, B, C (12 slots cromáticos cada).
+    - **Sync**: `dawSync` (ON/OFF), `bpmValue`.
+- **Metadados da Livraria (Informações)**:
+    - `nome`, `data`, `autor`, `instrumento`, `informacoes` (texto livre).
+    - `artworkPath` (Suporte a JPG/PNG/TIFF até 25MB).
+- **Flags de Exportação (To Player)**:
+    - Switches individuais para: `Layer 1`, `Layer 2`, `Velocity Curve`, `Compressor`, `Reverb`, `Equalizer`, `Punch`, `Loops (A/B/C)`.
 
 ### 3.3. Bloco de Dados Binários (Payload)
 Localizado após o Manifesto XML.

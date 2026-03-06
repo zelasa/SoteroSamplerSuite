@@ -20,6 +20,16 @@ public:
     xml->setAttribute("name", metadata.name);
     xml->setAttribute("author", metadata.author);
     xml->setAttribute("description", metadata.description);
+    xml->setAttribute("creationDate", metadata.creationDate);
+    xml->setAttribute("instrumentType", metadata.instrumentType);
+
+    // Toggles
+    auto toggles = xml->createNewChildElement("Toggles");
+    toggles->setAttribute("compressor", metadata.enableCompressor);
+    toggles->setAttribute("eq", metadata.enableEQ);
+    toggles->setAttribute("reverb", metadata.enableReverb);
+    toggles->setAttribute("punch", metadata.enablePunch);
+    toggles->setAttribute("loopCancellation", metadata.loopCancellationMode);
 
     auto artwork = xml->createNewChildElement("Artwork");
     artwork->setAttribute("path", metadata.artworkPath);
@@ -33,6 +43,24 @@ public:
       m->setAttribute("velLow", mapping.velocityLow);
       m->setAttribute("velHigh", mapping.velocityHigh);
       m->setAttribute("choke", mapping.chokeGroup);
+
+      // Non-destructive
+      m->setAttribute("start", (int)mapping.sampleStart);
+      m->setAttribute("end", (int)mapping.sampleEnd);
+      m->setAttribute("fadeIn", (int)mapping.fadeIn);
+      m->setAttribute("fadeOut", (int)mapping.fadeOut);
+      m->setAttribute("volume", (double)mapping.volumeMultiplier);
+      m->setAttribute("fineTune", (double)mapping.fineTuneCents);
+    }
+
+    auto loops = xml->createNewChildElement("Loops");
+    for (const auto &loop : metadata.loops) {
+      auto l = loops->createNewChildElement("Loop");
+      l->setAttribute("slot", loop.slotIndex);
+      l->setAttribute("path", loop.midiPath);
+      l->setAttribute("name", loop.name);
+      l->setAttribute("sync", loop.syncToHost);
+      l->setAttribute("tempoMult", (double)loop.tempoMultiplier);
     }
 
     return xml->toString(juce::XmlElement::TextFormat().withoutHeader());
@@ -49,6 +77,17 @@ public:
       metadata.name = xml->getStringAttribute("name");
       metadata.author = xml->getStringAttribute("author");
       metadata.description = xml->getStringAttribute("description");
+      metadata.creationDate = xml->getStringAttribute("creationDate");
+      metadata.instrumentType = xml->getStringAttribute("instrumentType");
+
+      if (auto *toggles = xml->getChildByName("Toggles")) {
+        metadata.enableCompressor = toggles->getBoolAttribute("compressor");
+        metadata.enableEQ = toggles->getBoolAttribute("eq");
+        metadata.enableReverb = toggles->getBoolAttribute("reverb");
+        metadata.enablePunch = toggles->getBoolAttribute("punch");
+        metadata.loopCancellationMode =
+            toggles->getBoolAttribute("loopCancellation");
+      }
 
       if (auto *artwork = xml->getChildByName("Artwork"))
         metadata.artworkPath = artwork->getStringAttribute("path");
@@ -62,7 +101,28 @@ public:
           mapping.velocityLow = m->getIntAttribute("velLow");
           mapping.velocityHigh = m->getIntAttribute("velHigh");
           mapping.chokeGroup = m->getIntAttribute("choke");
+
+          mapping.sampleStart = m->getIntAttribute("start");
+          mapping.sampleEnd = m->getIntAttribute("end");
+          mapping.fadeIn = m->getIntAttribute("fadeIn");
+          mapping.fadeOut = m->getIntAttribute("fadeOut");
+          mapping.volumeMultiplier =
+              (float)m->getDoubleAttribute("volume", 1.0);
+          mapping.fineTuneCents = (float)m->getDoubleAttribute("fineTune", 0.0);
+
           metadata.mappings.add(mapping);
+        }
+      }
+
+      if (auto *loops = xml->getChildByName("Loops")) {
+        for (auto *l : loops->getChildIterator()) {
+          LoopMapping loop;
+          loop.slotIndex = l->getIntAttribute("slot");
+          loop.midiPath = l->getStringAttribute("path");
+          loop.name = l->getStringAttribute("name");
+          loop.syncToHost = l->getBoolAttribute("sync", true);
+          loop.tempoMultiplier = (float)l->getDoubleAttribute("tempoMult", 1.0);
+          metadata.loops.add(loop);
         }
       }
     }

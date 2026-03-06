@@ -2,37 +2,11 @@
 
 Este documento contém diretrizes obrigatórias para qualquer agente de IA trabalhando neste projeto. Estas regras garantem a integridade da marca e a estabilidade técnica da **SoteropolySamples**.
 
-## 1. Estratégia de Versionamento (SemVer x.y.z)
+## 1. Diretrizes de IA e Desenvolvimento
+As regras de versionamento (SemVer), arquitetura de projeto e padrões de código estão centralizadas no [Sotero Developer Guide](Docs/DEVELOPER_GUIDE.md). Agentes devem seguir essas diretrizes rigorosamente.
 
-Seguimos estritamente o **Semantic Versioning 2.0.0**.
-
-- **X (MAJOR)**: Mudanças incompatíveis (Breaking Changes).
-    - Ex: Alteração no motor de criptografia .SSA (livrarias antigas param de funcionar).
-    - Ex: Reformulação total da UI/UX que mude o fluxo de trabalho.
-- **Y (MINOR)**: Novas funcionalidades retrocompatíveis.
-    - Ex: Adição de um novo efeito (Delay), suporte a novos tipos de samples.
-    - Ex: Adição de uma nova aba de visualização.
-- **Z (PATCH)**: Correções de bugs e otimizações internas.
-    - Ex: Correção de um crash, otimização de CPU no motor de áudio.
-
-### Regras de Ouro de Versão:
-1. O **SoteroBuilder** e o **SamplerPlayer** devem manter paridade de versão MAJOR para garantir compatibilidade do formato .SSA.
-2. Cada release deve ser documentada no `Docs/Changelog.md` (a ser criado).
-
-## 2. Arquitetura do Projeto (Monorepo)
-
-O projeto é organizado em uma única suite para evitar dessincronia de código.
-
-- `/Common`: Contém lógica de criptografia, parse de .SSA e modelos de dados compartilhados.
-- `/SamplerPlayer`: Código específico do Plugin/Standalone de áudio.
-- `/SoteroBuilder`: Código específico da ferramenta de criação.
-
-## 3. Padrões de Código (JUCE/C++)
-
-1. **Naming**: Usar `camelCase` para métodos e variáveis, `PascalCase` para Classes.
-2. **Propriedade**: Sempre usar `std::unique_ptr` para gerenciamento de vida de componentes JUCE.
-3. **UI**: Todas as dimensões devem ser pensadas para telas High-DPI (Escalabilidade).
-4. **Branding**: SoteropolySamples deve ser tratada como uma marca premium. UI nunca deve parecer amadora.
+## 2. Padrões Adicionais
+Consulte o guia técnico para naming, gerenciamento de memória e branding.
 
 ## 4. Fluxo de Trabalho do Agente
 

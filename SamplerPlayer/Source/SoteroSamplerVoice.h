@@ -13,11 +13,15 @@ public:
                      const juce::BigInteger &midiNotes, int midiRootNote,
                      double attackTimeSecs, double releaseTimeSecs,
                      double maxSampleLengthSecs, int chokeGroup = 0,
-                     int vLow = 0, int vHigh = 127)
+                     int vLow = 0, int vHigh = 127, int64_t start = 0,
+                     int64_t end = 0, int64_t fIn = 0, int64_t fOut = 0,
+                     float vol = 1.0f, float fineTune = 0.0f)
       : juce::SamplerSound(name, source, midiNotes, midiRootNote,
                            attackTimeSecs, releaseTimeSecs,
                            maxSampleLengthSecs),
-        chokeGroupId(chokeGroup), velocityLow(vLow), velocityHigh(vHigh) {
+        chokeGroupId(chokeGroup), velocityLow(vLow), velocityHigh(vHigh),
+        sampleStart(start), sampleEnd(end), fadeIn(fIn), fadeOut(fOut),
+        volumeMultiplier(vol), fineTuneCents(fineTune) {
 
     // Initial default ADSR
     adsrParams.attack = (float)attackTimeSecs;
@@ -33,6 +37,14 @@ public:
   int chokeGroupId = 0;
   int velocityLow = 0;
   int velocityHigh = 127;
+
+  // Non-destructive metadata
+  int64_t sampleStart = 0;
+  int64_t sampleEnd = 0;
+  int64_t fadeIn = 0;
+  int64_t fadeOut = 0;
+  float volumeMultiplier = 1.0f;
+  float fineTuneCents = 0.0f;
 
   juce::ADSR::Parameters adsrParams;
 

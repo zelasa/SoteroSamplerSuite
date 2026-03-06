@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <juce_core/juce_core.h>
+#include <memory>
 
 /**
  * @file SoteroFormat.h
@@ -37,26 +38,53 @@ struct SoteroHeader {
 };
 #pragma pack(pop)
 
-/**
- * @brief Metadata structure for a single key/sample mapping
- */
+/** Metadata for a single sample mapping */
 struct KeyMapping {
-  int midiNote;
+  int midiNote = -1;
   juce::String samplePath;
   juce::String fileName;
-  int velocityLow;
-  int velocityHigh;
-  int chokeGroup;
+  int velocityLow = 0;
+  int velocityHigh = 127;
+  int chokeGroup = 0;
+
+  // New non-destructive metadata
+  int64_t sampleStart = 0;
+  int64_t sampleEnd = 0;
+  int64_t fadeIn = 0;
+  int64_t fadeOut = 0;
+  float volumeMultiplier = 1.0f;
+  float fineTuneCents = 0.0f;
 };
 
-/**
- * @brief High-level metadata for the entire library
- */
+/** Metadata for a MIDI Loop slot */
+struct LoopMapping {
+  int slotIndex = 0; // 0-35 (Abas A, B, C)
+  juce::String midiPath;
+  juce::String name;
+
+  bool syncToHost = true;
+  float tempoMultiplier = 1.0f; // 0.5, 1.0, 2.0
+};
+
+/** Metadata for the entire library */
 struct LibraryMetadata {
   juce::String name;
-  juce::String author;
+  juce::String author; // also "creator"
   juce::String description;
+  juce::String creationDate;
+  juce::String instrumentType;
   juce::String artworkPath;
+
+  // Compilation Toggles (Enabled in Player)
+  bool enableCompressor = false;
+  bool enableEQ = false;
+  bool enableReverb = false;
+  bool enablePunch = false;
+
+  // Loop Global Settings
+  bool loopCancellationMode = false;
+
   juce::Array<KeyMapping> mappings;
+  juce::Array<LoopMapping> loops;
 };
 } // namespace sotero
