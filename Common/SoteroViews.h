@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SoteroEngineInterface.h"
+#include "SoteroLibraryManager.h"
 #include "SoteroUI.h"
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <juce_audio_utils/juce_audio_utils.h>
@@ -55,10 +56,10 @@ private:
       revSizeAtt, revMixAtt;
 
   // Master
-  sotero::HardwareKnob masterVolKnob;
+  sotero::HardwareKnob masterVolKnob, pitchKnob, toneKnob;
   sotero::VUMeter masterVU_L, masterVU_R;
   std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment>
-      masterVolAtt;
+      masterVolAtt, pitchAtt, toneAtt;
 };
 
 // ... (LibraryDashboard and SetupView content remains similar but I'll add them
@@ -85,10 +86,14 @@ private:
 class SetupView : public juce::Component {
 public:
   SetupView(sotero::ISoteroAudioEngine &e);
+  void paint(juce::Graphics &g) override;
   void resized() override;
 
 private:
   sotero::ISoteroAudioEngine &engine;
+  juce::Label machineIDLabel, loginLabel, passLabel, serialLabel;
+  juce::TextEditor loginInput, passInput, serialInput;
+  juce::TextButton activateBtn{"ACTIVATE LICENSE"};
   juce::GroupComponent globalGroup;
   juce::Label chanLabel;
   juce::ComboBox chanCombo;
@@ -99,6 +104,31 @@ private:
 
   juce::TextButton loadLibBtn;
   std::unique_ptr<juce::FileChooser> chooser;
+};
+
+class LibraryBrowser : public juce::Component {
+public:
+  LibraryBrowser(sotero::ISoteroAudioEngine &e);
+  void paint(juce::Graphics &g) override;
+  void resized() override;
+
+  struct Item : public juce::Component {
+    LibraryEntry entry;
+    std::function<void(juce::File)> onLoadRequested;
+    Item(const LibraryEntry &e);
+    void paint(juce::Graphics &g) override;
+    void mouseDown(const juce::MouseEvent &) override;
+    bool isSelected = false;
+  };
+
+  void refresh();
+
+private:
+  sotero::ISoteroAudioEngine &engine;
+  sotero::SoteroLibraryManager libManager;
+  juce::OwnedArray<Item> items;
+  juce::Viewport viewport;
+  juce::Component content;
 };
 
 /**
@@ -117,9 +147,11 @@ public:
 private:
   sotero::ISoteroAudioEngine &engine;
 
-  juce::TextButton performBtn{"PERFORMANCE"}, setupBtn{"SETUP"};
+  juce::TextButton performBtn{"PERFORMANCE"}, setupBtn{"SETUP"},
+      libBtn{"LIBRARY"};
   std::unique_ptr<PerformanceView> performanceView;
   std::unique_ptr<SetupView> setupView;
+  std::unique_ptr<LibraryBrowser> libraryBrowser;
 
   juce::Label midiMonitorLabel, midiVelocityLabel;
   juce::ImageComponent logo;

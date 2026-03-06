@@ -149,7 +149,10 @@ public:
       // 1. Calculate Fine Tune Speed Ratio
       // speedShift = 2 ^ (cents / 1200)
       const double fineTuneRatio = std::pow(2.0, s->fineTuneCents / 1200.0);
-      const double speedRatio = playbackSpeedRatio * fineTuneRatio;
+      const double masterPitchRatio =
+          std::pow(2.0, (double)masterPitchSemitones / 12.0);
+      const double speedRatio =
+          playbackSpeedRatio * fineTuneRatio * masterPitchRatio;
 
       // 2. Read Samples with Offset
       int64_t startInSource = s->sampleStart + (int64_t)sourceSamplePosition;
@@ -230,8 +233,11 @@ public:
     }
   }
 
+  void setMasterPitch(float semitones) { masterPitchSemitones = semitones; }
+
 private:
   int currentChokeGroupId = 0;
+  float masterPitchSemitones = 0.0f;
   juce::ADSR adsr;
   juce::AudioBuffer<float> tempBuffer;
 

@@ -83,7 +83,8 @@ struct LibraryMetadata {
   juce::String author; // also "creator"
   juce::String description;
   juce::String creationDate;
-  juce::String instrumentType;
+  juce::String instrumentType; // "Drum Kit", "Synth", etc.
+  juce::String dna;            // Machine Fingerprint for binding
   juce::String artworkPath;
 
   // Compilation Toggles (Enabled in Player)

@@ -157,6 +157,7 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected,
 
   masterCompressor.prepare(spec);
   masterReverb.prepare(spec);
+  masterToneFilter.prepare(spec);
 
   for (int i = 0; i < synth.getNumVoices(); ++i) {
     if (auto *v = dynamic_cast<sotero::SoteroSamplerVoice *>(synth.getVoice(i)))
@@ -201,6 +202,14 @@ void MainComponent::getNextAudioBlock(
     }
   }
 
+  // --- Master Parameters ---
+  float masterPitch = *apvts->getRawParameterValue("masterPitch");
+  for (int i = 0; i < synth.getNumVoices(); ++i) {
+    if (auto *v = dynamic_cast<sotero::SoteroSamplerVoice *>(synth.getVoice(i)))
+      v->setMasterPitch(masterPitch);
+  }
+
+  // --- Audio Processing ---
   synth.renderNextBlock(*bufferToFill.buffer, specializedMessages,
                         bufferToFill.startSample, bufferToFill.numSamples);
 
@@ -228,6 +237,24 @@ void MainComponent::getNextAudioBlock(
     juce::dsp::AudioBlock<float> block(buffer, bufferToFill.startSample);
     juce::dsp::ProcessContextReplacing<float> context(block);
     masterReverb.process(context);
+  }
+
+  // Master Tone Filter
+  float masterTone = *apvts->getRawParameterValue("masterTone");
+  if (std::abs(masterTone) > 0.05f) {
+    if (masterTone < 0) {
+      masterToneFilter.setType(juce::dsp::StateVariableTPTFilterType::lowpass);
+      float freq =
+          juce::jmap(std::abs(masterTone), 0.0f, 1.0f, 20000.0f, 400.0f);
+      masterToneFilter.setCutoffFrequency(freq);
+    } else {
+      masterToneFilter.setType(juce::dsp::StateVariableTPTFilterType::highpass);
+      float freq = juce::jmap(masterTone, 0.0f, 1.0f, 20.0f, 3000.0f);
+      masterToneFilter.setCutoffFrequency(freq);
+    }
+    juce::dsp::AudioBlock<float> block(buffer, bufferToFill.startSample);
+    juce::dsp::ProcessContextReplacing<float> context(block);
+    masterToneFilter.process(context);
   }
 
   // Master Gain
@@ -504,6 +531,10 @@ MainComponent::createParameterLayout() {
       "masterVol", "Master Volume", -60.0f, 6.0f, 0.0f));
   params.push_back(std::make_unique<juce::AudioParameterFloat>(
       "pan0", "Master Pan", -1.0f, 1.0f, 0.0f));
+  params.push_back(std::make_unique<juce::AudioParameterInt>(
+      "masterPitch", "Master Pitch", -12, 12, 0));
+  params.push_back(std::make_unique<juce::AudioParameterFloat>(
+      "masterTone", "Master Tone", -1.0f, 1.0f, 0.0f));
   return {params.begin(), params.end()};
 }
 

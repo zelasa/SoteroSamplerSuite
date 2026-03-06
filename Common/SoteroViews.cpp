@@ -40,7 +40,7 @@ void SoteroKeyboard::setOctaveRange(int note) {
 PerformanceView::PerformanceView(sotero::ISoteroAudioEngine &e)
     : engine(e), threshKnob("THRESH"), ratioKnob("RATIO"), attackKnob("ATTACK"),
       releaseKnob("RELEASE"), revSizeKnob("SIZE"), revMixKnob("MIX"),
-      masterVolKnob("MASTER") {
+      masterVolKnob("MASTER"), pitchKnob("PITCH"), toneKnob("TONE") {
   // Velocity Curve
   addAndMakeVisible(velocityGroup);
   velocityGroup.setText("VELOCITY CURVE");
@@ -128,6 +128,16 @@ PerformanceView::PerformanceView(sotero::ISoteroAudioEngine &e)
   masterVolAtt =
       std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
           engine.getAPVTS(), "masterVol", masterVolKnob.getSlider());
+
+  addAndMakeVisible(pitchKnob);
+  pitchAtt =
+      std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
+          engine.getAPVTS(), "masterPitch", pitchKnob.getSlider());
+
+  addAndMakeVisible(toneKnob);
+  toneAtt =
+      std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
+          engine.getAPVTS(), "masterTone", toneKnob.getSlider());
 
   addAndMakeVisible(masterVU_L);
   addAndMakeVisible(masterVU_R);
@@ -220,19 +230,50 @@ void PerformanceView::resized() {
   auto mastInner = masterGroup.getBounds().reduced(20, 30);
 
   // Stereo VU on the right
-  auto vuArea = mastInner.removeFromRight(100);
-  masterVU_L.setBounds(vuArea.removeFromLeft(45).reduced(5, 10));
-  masterVU_R.setBounds(vuArea.reduced(5, 10));
-
-  // Hero Master Volume
-  masterVolKnob.setBounds(mastInner.reduced(10, 5));
+  // Hero Master Area
+  auto mastControls = mastInner.reduced(10, 5);
+  int mw = mastControls.getWidth() / 3;
+  pitchKnob.setBounds(mastControls.removeFromLeft(mw).reduced(5));
+  toneKnob.setBounds(mastControls.removeFromLeft(mw).reduced(5));
+  masterVolKnob.setBounds(mastControls.reduced(5));
 }
 
 // --- SetupView Implementation ---
 
 SetupView::SetupView(sotero::ISoteroAudioEngine &e) : engine(e) {
+  addAndMakeVisible(machineIDLabel);
+  machineIDLabel.setText("YOUR MACHINE DNA: " + SoteroSecurity::getMachineID(),
+                         juce::dontSendNotification);
+  machineIDLabel.setColour(juce::Label::textColourId,
+                           juce::Colours::cyan.withAlpha(0.8f));
+  machineIDLabel.setJustificationType(juce::Justification::centred);
+  machineIDLabel.setFont(juce::Font(14.0f, juce::Font::bold));
+
+  addAndMakeVisible(loginLabel);
+  loginLabel.setText("ACCOUNT LOGIN:", juce::dontSendNotification);
+  addAndMakeVisible(loginInput);
+
+  addAndMakeVisible(passLabel);
+  passLabel.setText("PASSWORD:", juce::dontSendNotification);
+  addAndMakeVisible(passInput);
+  passInput.setPasswordCharacter('*');
+
+  addAndMakeVisible(serialLabel);
+  serialLabel.setText("SERIAL KEY / LICENSE:", juce::dontSendNotification);
+  addAndMakeVisible(serialInput);
+
+  addAndMakeVisible(activateBtn);
+  activateBtn.setColour(juce::TextButton::buttonColourId,
+                        juce::Colours::darkgreen);
+  activateBtn.onClick = [this] {
+    juce::AlertWindow::showMessageBoxAsync(
+        juce::AlertWindow::InfoIcon, "Sotero Shield",
+        "Connecting to server...\nValidation successful!\nYour machine is now "
+        "authorized for your libraries.");
+  };
+
   addAndMakeVisible(globalGroup);
-  globalGroup.setText("LIBRARY SETUP");
+  globalGroup.setText("AUDIO SETTINGS");
 
   addAndMakeVisible(chanLabel);
   chanLabel.setText("MIDI CHANNEL:", juce::dontSendNotification);
@@ -365,6 +406,7 @@ SoteroPlayerUI::SoteroPlayerUI(sotero::ISoteroAudioEngine &e)
   performBtn.onClick = [this] {
     performanceView->setVisible(true);
     setupView->setVisible(false);
+    libraryBrowser->setVisible(false);
   };
 
   addAndMakeVisible(setupBtn);
@@ -373,6 +415,17 @@ SoteroPlayerUI::SoteroPlayerUI(sotero::ISoteroAudioEngine &e)
   setupBtn.onClick = [this] {
     performanceView->setVisible(false);
     setupView->setVisible(true);
+    libraryBrowser->setVisible(false);
+  };
+
+  addAndMakeVisible(libBtn);
+  libBtn.setClickingTogglesState(true);
+  libBtn.setRadioGroupId(100);
+  libBtn.onClick = [this] {
+    performanceView->setVisible(false);
+    setupView->setVisible(false);
+    libraryBrowser->setVisible(true);
+    libraryBrowser->refresh();
   };
 
   addAndMakeVisible(midiMonitorLabel);
@@ -398,6 +451,10 @@ SoteroPlayerUI::SoteroPlayerUI(sotero::ISoteroAudioEngine &e)
   addAndMakeVisible(*setupView);
   setupView->setVisible(false);
 
+  libraryBrowser = std::make_unique<LibraryBrowser>(engine);
+  addAndMakeVisible(*libraryBrowser);
+  libraryBrowser->setVisible(false);
+
   addAndMakeVisible(keyboard);
 
   startTimerHz(30);
@@ -422,14 +479,16 @@ void SoteroPlayerUI::resized() {
 
   // Navigation (Center)
   auto tabs = topBar.reduced(50, 5);
-  int tabW = tabs.getWidth() / 2;
-  performBtn.setBounds(tabs.removeFromLeft(tabW).reduced(15, 0));
-  setupBtn.setBounds(tabs.reduced(15, 0));
+  int tabW = tabs.getWidth() / 3;
+  performBtn.setBounds(tabs.removeFromLeft(tabW).reduced(10, 0));
+  libBtn.setBounds(tabs.removeFromLeft(tabW).reduced(10, 0));
+  setupBtn.setBounds(tabs.reduced(10, 0));
 
   keyboard.setBounds(area.removeFromBottom(120).reduced(20, 10));
 
   performanceView->setBounds(area);
   setupView->setBounds(area);
+  libraryBrowser->setBounds(area);
 }
 
 void SoteroPlayerUI::timerCallback() {
@@ -446,6 +505,110 @@ void SoteroPlayerUI::timerCallback() {
   } else {
     midiMonitorLabel.setText("MIDI IN: ---", juce::dontSendNotification);
     midiVelocityLabel.setText("VELOCITY: ---", juce::dontSendNotification);
+  }
+}
+
+// --- LibraryBrowser Implementation ---
+
+LibraryBrowser::Item::Item(const LibraryEntry &e) : entry(e) {}
+
+void LibraryBrowser::Item::paint(juce::Graphics &g) {
+  auto bounds = getLocalBounds().toFloat().reduced(2);
+
+  // Background
+  if (entry.isLocked) {
+    g.setColour(juce::Colours::red.withAlpha(0.15f));
+  } else {
+    g.setColour(isSelected ? juce::Colours::orange.withAlpha(0.2f)
+                           : juce::Colours::black.withAlpha(0.2f));
+  }
+  g.fillRoundedRectangle(bounds, 5.0f);
+
+  // Selection Border
+  if (isSelected) {
+    g.setColour(juce::Colours::orange);
+    g.drawRoundedRectangle(bounds, 5.0f, 2.0f);
+  } else {
+    g.setColour(juce::Colours::white.withAlpha(0.1f));
+    g.drawRoundedRectangle(bounds, 5.0f, 1.0f);
+  }
+
+  auto textBounds = bounds.reduced(10);
+  g.setColour(juce::Colours::white);
+  g.setFont(juce::Font(16.0f, juce::Font::bold));
+  g.drawText(entry.name, textBounds.removeFromTop(20),
+             juce::Justification::centredLeft);
+
+  g.setColour(juce::Colours::grey);
+  g.setFont(12.0f);
+  g.drawText(entry.author, textBounds.removeFromTop(15),
+             juce::Justification::centredLeft);
+
+  g.drawText(entry.instrumentType, textBounds.removeFromBottom(15),
+             juce::Justification::bottomRight);
+
+  if (entry.isLocked) {
+    g.setColour(juce::Colours::red);
+    g.setFont(juce::Font(10.0f, juce::Font::bold));
+    g.drawText("DNA LOCKED", bounds.reduced(10), juce::Justification::topRight);
+  }
+}
+
+void LibraryBrowser::Item::mouseDown(const juce::MouseEvent &) {
+  if (entry.isLocked) {
+    juce::AlertWindow::showMessageBoxAsync(
+        juce::AlertWindow::WarningIcon, "Sotero Shield: Library Locked",
+        "This library is bound to another machine (DNA mismatch).\nYour "
+        "Machine "
+        "ID: " +
+            SoteroSecurity::getMachineID() +
+            "\n\nPlease activate via your Sotero account.");
+    return;
+  }
+  if (onLoadRequested)
+    onLoadRequested(entry.file);
+}
+
+LibraryBrowser::LibraryBrowser(sotero::ISoteroAudioEngine &e) : engine(e) {
+  addAndMakeVisible(viewport);
+  viewport.setViewedComponent(&content);
+  refresh();
+}
+
+void LibraryBrowser::refresh() {
+  libManager.refresh();
+  items.clear();
+
+  auto &libs = libManager.getLibraries();
+  for (auto &lib : libs) {
+    auto *item = items.add(new Item(lib));
+    content.addAndMakeVisible(item);
+    item->onLoadRequested = [this](juce::File f) {
+      engine.loadSoteroLibrary(f);
+      refresh(); // Redraw selection if we add selection state later
+    };
+  }
+
+  resized();
+}
+
+void LibraryBrowser::paint(juce::Graphics &g) {
+  g.setColour(juce::Colours::black.withAlpha(0.3f));
+  g.fillAll();
+}
+
+void LibraryBrowser::resized() {
+  viewport.setBounds(getLocalBounds());
+
+  int itemH = 80;
+  int spacing = 5;
+  content.setBounds(0, 0,
+                    viewport.getWidth() - viewport.getScrollBarThickness(),
+                    items.size() * (itemH + spacing) + spacing);
+
+  for (int i = 0; i < items.size(); ++i) {
+    items[i]->setBounds(spacing, spacing + i * (itemH + spacing),
+                        content.getWidth() - spacing * 2, itemH);
   }
 }
 

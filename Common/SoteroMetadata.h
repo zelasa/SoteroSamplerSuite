@@ -29,6 +29,7 @@ public:
     toggles->setAttribute("eq", metadata.enableEQ);
     toggles->setAttribute("reverb", metadata.enableReverb);
     toggles->setAttribute("punch", metadata.enablePunch);
+    toggles->setAttribute("dna", metadata.dna); // Added dna property
     toggles->setAttribute("adsr", metadata.enableADSR);
     toggles->setAttribute("filter", metadata.enableFilter);
     toggles->setAttribute("loopCancellation", metadata.loopCancellationMode);
@@ -97,6 +98,7 @@ public:
         metadata.enableEQ = toggles->getBoolAttribute("eq");
         metadata.enableReverb = toggles->getBoolAttribute("reverb");
         metadata.enablePunch = toggles->getBoolAttribute("punch");
+        metadata.dna = toggles->getStringAttribute("dna"); // Added dna property
         metadata.enableADSR = toggles->getBoolAttribute("adsr", true);
         metadata.enableFilter = toggles->getBoolAttribute("filter", true);
         metadata.loopCancellationMode =

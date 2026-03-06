@@ -196,6 +196,7 @@ private:
 
   // Parameters & Effects (Player Mode) - DECLARED AFTER dummyProcessor
   std::unique_ptr<juce::AudioProcessorValueTreeState> apvts;
+  juce::dsp::StateVariableTPTFilter<float> masterToneFilter;
 
   std::unique_ptr<juce::FileChooser> chooser;
   // --- Library Info Section ---

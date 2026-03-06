@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SoteroMetadata.h"
+#include "SoteroSecurity.h"
 #include <juce_core/juce_core.h>
 
 namespace sotero {
@@ -25,12 +26,12 @@ public:
   bool isExhausted() override { return sourceStream->isExhausted(); }
 
   int read(void *destBuffer, int maxBytesToRead) override {
+    int64_t startPos = sourceStream->getPosition();
     int bytesRead = sourceStream->read(destBuffer, maxBytesToRead);
     if (bytesRead > 0 && !userKey.isEmpty()) {
-      // Placeholder DNA XOR encryption
       uint8_t *data = static_cast<uint8_t *>(destBuffer);
       for (int i = 0; i < bytesRead; ++i) {
-        data[i] ^= 0xAA; // Simple XOR placeholder
+        data[i] ^= (uint8_t)userKey[(startPos + i) % userKey.length()];
       }
     }
     return bytesRead;
@@ -139,14 +140,20 @@ static bool write(const juce::File &outputFile, LibraryMetadata metadata,
   // 2. Serialize Metadata with internal offsets
   juce::String xmlString = SoteroMetadataHandler::toXmlString(metadata);
   juce::MemoryBlock xmlData;
-  xmlData.append(xmlString.toRawUTF8(), xmlString.getNumBytesAsUTF8());
+
+  if (!metadata.dna.isEmpty()) {
+    // Obfuscate (Protect)
+    xmlData = SoteroSecurity::obfuscate(xmlString, "SOTERO_SHIELD_V1");
+  } else {
+    xmlData.append(xmlString.toRawUTF8(), xmlString.getNumBytesAsUTF8());
+  }
 
   // 3. Write Header
   SoteroHeader header;
   memcpy(header.magic, constants::kMagicNumber, 8);
   header.version = constants::kCurrentVersion;
   header.xmlMetadataSize = (uint32_t)xmlData.getSize();
-  header.encryptionFlags = 0;
+  header.encryptionFlags = metadata.dna.isEmpty() ? 0 : 1; // 1 = Protected
 
   stream.write(&header, sizeof(SoteroHeader));
 
@@ -223,7 +230,12 @@ static LibraryMetadata readMetadata(const juce::File &inputFile) {
       header.xmlMetadataSize)
     return {};
 
-  juce::String xmlString = xmlData.toString();
+  juce::String xmlString;
+  if (header.encryptionFlags & 1) {
+    xmlString = SoteroSecurity::deobfuscate(xmlData, "SOTERO_SHIELD_V1");
+  } else {
+    xmlString = xmlData.toString();
+  }
   return SoteroMetadataHandler::fromXmlString(xmlString);
 }
 };
