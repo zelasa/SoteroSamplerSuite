@@ -204,6 +204,38 @@ private:
   juce::TextEditor authorEditor;
   juce::TextButton importButton{"IMPORT"};
   juce::TextButton exportButton{"EXPORT"};
+  juce::ToggleButton enableADSRCheckbox{"Enable ADSR ENVs"};
+  juce::ToggleButton enableFilterCheckbox{"Enable Filters"};
+
+  // --- Octave Selector ---
+  juce::ComboBox octaveSelector;
+  int currentOctave = 3; // Default C3
+
+  // --- Sculpting Panel ---
+  struct SculptingPanel : public juce::Component {
+    juce::Slider attackSlider, decaySlider, sustainSlider, releaseSlider;
+    juce::Slider cutoffSlider, resSlider;
+    juce::ComboBox filterTypeSelector;
+    juce::Label title{"Sculpting", "SCULPTING TOOLS"};
+
+    SculptingPanel() {
+      addAndMakeVisible(title);
+      addAndMakeVisible(attackSlider);
+      addAndMakeVisible(decaySlider);
+      addAndMakeVisible(sustainSlider);
+      addAndMakeVisible(releaseSlider);
+      addAndMakeVisible(filterTypeSelector);
+      addAndMakeVisible(cutoffSlider);
+      addAndMakeVisible(resSlider);
+
+      filterTypeSelector.addItem("None", 1);
+      filterTypeSelector.addItem("Low Pass", 2);
+      filterTypeSelector.addItem("High Pass", 3);
+      filterTypeSelector.addItem("Band Pass", 4);
+    }
+    void resized() override;
+    void paint(juce::Graphics &g) override;
+  } sculptingPanel;
 
   // --- Grid Mapper Section ---
   struct LayerSlot : public juce::Component {
@@ -289,6 +321,7 @@ private:
   LibraryMetadata libraryData;
   int activeMappingIndex = -1;
   juce::File lastBrowseDirectory;
+  void updateOctave(int newOctave);
 
   juce::File currentLibraryFile;
 

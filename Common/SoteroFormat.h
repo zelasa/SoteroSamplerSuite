@@ -55,6 +55,16 @@ struct KeyMapping {
   float volumeMultiplier = 1.0f;
   float fineTuneCents = 0.0f;
   int micLayer = 0; // 0 = Layer 1 (Mic 1), 1 = Layer 2 (Mic 2)
+
+  // Sculpting Parameters (Per-mapping)
+  float adsrAttack = 0.01f;
+  float adsrDecay = 0.1f;
+  float adsrSustain = 1.0f;
+  float adsrRelease = 0.1f;
+
+  int filterType = 0; // 0 = None, 1 = LP, 2 = HP, 3 = BP
+  float filterCutoff = 20000.0f;
+  float filterResonance = 1.0f;
 };
 
 /** Metadata for a MIDI Loop slot */
@@ -81,6 +91,8 @@ struct LibraryMetadata {
   bool enableEQ = false;
   bool enableReverb = false;
   bool enablePunch = false;
+  bool enableADSR = true;
+  bool enableFilter = true;
 
   // Loop Global Settings
   bool loopCancellationMode = false;

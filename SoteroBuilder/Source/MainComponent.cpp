@@ -25,6 +25,20 @@ MainComponent::MainComponent()
   editView->addAndMakeVisible(nameEditor);
   editView->addAndMakeVisible(authorEditor);
 
+  enableADSRCheckbox.setToggleState(libraryData.enableADSR,
+                                    juce::dontSendNotification);
+  enableADSRCheckbox.onClick = [this] {
+    libraryData.enableADSR = enableADSRCheckbox.getToggleState();
+  };
+  editView->addAndMakeVisible(enableADSRCheckbox);
+
+  enableFilterCheckbox.setToggleState(libraryData.enableFilter,
+                                      juce::dontSendNotification);
+  enableFilterCheckbox.onClick = [this] {
+    libraryData.enableFilter = enableFilterCheckbox.getToggleState();
+  };
+  editView->addAndMakeVisible(enableFilterCheckbox);
+
   for (int i = 0; i < 12; ++i) {
     auto *col = keyColumns.add(new KeyColumn(60 + i));
     col->onBackgroundClick = [this] { deselectAllRegions(); };
@@ -100,6 +114,27 @@ MainComponent::MainComponent()
     if (deviceManager.isMidiInputDeviceEnabled(device.identifier))
       deviceManager.addMidiInputDeviceCallback(device.identifier, this);
   }
+
+  // --- Octave Selector ---
+  editView->addAndMakeVisible(octaveSelector);
+  for (int i = -2; i <= 8; ++i) {
+    octaveSelector.addItem("Octave C" + juce::String(i),
+                           i + 3); // 1-indexed for combo
+  }
+  octaveSelector.setSelectedId(currentOctave + 3);
+  octaveSelector.onChange = [this] {
+    updateOctave(octaveSelector.getSelectedId() - 3);
+  };
+
+  // --- Sculpting Panel ---
+  editView->addAndMakeVisible(sculptingPanel);
+  sculptingPanel.attackSlider.setRange(0.0, 10.0, 0.01);
+  sculptingPanel.releaseSlider.setRange(0.01, 10.0, 0.01);
+  sculptingPanel.cutoffSlider.setRange(20.0, 20000.0, 1.0);
+  sculptingPanel.cutoffSlider.setSkewFactorFromMidPoint(1000.0);
+
+  // Update Sculpting Panel when region is selected
+  // (Logic will be integrated into updateGridUI)
 
   updateGridUI();
 }
@@ -252,7 +287,11 @@ void MainComponent::rebuildSynth() {
 
           newSounds.add(new sotero::SoteroSamplerSound(
               m.samplePath, *reader, range, m.midiNote, 0.01, 0.1, 10.0,
-              m.chokeGroup, m.velocityLow, m.velocityHigh));
+              m.chokeGroup, m.velocityLow, m.velocityHigh, m.sampleStart,
+              m.sampleEnd, m.fadeIn, m.fadeOut, m.volumeMultiplier,
+              m.fineTuneCents, m.micLayer, m.adsrAttack, m.adsrDecay,
+              m.adsrSustain, m.adsrRelease, m.filterType, m.filterCutoff,
+              m.filterResonance));
         }
       }
     }
@@ -287,7 +326,8 @@ void MainComponent::updateGridUI() {
     if (mapping.samplePath.isEmpty())
       continue;
 
-    int colIndex = mapping.midiNote - 60;
+    int baseNote = (currentOctave + 2) * 12;
+    int colIndex = mapping.midiNote - baseNote;
     if (colIndex >= 0 && colIndex < 12) {
       auto *col = keyColumns[colIndex];
       col->addRegion(mapping);
@@ -305,6 +345,48 @@ void MainComponent::updateGridUI() {
       region->onSelect = [this, mIndex]() {
         deselectAllRegions();
         activeMappingIndex = mIndex;
+
+        // Update Sculpting Panel
+        auto &m = libraryData.mappings.getReference(mIndex);
+        sculptingPanel.attackSlider.setValue(m.adsrAttack,
+                                             juce::dontSendNotification);
+        sculptingPanel.decaySlider.setValue(m.adsrDecay,
+                                            juce::dontSendNotification);
+        sculptingPanel.sustainSlider.setValue(m.adsrSustain,
+                                              juce::dontSendNotification);
+        sculptingPanel.releaseSlider.setValue(m.adsrRelease,
+                                              juce::dontSendNotification);
+        sculptingPanel.filterTypeSelector.setSelectedId(
+            m.filterType + 1, juce::dontSendNotification);
+        sculptingPanel.cutoffSlider.setValue(m.filterCutoff,
+                                             juce::dontSendNotification);
+        sculptingPanel.resSlider.setValue(m.filterResonance,
+                                          juce::dontSendNotification);
+
+        // Connect Sliders to data
+        auto updateData = [this, mIndex]() {
+          if (mIndex >= 0 && mIndex < libraryData.mappings.size()) {
+            auto &ref = libraryData.mappings.getReference(mIndex);
+            ref.adsrAttack = (float)sculptingPanel.attackSlider.getValue();
+            ref.adsrDecay = (float)sculptingPanel.decaySlider.getValue();
+            ref.adsrSustain = (float)sculptingPanel.sustainSlider.getValue();
+            ref.adsrRelease = (float)sculptingPanel.releaseSlider.getValue();
+            ref.filterType =
+                sculptingPanel.filterTypeSelector.getSelectedId() - 1;
+            ref.filterCutoff = (float)sculptingPanel.cutoffSlider.getValue();
+            ref.filterResonance = (float)sculptingPanel.resSlider.getValue();
+
+            rebuildSynth(); // Immediate feedback
+          }
+        };
+
+        sculptingPanel.attackSlider.onValueChange = updateData;
+        sculptingPanel.decaySlider.onValueChange = updateData;
+        sculptingPanel.sustainSlider.onValueChange = updateData;
+        sculptingPanel.releaseSlider.onValueChange = updateData;
+        sculptingPanel.filterTypeSelector.onChange = updateData;
+        sculptingPanel.cutoffSlider.onValueChange = updateData;
+        sculptingPanel.resSlider.onValueChange = updateData;
       };
 
       region->onClear = [this, mIndex](const KeyMapping &) {
@@ -363,6 +445,18 @@ void MainComponent::deselectAllRegions() {
   }
 }
 
+void MainComponent::updateOctave(int newOctave) {
+  currentOctave = newOctave;
+  int baseNote = (currentOctave + 2) * 12; // C-2 is 0, so C0 is 24, C3 is 60
+
+  for (int i = 0; i < 12; ++i) {
+    keyColumns[i]->noteNumber = baseNote + i;
+  }
+
+  updateGridUI();
+  keyboard->repaint();
+}
+
 void MainComponent::loadSoteroLibrary(const juce::File &file) {
   if (!file.existsAsFile())
     return;
@@ -372,6 +466,10 @@ void MainComponent::loadSoteroLibrary(const juce::File &file) {
     libraryData = imported;
     nameEditor.setText(libraryData.name);
     authorEditor.setText(libraryData.author);
+    enableADSRCheckbox.setToggleState(libraryData.enableADSR,
+                                      juce::dontSendNotification);
+    enableFilterCheckbox.setToggleState(libraryData.enableFilter,
+                                        juce::dontSendNotification);
     updateGridUI();
     rebuildSynth();
   }
@@ -415,25 +513,62 @@ void MainComponent::resized() {
   // Edit View Layout
   auto r = editView->getLocalBounds().reduced(20);
   titleLabel.setBounds(r.removeFromTop(40));
+
   auto infoArea = r.removeFromTop(40);
-  nameEditor.setBounds(infoArea.removeFromLeft(r.getWidth() / 2).reduced(5));
-  authorEditor.setBounds(infoArea.reduced(5));
+  nameEditor.setBounds(infoArea.removeFromLeft(r.getWidth() / 4).reduced(5));
+  authorEditor.setBounds(infoArea.removeFromLeft(r.getWidth() / 4).reduced(5));
+  enableADSRCheckbox.setBounds(
+      infoArea.removeFromLeft(r.getWidth() / 6).reduced(5));
+  enableFilterCheckbox.setBounds(
+      infoArea.removeFromLeft(r.getWidth() / 6).reduced(5));
+  octaveSelector.setBounds(infoArea.reduced(5));
+
   r.removeFromTop(10);
-  auto footerArea = r.removeFromBottom(80);
-  auto buttonW = 150;
-  exportButton.setBounds(footerArea.removeFromRight(buttonW)
-                             .withSizeKeepingCentre(buttonW, 40)
-                             .reduced(5));
-  importButton.setBounds(footerArea.removeFromRight(buttonW)
-                             .withSizeKeepingCentre(buttonW, 40)
-                             .reduced(5));
-  keyboard->setBounds(r.removeFromBottom(80));
-  r.removeFromBottom(5);
-  float colWidth = (float)r.getWidth() / 12.0f;
+
+  auto mainArea = r.removeFromBottom(r.getHeight() - 10);
+  auto sidePanel = mainArea.removeFromRight(250).reduced(10);
+  sculptingPanel.setBounds(sidePanel);
+
+  auto footerArea = mainArea.removeFromBottom(150);
+  keyboard->setBounds(footerArea.removeFromBottom(80));
+
+  auto buttonArea = footerArea.reduced(5);
+  exportButton.setBounds(buttonArea.removeFromRight(120).withHeight(35));
+  importButton.setBounds(buttonArea.removeFromRight(120).withHeight(35));
+
+  mainArea.removeFromBottom(10);
+  float colWidth = (float)mainArea.getWidth() / 12.0f;
   for (int i = 0; i < 12; ++i) {
-    keyColumns[i]->setBounds((int)(r.getX() + i * colWidth), r.getY(),
-                             (int)colWidth, r.getHeight());
+    keyColumns[i]->setBounds((int)(mainArea.getX() + i * colWidth),
+                             mainArea.getY(), (int)colWidth,
+                             mainArea.getHeight());
   }
+}
+
+void MainComponent::SculptingPanel::paint(juce::Graphics &g) {
+  g.setColour(juce::Colours::black.withAlpha(0.2f));
+  g.fillRoundedRectangle(getLocalBounds().toFloat(), 5.0f);
+  g.setColour(juce::Colours::white.withAlpha(0.1f));
+  g.drawRoundedRectangle(getLocalBounds().toFloat(), 5.0f, 1.0f);
+}
+
+void MainComponent::SculptingPanel::resized() {
+  auto r = getLocalBounds().reduced(10);
+  title.setBounds(r.removeFromTop(30));
+  r.removeFromTop(10);
+
+  auto adsrArea = r.removeFromTop(120);
+  int sliderW = adsrArea.getWidth() / 4;
+  attackSlider.setBounds(adsrArea.removeFromLeft(sliderW).reduced(2));
+  decaySlider.setBounds(adsrArea.removeFromLeft(sliderW).reduced(2));
+  sustainSlider.setBounds(adsrArea.removeFromLeft(sliderW).reduced(2));
+  releaseSlider.setBounds(adsrArea.reduced(2));
+
+  r.removeFromTop(20);
+  filterTypeSelector.setBounds(r.removeFromTop(30));
+  r.removeFromTop(10);
+  cutoffSlider.setBounds(r.removeFromTop(40));
+  resSlider.setBounds(r.removeFromTop(40));
 }
 
 void MainComponent::filesDropped(const juce::StringArray &files, int x, int y) {
@@ -443,6 +578,7 @@ void MainComponent::filesDropped(const juce::StringArray &files, int x, int y) {
       auto colBounds = col->getBounds();
 
       if (colBounds.contains(x, y)) {
+        int targetNote = col->noteNumber;
         int localY = y - colBounds.getY();
         float dropVelocityNormalized =
             1.0f - ((float)localY / (float)colBounds.getHeight());
@@ -462,7 +598,7 @@ void MainComponent::filesDropped(const juce::StringArray &files, int x, int y) {
             for (int mapIdx = 0; mapIdx < libraryData.mappings.size();
                  ++mapIdx) {
               const auto &mCheck = libraryData.mappings.getReference(mapIdx);
-              if (mCheck.midiNote == (60 + i) &&
+              if (mCheck.midiNote == targetNote &&
                   mCheck.samplePath.isNotEmpty()) {
                 // Check for overlap
                 if (velLow <= mCheck.velocityHigh &&
@@ -491,7 +627,7 @@ void MainComponent::filesDropped(const juce::StringArray &files, int x, int y) {
           }
 
           KeyMapping m;
-          m.midiNote = 60 + i;
+          m.midiNote = targetNote;
           m.samplePath = files[f];
           m.fileName = juce::File(files[f]).getFileName();
           m.velocityLow = velLow;
@@ -509,7 +645,7 @@ void MainComponent::filesDropped(const juce::StringArray &files, int x, int y) {
         rebuildSynth();
 
         // Audition the first dropped file
-        auditionSample(files[0], 60 + i, targetVelocity);
+        auditionSample(files[0], targetNote, targetVelocity);
         return;
       }
     }

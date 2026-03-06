@@ -15,19 +15,22 @@ public:
                      double maxSampleLengthSecs, int chokeGroup = 0,
                      int vLow = 0, int vHigh = 127, int64_t start = 0,
                      int64_t end = 0, int64_t fIn = 0, int64_t fOut = 0,
-                     float vol = 1.0f, float fineTune = 0.0f, int micLayer = 0)
+                     float vol = 1.0f, float fineTune = 0.0f, int micLayer = 0,
+                     float a = 0.01f, float d = 0.1f, float s = 1.0f,
+                     float r = 0.1f, int fType = 0, float fCut = 20000.0f,
+                     float fRes = 1.0f)
       : juce::SamplerSound(name, source, midiNotes, midiRootNote,
                            attackTimeSecs, releaseTimeSecs,
                            maxSampleLengthSecs),
         chokeGroupId(chokeGroup), velocityLow(vLow), velocityHigh(vHigh),
         sampleStart(start), sampleEnd(end), fadeIn(fIn), fadeOut(fOut),
-        volumeMultiplier(vol), fineTuneCents(fineTune), micLayer(micLayer) {
+        volumeMultiplier(vol), fineTuneCents(fineTune), micLayer(micLayer),
+        filterType(fType), filterCutoff(fCut), filterResonance(fRes) {
 
-    // Initial default ADSR
-    adsrParams.attack = (float)attackTimeSecs;
-    adsrParams.decay = 0.1f;
-    adsrParams.sustain = 1.0f;
-    adsrParams.release = (float)releaseTimeSecs;
+    adsrParams.attack = a;
+    adsrParams.decay = d;
+    adsrParams.sustain = s;
+    adsrParams.release = r;
   }
 
   bool appliesToVelocity(int velocity) const {
@@ -80,7 +83,23 @@ public:
       adsr.setParameters(s->adsrParams);
 
       auto &filter = processorChain.get<0>();
-      filter.setCutoffFrequency(s->filterCutoff);
+
+      switch (s->filterType) {
+      case 1:
+        filter.setType(juce::dsp::StateVariableTPTFilterType::lowpass);
+        break;
+      case 2:
+        filter.setType(juce::dsp::StateVariableTPTFilterType::highpass);
+        break;
+      case 3:
+        filter.setType(juce::dsp::StateVariableTPTFilterType::bandpass);
+        break;
+      default:
+        filter.setType(juce::dsp::StateVariableTPTFilterType::lowpass);
+        break; // Default or Bypassed (via cutoff)
+      }
+
+      filter.setCutoffFrequency(s->filterType > 0 ? s->filterCutoff : 20000.0f);
       filter.setResonance(s->filterResonance);
 
     } else {

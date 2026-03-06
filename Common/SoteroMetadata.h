@@ -29,6 +29,8 @@ public:
     toggles->setAttribute("eq", metadata.enableEQ);
     toggles->setAttribute("reverb", metadata.enableReverb);
     toggles->setAttribute("punch", metadata.enablePunch);
+    toggles->setAttribute("adsr", metadata.enableADSR);
+    toggles->setAttribute("filter", metadata.enableFilter);
     toggles->setAttribute("loopCancellation", metadata.loopCancellationMode);
 
     auto artwork = xml->createNewChildElement("Artwork");
@@ -52,6 +54,15 @@ public:
       m->setAttribute("volume", (double)mapping.volumeMultiplier);
       m->setAttribute("fineTune", (double)mapping.fineTuneCents);
       m->setAttribute("micLayer", mapping.micLayer);
+
+      // Sculpting
+      m->setAttribute("adsrA", (double)mapping.adsrAttack);
+      m->setAttribute("adsrD", (double)mapping.adsrDecay);
+      m->setAttribute("adsrS", (double)mapping.adsrSustain);
+      m->setAttribute("adsrR", (double)mapping.adsrRelease);
+      m->setAttribute("fType", mapping.filterType);
+      m->setAttribute("fCut", (double)mapping.filterCutoff);
+      m->setAttribute("fRes", (double)mapping.filterResonance);
     }
 
     auto loops = xml->createNewChildElement("Loops");
@@ -86,6 +97,8 @@ public:
         metadata.enableEQ = toggles->getBoolAttribute("eq");
         metadata.enableReverb = toggles->getBoolAttribute("reverb");
         metadata.enablePunch = toggles->getBoolAttribute("punch");
+        metadata.enableADSR = toggles->getBoolAttribute("adsr", true);
+        metadata.enableFilter = toggles->getBoolAttribute("filter", true);
         metadata.loopCancellationMode =
             toggles->getBoolAttribute("loopCancellation");
       }
@@ -111,6 +124,15 @@ public:
               (float)m->getDoubleAttribute("volume", 1.0);
           mapping.fineTuneCents = (float)m->getDoubleAttribute("fineTune", 0.0);
           mapping.micLayer = m->getIntAttribute("micLayer", 0);
+
+          // Sculpting
+          mapping.adsrAttack = (float)m->getDoubleAttribute("adsrA", 0.01);
+          mapping.adsrDecay = (float)m->getDoubleAttribute("adsrD", 0.1);
+          mapping.adsrSustain = (float)m->getDoubleAttribute("adsrS", 1.0);
+          mapping.adsrRelease = (float)m->getDoubleAttribute("adsrR", 0.1);
+          mapping.filterType = m->getIntAttribute("fType", 0);
+          mapping.filterCutoff = (float)m->getDoubleAttribute("fCut", 20000.0);
+          mapping.filterResonance = (float)m->getDoubleAttribute("fRes", 1.0);
 
           metadata.mappings.add(mapping);
         }
