@@ -86,6 +86,7 @@ public:
       currentChokeGroupId = 0;
     }
 
+    sourceSamplePosition = 0;
     juce::SamplerVoice::startNote(midiNoteNumber, velocity, sound,
                                   currentPitchWheelPosition);
     adsr.noteOn();
@@ -105,12 +106,45 @@ public:
     if (!isVoiceActive())
       return;
 
-    // 1. Render raw sample into temp buffer
+    auto *s = dynamic_cast<const sotero::SoteroSamplerSound *>(
+        getCurrentlyPlayingSound().get());
+    if (s == nullptr) {
+      clearCurrentNote();
+      return;
+    }
+
     tempBuffer.setSize(outputBuffer.getNumChannels(), numSamples, false, false,
                        true);
     tempBuffer.clear();
 
-    juce::SamplerVoice::renderNextBlock(tempBuffer, 0, numSamples);
+    const double playbackSpeedRatio =
+        getLevelMultiplier() * (s->getSampleRate() / getSampleRate());
+
+    // Simple implementation of sample offset and playback
+    // In a real implementation, we'd use an interpolator for pitch/fine tune.
+    // For this foundation, we'll implement the basic offset logic.
+
+    auto *reader = s->getAudioFormatReader();
+    if (reader != nullptr) {
+      // Calculate the range of samples to read
+      int64_t startInSource = s->sampleStart + (int64_t)sourceSamplePosition;
+      int64_t numToRead = (int64_t)numSamples;
+
+      // Ensure we don't exceed sampleEnd
+      if (s->sampleEnd > 0 && startInSource + numToRead > s->sampleEnd) {
+        numToRead = s->sampleEnd - startInSource;
+      }
+
+      if (numToRead > 0) {
+        reader->read(&tempBuffer, 0, (int)numToRead, startInSource, true, true);
+        sourceSamplePosition += (double)numToRead;
+      } else {
+        adsr.noteOff(); // Stop if reached end
+      }
+    }
+
+    // Apply Volume Multiplier from Region
+    tempBuffer.applyGain(s->volumeMultiplier);
 
     // 2. Apply ADSR
     adsr.applyEnvelopeToBuffer(tempBuffer, 0, numSamples);
@@ -126,7 +160,9 @@ public:
                            ch % tempBuffer.getNumChannels(), 0, numSamples);
     }
 
-    if (!adsr.isActive()) {
+    if (!adsr.isActive() ||
+        (s->sampleEnd > 0 &&
+         s->sampleStart + sourceSamplePosition >= s->sampleEnd)) {
       clearCurrentNote();
     }
   }

@@ -276,8 +276,9 @@ void SamplerPlayerAudioProcessor::loadSoteroLibrary(const juce::File &file) {
 
         synth.addSound(new sotero::SoteroSamplerSound(
             mapping.samplePath, *reader, range, mapping.midiNote, 0.01, 0.1,
-            10.0, mapping.chokeGroup, mapping.velocityLow,
-            mapping.velocityHigh));
+            10.0, mapping.chokeGroup, mapping.velocityLow, mapping.velocityHigh,
+            mapping.sampleStart, mapping.sampleEnd, mapping.fadeIn,
+            mapping.fadeOut, mapping.volumeMultiplier, mapping.fineTuneCents));
 
         delete reader;
       }

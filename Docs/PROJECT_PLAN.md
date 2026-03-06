@@ -41,22 +41,37 @@ O desenvolvimento é focado em construir engines robustas que sustentam as funci
 - [ ] **Validação de Estética**: Refinamento visual dos knobs e teclados (Visual Feedback).
 - [ ] **Bug Hunting**: Correção de falhas no sistema de Drag & Drop e Compilação.
 
+## 5. Camada de Segurança e Anti-Pirataria (Sotero Shield)
+
+Esta camada garante que o conteúdo seja acessível apenas por usuários legítimos através do SamplerPlayer.
+
+### 5.1. Mecanismos de Proteção
+- **DNA Encryption**: Criptografia binária dos assets (`.spsa`) usando uma chave única que combina o ID do usuário e o Hardware ID (HWID) da máquina.
+- **Validação Online (Call-Home)**: O Player exige login (Plataforma Sotero) para validar a sessão do usuário.
+- **Licenciamento por Serial**: Cada biblioteca adquirida gera um Serial/Key vinculado à conta do usuário, validado no primeiro carregamento.
+- **Stream de Leitura Blindado**: O motor de áudio lê os samples diretamente da memória criptografada, sem extrair arquivos temporários no disco (evitando interceptação).
+
+### 5.2. Fluxo de Ativação do Usuário
+1. **Login**: Usuário insere credenciais no Player.
+2. **Serial**: Player solicita a Chave da Biblioteca (comprada ou via assinatura).
+3. **Binding**: O sistema vincula a licença ao HWID do computador do usuário.
+4. **Desbloqueio**: O arquivo `.spsa` passa a ser descriptografado em tempo real pelo motor de áudio.
+
+---
+
+## 6. Evolução das Fases com Foco em Segurança
+
+### Fase 3: Engine Foundation (Atual)
+- [ ] **Encrypted Reader**: Implementar a classe `SoteroEncryptedStream` para leitura segura de blocos binários.
+- [ ] **Format Security**: Ativar os `encryptionFlags` no cabeçalho do arquivo .spsa.
+
+### Fase Q&A 1: Validação Técnica
+- [ ] **Pentest Básico**: Tentar extrair áudio do arquivo .spsa sem a chave de descriptografia.
+
 ### Fase 5: Evolução do "SamplerPlayer"
-*Foco: Transformar o player em uma central de bibliotecas premium.*
-- [ ] **Painel de Controle**: Volume/Pan por oitava, Tone e Fine Tune por nota.
-- [ ] **Player de Loops**: Interface de disparo polifônico vs cancelamento global e MIDI Drag-to-DAW.
-- [ ] **Visualizador de Metadados**: Pop-up informativo sobre a história e criador da livraria.
-- [ ] **DNA Encryption**: Proteção final dos assets consolidados.
-
-## 4. Diferencial Funcional: Developer vs Player
-
-| Recurso | Developer (Design) | Player (Performance) |
-| :--- | :--- | :--- |
-| **ADSR / Filtro** | Completo (Design) | N/A (Striped na compilação) |
-| **Fades / Tuning** | Ajustável por região | Leitura de Metadados |
-| **Efeitos (Comp/EQ/etc)** | Ajuste auditivo total | Apenas se ativado no Developer |
-| **Loops** | Importação e Sync | Disparo e Drag-to-DAW |
-| **Microfones** | Mixagem de Camadas | Som consolidado/Mixado |
+- [ ] **Módulo de Autenticação**: Interface de Login/Senha integrada ao Player.
+- [ ] **Gerenciador de Licenças**: Sistema de input de Serial e validação via API.
+- [ ] **Hardware Locking**: Algoritmo de geração de HWID para travar o uso na máquina autorizada.
 
 ---
 *Atualizado em 2026-03-05*
