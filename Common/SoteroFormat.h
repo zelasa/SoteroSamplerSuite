@@ -54,6 +54,7 @@ struct KeyMapping {
   int64_t fadeOut = 0;
   float volumeMultiplier = 1.0f;
   float fineTuneCents = 0.0f;
+  int micLayer = 0; // 0 = Layer 1 (Mic 1), 1 = Layer 2 (Mic 2)
 };
 
 /** Metadata for a MIDI Loop slot */

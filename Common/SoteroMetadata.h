@@ -51,6 +51,7 @@ public:
       m->setAttribute("fadeOut", (int)mapping.fadeOut);
       m->setAttribute("volume", (double)mapping.volumeMultiplier);
       m->setAttribute("fineTune", (double)mapping.fineTuneCents);
+      m->setAttribute("micLayer", mapping.micLayer);
     }
 
     auto loops = xml->createNewChildElement("Loops");
@@ -109,6 +110,7 @@ public:
           mapping.volumeMultiplier =
               (float)m->getDoubleAttribute("volume", 1.0);
           mapping.fineTuneCents = (float)m->getDoubleAttribute("fineTune", 0.0);
+          mapping.micLayer = m->getIntAttribute("micLayer", 0);
 
           metadata.mappings.add(mapping);
         }

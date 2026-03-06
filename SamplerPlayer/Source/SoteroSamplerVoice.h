@@ -15,13 +15,13 @@ public:
                      double maxSampleLengthSecs, int chokeGroup = 0,
                      int vLow = 0, int vHigh = 127, int64_t start = 0,
                      int64_t end = 0, int64_t fIn = 0, int64_t fOut = 0,
-                     float vol = 1.0f, float fineTune = 0.0f)
+                     float vol = 1.0f, float fineTune = 0.0f, int micLayer = 0)
       : juce::SamplerSound(name, source, midiNotes, midiRootNote,
                            attackTimeSecs, releaseTimeSecs,
                            maxSampleLengthSecs),
         chokeGroupId(chokeGroup), velocityLow(vLow), velocityHigh(vHigh),
         sampleStart(start), sampleEnd(end), fadeIn(fIn), fadeOut(fOut),
-        volumeMultiplier(vol), fineTuneCents(fineTune) {
+        volumeMultiplier(vol), fineTuneCents(fineTune), micLayer(micLayer) {
 
     // Initial default ADSR
     adsrParams.attack = (float)attackTimeSecs;
@@ -45,6 +45,7 @@ public:
   int64_t fadeOut = 0;
   float volumeMultiplier = 1.0f;
   float fineTuneCents = 0.0f;
+  int micLayer = 0;
 
   juce::ADSR::Parameters adsrParams;
 
@@ -126,20 +127,52 @@ public:
 
     auto *reader = s->getAudioFormatReader();
     if (reader != nullptr) {
-      // Calculate the range of samples to read
+      // 1. Calculate Fine Tune Speed Ratio
+      // speedShift = 2 ^ (cents / 1200)
+      const double fineTuneRatio = std::pow(2.0, s->fineTuneCents / 1200.0);
+      const double speedRatio = playbackSpeedRatio * fineTuneRatio;
+
+      // 2. Read Samples with Offset
       int64_t startInSource = s->sampleStart + (int64_t)sourceSamplePosition;
       int64_t numToRead = (int64_t)numSamples;
 
-      // Ensure we don't exceed sampleEnd
+      // Safety: Don't exceed sampleEnd
       if (s->sampleEnd > 0 && startInSource + numToRead > s->sampleEnd) {
         numToRead = s->sampleEnd - startInSource;
       }
 
       if (numToRead > 0) {
         reader->read(&tempBuffer, 0, (int)numToRead, startInSource, true, true);
-        sourceSamplePosition += (double)numToRead;
+
+        // 3. Apply Fades (Non-Destructive)
+        for (int i = 0; i < (int)numToRead; ++i) {
+          float gain = 1.0f;
+          int64_t currentRelative = (int64_t)sourceSamplePosition + i;
+
+          // Fade In
+          if (s->fadeIn > 0 && currentRelative < s->fadeIn) {
+            gain *= (float)currentRelative / (float)s->fadeIn;
+          }
+
+          // Fade Out
+          int64_t totalLength = (s->sampleEnd > 0)
+                                    ? (s->sampleEnd - s->sampleStart)
+                                    : reader->lengthInSamples;
+          int64_t distFromEnd = totalLength - currentRelative;
+          if (s->fadeOut > 0 && distFromEnd < s->fadeOut) {
+            gain *= (float)distFromEnd / (float)s->fadeOut;
+          }
+
+          for (int ch = 0; ch < tempBuffer.getNumChannels(); ++ch) {
+            tempBuffer.setSample(ch, i, tempBuffer.getSample(ch, i) * gain);
+          }
+        }
+
+        sourceSamplePosition +=
+            (double)numToRead *
+            speedRatio; // Move head based on pitch/fine tune
       } else {
-        adsr.noteOff(); // Stop if reached end
+        adsr.noteOff();
       }
     }
 

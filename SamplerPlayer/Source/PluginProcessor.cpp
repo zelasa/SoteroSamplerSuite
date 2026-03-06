@@ -1,5 +1,7 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "SoteroArchive.h"
+#include "SoteroLoopEngine.h"
 
 SamplerPlayerAudioProcessor::SamplerPlayerAudioProcessor()
     : AudioProcessor(BusesProperties().withOutput(
@@ -103,7 +105,14 @@ void SamplerPlayerAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
   }
 
   // Render the unified synth
-  synth.renderNextBlock(buffer, specializedMessages, 0, buffer.getNumSamples());
+  // 1. Process MIDI Loops
+  double bpm = getPlayHead() != nullptr
+                   ? (*getPlayHead()->getPosition()).getBpm().orFallback(120.0)
+                   : 120.0;
+  loopEngine.processBlock(buffer, midiMessages, bpm);
+
+  // 2. Process Synthesiser One-Shots
+  synth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
 
   // Update and Apply Master Compressor
   int compType = (int)*apvts.getRawParameterValue("masterComp");
@@ -278,7 +287,8 @@ void SamplerPlayerAudioProcessor::loadSoteroLibrary(const juce::File &file) {
             mapping.samplePath, *reader, range, mapping.midiNote, 0.01, 0.1,
             10.0, mapping.chokeGroup, mapping.velocityLow, mapping.velocityHigh,
             mapping.sampleStart, mapping.sampleEnd, mapping.fadeIn,
-            mapping.fadeOut, mapping.volumeMultiplier, mapping.fineTuneCents));
+            mapping.fadeOut, mapping.volumeMultiplier, mapping.fineTuneCents,
+            mapping.micLayer));
 
         delete reader;
       }
