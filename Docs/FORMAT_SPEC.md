@@ -55,8 +55,32 @@ Localizado após o Manifesto XML.
 - **Byte Order**: O arquivo deve ser lido e escrito estritamente em **Little-Endian**.
 - **Fixed Width**: Implementações devem usar tipos `uint32_t` e `uint64_t` para garantir paridade entre sistemas de 32 e 64 bits.
 
-## 5. Segurança e Propriedade
-O acesso ao conteúdo bruto de áudio é protegido pela arquitetura de "Closed Engine" do SamplerPlayer. O DNA-Encryption (Fase 3) obfuscara o Bloco de Dados Binários, impedindo a extração de WAVs por ferramentas de extração genéricas ou visualizadores hexadecimais comuns.
+## 5. Sotero Shield (Segurança e Licenciamento)
+
+O **Sotero Shield** é a camada de segurança e antipirataria que integra vinculação de hardware (node-locking) e ofuscação de dados.
+
+### 5.1. DNA da Máquina (HWID)
+O DNA é uma impressão digital única (hash MD5/SHA) gerada em tempo de execução combinando:
+- Nome de usuário do sistema.
+- Descrição do hardware e modelo da CPU.
+- Versão e nome do Sistema Operacional.
+
+### 5.2. Estados do Arquivo (`.sotero`)
+1.  **Arquivo Master (Mestre)**: O arquivo gerado pelo **Sotero Builder** para distribuição inicial. O campo `dna` no manifesto está vazio ou marcado como `DEV`.
+2.  **Arquivo Bound (Vinculado)**: O arquivo após o processo de ativação. Ele contém o DNA específico da máquina do usuário injetado no manifesto XML.
+
+### 5.3. Fluxo de Ativação e Atribuição (Stamping)
+- **Bloqueio Inicial**: Ao carregar um arquivo Master, o Player valida o campo `dna`. Se estiver vazio ou for divergente do DNA local, a biblioteca entra em estado **DNA LOCKED**.
+- **Autenticação**: O usuário fornece Login, Senha e Serial Key na aba **Setup**.
+- **Validação e Vinculação**: O Player comunica-se com o servidor da SoteropolySamples. Após a autorização do servidor, o Player realiza o "Stamping" local: o arquivo é atualizado para conter o DNA daquela máquina específica.
+- **Proteção Individual**: Uma vez vinculado, o arquivo só será descriptografado se carregado na máquina com o DNA correspondente.
+
+### 5.4. Ofuscação Progressiva (XOR)
+Se a flag `encryptionFlags` (offset 16) for `1`:
+- O Bloco do Manifesto XML é processado byte a byte usando uma operação XOR com uma chave dinâmica baseada no DNA e no ID da livraria.
+- Isso impede que o conteúdo da biblioteca (nomes de samples, caminhos internos, parâmetros) seja visualizado em editores de texto ou ferramentas de extração genéricas.
+
+---
 
 ---
 © 2026 SoteropolySamples. Todos os direitos reservados.

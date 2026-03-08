@@ -2,8 +2,8 @@
 
 namespace sotero {
 
-SampleRegion::SampleRegion(const KeyMapping &mapping, int nIdx)
-    : currentMapping(mapping), parentNoteIndex(nIdx) {
+SampleRegion::SampleRegion(const KeyMapping &mapping, int nIdx, int layer)
+    : currentMapping(mapping), parentNoteIndex(nIdx), micLayer(layer) {
   setRepaintsOnMouseActivity(true);
 }
 
@@ -12,10 +12,18 @@ void SampleRegion::paint(juce::Graphics &g) {
     return;
 
   auto bounds = getLocalBounds().toFloat();
+  // Ensure visual minimum height for tiny logical ranges
+  if (bounds.getHeight() < 6.0f) {
+    bounds = bounds.withHeight(6.0f).withCentre(bounds.getCentre());
+  }
 
-  // Base color
-  juce::Colour activeColor(255, 180, 50);
-  juce::Colour baseColor = isActive ? activeColor : juce::Colours::cyan;
+  // Base color logic
+  juce::Colour baseColor;
+  if (micLayer == 0) { // Layer A (Blue tones)
+    baseColor = isActive ? juce::Colour(0xff0088cc) : juce::Colour(0xff00d2ff);
+  } else { // Layer B (Red tones)
+    baseColor = isActive ? juce::Colour(0xffaa2222) : juce::Colour(0xffff4d4d);
+  }
 
   if (isActive) {
     // Premium glow for active sample
@@ -32,27 +40,67 @@ void SampleRegion::paint(juce::Graphics &g) {
   g.fillRoundedRectangle(bounds.reduced(1.0f), 3.0f);
 
   // Border
-  g.setColour(juce::Colours::white.withAlpha(isHovering ? 0.9f : 0.4f));
-  g.drawRoundedRectangle(bounds.reduced(1.0f), 3.0f, isHovering ? 2.0f : 1.0f);
-
-  // Draw handles if hovering
-  if (isHovering) {
-    g.setColour(juce::Colours::white);
-    g.fillRect(getTopHandleBounds().reduced(1));
-    g.fillRect(getBottomHandleBounds().reduced(1));
+  if (isActive) {
+    g.setColour(juce::Colours::yellow); // High contrast for selection
+    g.drawRoundedRectangle(bounds.reduced(0.5f), 3.0f, 2.5f);
+  } else {
+    g.setColour(juce::Colours::white.withAlpha(isHovering ? 0.9f : 0.4f));
+    g.drawRoundedRectangle(bounds.reduced(1.0f), 3.0f,
+                           isHovering ? 1.5f : 1.0f);
   }
 
-  // Draw Sample Name
-  if (currentMapping.fileName.isNotEmpty() &&
-      currentDragMode == DragMode::None) {
-    g.setColour(juce::Colours::white);
+  // Handles (Only on Hover)
+  if (isHovering) {
+    g.setColour(isActive ? juce::Colours::white
+                         : juce::Colours::white.withAlpha(0.95f));
+
+    auto topH = getTopHandleBounds()
+                    .toFloat()
+                    .withSize(28.0f, 5.0f)
+                    .withCentre(getTopHandleBounds().getCentre().toFloat());
+    auto bottomH =
+        getBottomHandleBounds()
+            .toFloat()
+            .withSize(28.0f, 5.0f)
+            .withCentre(getBottomHandleBounds().getCentre().toFloat());
+
+    g.fillRoundedRectangle(topH, 2.0f);
+    g.fillRoundedRectangle(bottomH, 2.0f);
+
+    // Optional: add a tiny orange glow if active
+    if (isActive) {
+      g.setColour(juce::Colours::orange.withAlpha(0.3f));
+      g.drawRoundedRectangle(topH.expanded(1.0f), 2.0f, 1.0f);
+      g.drawRoundedRectangle(bottomH.expanded(1.0f), 2.0f, 1.0f);
+    }
+  } else if (isActive) {
+    // Keep handles slightly visible when active but not hovered?
+    // Or just the main border? Let's use a subtle orange to show they are
+    // there.
+    g.setColour(juce::Colours::orange.withAlpha(0.6f));
+    auto topH = getTopHandleBounds()
+                    .toFloat()
+                    .withSize(24.0f, 4.0f)
+                    .withCentre(getTopHandleBounds().getCentre().toFloat());
+    auto bottomH =
+        getBottomHandleBounds()
+            .toFloat()
+            .withSize(24.0f, 4.0f)
+            .withCentre(getBottomHandleBounds().getCentre().toFloat());
+    g.fillRoundedRectangle(topH, 2.0f);
+    g.fillRoundedRectangle(bottomH, 2.0f);
+  }
+
+  // Draw Sample Name - avoid crash if path is corrupt
+  if (currentMapping.samplePath.isNotEmpty()) {
+    g.setColour(juce::Colours::white.withAlpha(0.8f));
+    auto fileName = juce::File(currentMapping.samplePath).getFileName();
     g.setFont(10.0f);
 
     // Calculate a safe area for text (away from handles)
     auto textArea = getLocalBounds().reduced(2, 6);
     if (textArea.getHeight() > 10) {
-      g.drawFittedText(currentMapping.fileName, textArea,
-                       juce::Justification::centred, 2);
+      g.drawFittedText(fileName, textArea, juce::Justification::centred, 2);
     }
   }
 
@@ -87,12 +135,14 @@ void SampleRegion::paint(juce::Graphics &g) {
 void SampleRegion::resized() {}
 
 juce::Rectangle<int> SampleRegion::getTopHandleBounds() const {
-  int handleH = juce::jmin(8, getLocalBounds().getHeight() / 3);
+  int h = getLocalBounds().getHeight();
+  int handleH = juce::jlimit(8, 12, h / 4);
   return getLocalBounds().removeFromTop(handleH);
 }
 
 juce::Rectangle<int> SampleRegion::getBottomHandleBounds() const {
-  int handleH = juce::jmin(8, getLocalBounds().getHeight() / 3);
+  int h = getLocalBounds().getHeight();
+  int handleH = juce::jlimit(8, 12, h / 4);
   return getLocalBounds().removeFromBottom(handleH);
 }
 
@@ -117,16 +167,23 @@ void SampleRegion::mouseExit(const juce::MouseEvent &e) {
 }
 
 void SampleRegion::mouseDown(const juce::MouseEvent &e) {
+  juce::Component::SafePointer<SampleRegion> safeThis(this);
   toFront(true); // Bring to front when clicked so it's not hidden by
                  // overlapping regions
 
   if (onSelect)
     onSelect();
+  if (safeThis == nullptr)
+    return;
 
   setActive(true);
 
   if (e.mods.isRightButtonDown() && e.mods.isShiftDown()) {
     currentDragMode = DragMode::Eraser;
+    if (onAudition && (e.mods.isCtrlDown() || e.mods.isCommandDown())) {
+      onAudition(currentMapping);
+    }
+
     dragStartY = e.getScreenY();
     currentMapping.samplePath = ""; // Clear immediately for visual feedback
     repaint();
@@ -139,36 +196,39 @@ void SampleRegion::mouseDown(const juce::MouseEvent &e) {
     currentDragMode = DragMode::BottomHandle;
   } else {
     currentDragMode = DragMode::Body;
+    if (onAudition && (e.mods.isCtrlDown() || e.mods.isCommandDown())) {
+      onAudition(currentMapping);
+    }
   }
 
   dragStartY = e.getScreenY();
   initialVelLow = currentMapping.velocityLow;
   initialVelHigh = currentMapping.velocityHigh;
 
-  // Find glued neighbors
-  gluedTopNeighbor = nullptr;
-  gluedBottomNeighbor = nullptr;
+  bool stickyTop = false;
+  bool stickyBottom = false;
 
   if (auto *parent = getParentComponent()) {
     for (auto *sibling : parent->getChildren()) {
-      if (auto *otherRegion = dynamic_cast<SampleRegion *>(sibling)) {
-        if (otherRegion != this &&
-            otherRegion->currentMapping.samplePath.isNotEmpty()) {
-          // If sibling's bottom edge touches our top edge
-          if (otherRegion->currentMapping.velocityLow == initialVelHigh + 1) {
-            gluedTopNeighbor = otherRegion;
-          }
-          // If sibling's top edge touches our bottom edge
-          if (otherRegion->currentMapping.velocityHigh == initialVelLow - 1) {
-            gluedBottomNeighbor = otherRegion;
-          }
+      if (auto *other = dynamic_cast<SampleRegion *>(sibling)) {
+        if (other != this && other->currentMapping.samplePath.isNotEmpty()) {
+          if (other->currentMapping.velocityLow ==
+              currentMapping.velocityHigh + 1)
+            stickyTop = true;
+          if (other->currentMapping.velocityHigh ==
+              currentMapping.velocityLow - 1)
+            stickyBottom = true;
         }
       }
     }
   }
+
+  if (onDragStart)
+    onDragStart(stickyTop, stickyBottom);
 }
 
 void SampleRegion::mouseDrag(const juce::MouseEvent &e) {
+  juce::Component::SafePointer<SampleRegion> safeThis(this);
   if (currentDragMode == DragMode::None)
     return;
 
@@ -177,13 +237,12 @@ void SampleRegion::mouseDrag(const juce::MouseEvent &e) {
       auto screenPos = e.getScreenPosition();
       for (auto *sibling : parent->getChildren()) {
         if (auto *other = dynamic_cast<SampleRegion *>(sibling)) {
-          if (other != this &&
-              other->getScreenBounds().contains(screenPos.toInt())) {
+          if (other->getScreenBounds().contains(screenPos.toInt())) {
             if (other->currentMapping.samplePath.isNotEmpty()) {
-              other->currentMapping.samplePath = "";
+              other->currentMapping.samplePath = ""; // Visual clear
+              if (other->onErase)
+                other->onErase(); // Silent data clear
               other->repaint();
-              if (other->onBoundsChanged)
-                other->onBoundsChanged(other->currentMapping);
             }
           }
         }
@@ -205,99 +264,38 @@ void SampleRegion::mouseDrag(const juce::MouseEvent &e) {
     float pixelsPerVelocity = parentHeight / 128.0f;
     int dragDeltaY = e.getScreenY() - dragStartY;
 
-    // Negative Y is up (higher velocity), Positive Y is down (lower velocity)
-    int velocityDelta = juce::roundToInt(-dragDeltaY / pixelsPerVelocity);
+    // Use float precision for delta to avoid "stuck" dragging on small screens
+    float velocityDeltaFloat = -((float)dragDeltaY / pixelsPerVelocity);
+    int velocityDelta = juce::roundToInt(velocityDeltaFloat);
 
     int limitLow = 0;
     int limitHigh = 127;
 
     if (currentDragMode == DragMode::TopHandle ||
         currentDragMode == DragMode::BottomHandle) {
-      for (auto *sibling : parent->getChildren()) {
-        if (auto *otherRegion = dynamic_cast<SampleRegion *>(sibling)) {
-          if (otherRegion != this &&
-              otherRegion->currentMapping.samplePath.isNotEmpty()) {
-
-            const auto &otherMap = otherRegion->currentMapping;
-            if (otherMap.velocityHigh < initialVelLow) {
-              // Only limit by the neighbor's BOTTOM edge if we want to allow
-              // pushing it
-              limitLow = juce::jmax(limitLow, otherMap.velocityLow + 1);
-            }
-            if (otherMap.velocityLow > initialVelHigh) {
-              // Only limit by the neighbor's TOP edge if we want to allow
-              // pushing it
-              limitHigh = juce::jmin(limitHigh, otherMap.velocityHigh - 1);
-            }
-          }
-        }
-      }
+      // Handles are now only limited by 0-127 and push-back logic.
+      // We removed the neighbor-based caps that were preventing "Pushing".
     }
 
     bool boundsChanged = false;
 
     if (currentDragMode == DragMode::TopHandle) {
-      int newHigh = juce::jlimit(currentMapping.velocityLow + 1, limitHigh,
-                                 initialVelHigh + velocityDelta);
+      int newHighL = currentMapping.velocityLow + 1;
+      int newHighH = juce::jmax(newHighL, limitHigh);
+      int newHigh =
+          juce::jlimit(newHighL, newHighH, initialVelHigh + velocityDelta);
       if (currentMapping.velocityHigh != newHigh) {
         currentMapping.velocityHigh = newHigh;
         boundsChanged = true;
-
-        // Dynamic gluing: if we hit a neighbor's bottom edge, glue to it
-        if (gluedTopNeighbor == nullptr) {
-          for (auto *sibling : parent->getChildren()) {
-            if (auto *other = dynamic_cast<SampleRegion *>(sibling)) {
-              if (other != this &&
-                  other->currentMapping.samplePath.isNotEmpty()) {
-                if (other->currentMapping.velocityLow ==
-                    currentMapping.velocityHigh + 1) {
-                  gluedTopNeighbor = other;
-                  break;
-                }
-              }
-            }
-          }
-        }
-
-        if (gluedTopNeighbor != nullptr) {
-          gluedTopNeighbor->currentMapping.velocityLow =
-              currentMapping.velocityHigh + 1;
-          if (gluedTopNeighbor->onBoundsChanged)
-            gluedTopNeighbor->onBoundsChanged(gluedTopNeighbor->currentMapping);
-          gluedTopNeighbor->repaint();
-        }
       }
     } else if (currentDragMode == DragMode::BottomHandle) {
-      int newLow = juce::jlimit(limitLow, currentMapping.velocityHigh - 1,
-                                initialVelLow + velocityDelta);
+      int newLowH = currentMapping.velocityHigh - 1;
+      int newLowL = juce::jmin(limitLow, newLowH);
+      int newLow =
+          juce::jlimit(newLowL, newLowH, initialVelLow + velocityDelta);
       if (currentMapping.velocityLow != newLow) {
         currentMapping.velocityLow = newLow;
         boundsChanged = true;
-
-        // Dynamic gluing: if we hit a neighbor's top edge, glue to it
-        if (gluedBottomNeighbor == nullptr) {
-          for (auto *sibling : parent->getChildren()) {
-            if (auto *other = dynamic_cast<SampleRegion *>(sibling)) {
-              if (other != this &&
-                  other->currentMapping.samplePath.isNotEmpty()) {
-                if (other->currentMapping.velocityHigh ==
-                    currentMapping.velocityLow - 1) {
-                  gluedBottomNeighbor = other;
-                  break;
-                }
-              }
-            }
-          }
-        }
-
-        if (gluedBottomNeighbor != nullptr) {
-          gluedBottomNeighbor->currentMapping.velocityHigh =
-              currentMapping.velocityLow - 1;
-          if (gluedBottomNeighbor->onBoundsChanged)
-            gluedBottomNeighbor->onBoundsChanged(
-                gluedBottomNeighbor->currentMapping);
-          gluedBottomNeighbor->repaint();
-        }
       }
     } else if (currentDragMode == DragMode::Body) {
       int range = initialVelHigh - initialVelLow;
@@ -315,18 +313,44 @@ void SampleRegion::mouseDrag(const juce::MouseEvent &e) {
       }
     }
 
+    // --- Horizontal Drag (Move across grid nodes) ---
+    if (onRequestMove) {
+      int xThreshold = getWidth();
+      int localX = e.x;
+      if (localX < -xThreshold / 2) {
+        onRequestMove(-1);
+        if (safeThis == nullptr)
+          return; // Check after callback
+        // Reset drag start to prevent multiple jumps
+        dragStartY = e.getScreenY();
+        initialVelLow = currentMapping.velocityLow;
+        initialVelHigh = currentMapping.velocityHigh;
+      } else if (localX > getWidth() + xThreshold / 2) {
+        onRequestMove(1);
+        if (safeThis == nullptr)
+          return; // Check after callback
+        dragStartY = e.getScreenY();
+        initialVelLow = currentMapping.velocityLow;
+        initialVelHigh = currentMapping.velocityHigh;
+      }
+    }
+
     if (boundsChanged) {
       // Apply global limits only - allowing "pass through" behavior during drag
       if (currentDragMode == DragMode::TopHandle) {
+        int newHighL =
+            currentMapping.velocityLow + 1; // Enforce minimum range of 1
+        int newHighH = juce::jmax(newHighL, limitHigh);
         currentMapping.velocityHigh =
-            juce::jlimit(currentMapping.velocityLow + 1, limitHigh,
-                         currentMapping.velocityHigh);
+            juce::jlimit(newHighL, newHighH, currentMapping.velocityHigh);
       } else if (currentDragMode == DragMode::BottomHandle) {
+        int newLowH =
+            currentMapping.velocityHigh - 1; // Enforce minimum range of 1
+        int newLowL = juce::jmin(limitLow, newLowH);
         currentMapping.velocityLow =
-            juce::jlimit(limitLow, currentMapping.velocityHigh - 1,
-                         currentMapping.velocityLow);
+            juce::jlimit(newLowL, newLowH, currentMapping.velocityLow);
       } else if (currentDragMode == DragMode::Body) {
-        int range = initialVelHigh - initialVelLow;
+        int range = juce::jmax(1, initialVelHigh - initialVelLow);
         currentMapping.velocityLow =
             juce::jlimit(0, 127 - range, currentMapping.velocityLow);
         currentMapping.velocityHigh = currentMapping.velocityLow + range;
@@ -334,122 +358,63 @@ void SampleRegion::mouseDrag(const juce::MouseEvent &e) {
 
       if (onBoundsChanged)
         onBoundsChanged(currentMapping);
-      repaint();
+      if (safeThis == nullptr)
+        return; // Check after callback
+
+      if (safeThis != nullptr)
+        repaint();
     }
   }
 }
 
 void SampleRegion::mouseUp(const juce::MouseEvent &e) {
-  if (currentDragMode == DragMode::Eraser) {
-    // Clear the source component itself
-    currentMapping.samplePath = "";
-    if (onClear)
-      onClear(currentMapping);
-    // onClear in MainComponent calls updateGridUI and rebuildSynth
-    // asynchronously
-  } else if (currentDragMode == DragMode::Body &&
-             !e.mouseWasDraggedSinceMouseDown()) {
-    // It was a click!
-    if (onAudition && (e.mods.isCtrlDown() || e.mods.isCommandDown()))
-      onAudition(currentMapping);
-  } else if (e.mouseWasDraggedSinceMouseDown() &&
-             currentDragMode != DragMode::None) {
+  juce::Component::SafePointer<SampleRegion> safeThis(this);
+  auto mode = currentDragMode;
+  currentDragMode = DragMode::None; // Set to None before callbacks
 
-    // Reconciliation: If we dropped on another sample, snap to the nearest edge
-    // Reconciliation: Drop the sample into the nearest available gap
+  if (onAuditionEnd) {
+    onAuditionEnd(currentMapping);
+  }
+  if (safeThis == nullptr)
+    return;
+
+  if (mode == DragMode::Eraser) {
+    // Final clear at mouseUp location
     if (auto *parent = getParentComponent()) {
-      int targetLow = currentMapping.velocityLow;
-      int targetHigh = currentMapping.velocityHigh;
-      int range = targetHigh - targetLow;
-
-      // 1. Collect all other occupied ranges in this column
-      struct R {
-        int low, high;
-      };
-      juce::Array<R> occupied;
+      auto screenPos = e.getScreenPosition();
       for (auto *sibling : parent->getChildren()) {
         if (auto *other = dynamic_cast<SampleRegion *>(sibling)) {
-          if (other != this && other->currentMapping.samplePath.isNotEmpty()) {
-            occupied.add({other->currentMapping.velocityLow,
-                          other->currentMapping.velocityHigh});
+          if (other->getScreenBounds().contains(screenPos.toInt())) {
+            other->currentMapping.samplePath = "";
+            if (other->onErase)
+              other->onErase();
           }
         }
       }
-
-      // Sort occupied ranges by velocity
-      std::sort(occupied.begin(), occupied.end(),
-                [](const R &a, const R &b) { return a.low < b.low; });
-
-      // 2. Check for overlaps
-      bool overlapping = false;
-      for (const auto &r : occupied) {
-        if (targetLow <= r.high && targetHigh >= r.low) {
-          overlapping = true;
-          break;
-        }
-      }
-
-      if (overlapping) {
-        // 3. Find all available gaps
-        juce::Array<R> gaps;
-        int lastHigh = -1;
-        for (const auto &r : occupied) {
-          if (r.low > lastHigh + 1) {
-            gaps.add({lastHigh + 1, r.low - 1});
-          }
-          lastHigh = r.high;
-        }
-        if (lastHigh < 127) {
-          gaps.add({lastHigh + 1, 127});
-        }
-
-        // 4. Find the gap closest to where we dropped
-        float targetCenter = (targetLow + targetHigh) / 2.0f;
-        int bestGapIdx = -1;
-        float minDistance = 1000.0f;
-
-        for (int i = 0; i < gaps.size(); ++i) {
-          float gapCenter = (gaps[i].low + gaps[i].high) / 2.0f;
-          float dist = std::abs(gapCenter - targetCenter);
-          if (dist < minDistance) {
-            minDistance = dist;
-            bestGapIdx = i;
-          }
-        }
-
-        if (bestGapIdx != -1) {
-          const auto &gap = gaps[bestGapIdx];
-          int gapSize = gap.high - gap.low; // inclusive size minus 1
-
-          if (gapSize >= range) {
-            // Fits! Place it as close to target as possible inside the gap
-            targetLow = juce::jlimit(gap.low, gap.high - range, targetLow);
-            targetHigh = targetLow + range;
-          } else {
-            // Doesn't fit? Squash it to fill the gap
-            targetLow = gap.low;
-            targetHigh = gap.high;
-          }
-        }
-      }
-
-      currentMapping.velocityLow = targetLow;
-      currentMapping.velocityHigh = targetHigh;
-
-      if (onBoundsChanged)
-        onBoundsChanged(currentMapping);
     }
+    // Clear self if dragging started on self
+    currentMapping.samplePath = "";
+    if (onErase)
+      onErase();
 
+    // Trigger ONE final UI update and synth rebuild
     if (onDragFinished)
       onDragFinished(currentMapping);
+
+  } else if (e.mouseWasDraggedSinceMouseDown() && mode != DragMode::None) {
+    if (onDragFinished)
+      onDragFinished(currentMapping);
+    if (safeThis == nullptr)
+      return;
   }
 
-  currentDragMode = DragMode::None;
   setMouseCursor(juce::MouseCursor::NormalCursor);
   repaint();
 }
 
 void SampleRegion::mouseDoubleClick(const juce::MouseEvent &e) {
+  juce::Component::SafePointer<SampleRegion> safeThis(this);
+
   if (auto *parent = getParentComponent()) {
     int limitLow = 0;
     int limitHigh = 127;
@@ -479,9 +444,13 @@ void SampleRegion::mouseDoubleClick(const juce::MouseEvent &e) {
 
       if (onBoundsChanged)
         onBoundsChanged(currentMapping);
+      if (safeThis == nullptr)
+        return;
 
       if (onDragFinished)
         onDragFinished(currentMapping);
+      if (safeThis == nullptr)
+        return;
 
       parent->resized();
       repaint();

@@ -31,4 +31,5 @@ target_link_libraries(SoteroBuilder PRIVATE
     juce::juce_gui_basics
     juce::juce_audio_formats
     juce::juce_audio_basics
-    juce::juce_dsp)
+    juce::juce_dsp
+    juce::juce_cryptography)

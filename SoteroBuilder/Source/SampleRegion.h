@@ -6,7 +6,7 @@ namespace sotero {
 
 class SampleRegion : public juce::Component {
 public:
-  SampleRegion(const KeyMapping &mapping, int noteIndex);
+  SampleRegion(const KeyMapping &mapping, int noteIndex, int micLayer);
   ~SampleRegion() override = default;
 
   void paint(juce::Graphics &g) override;
@@ -24,21 +24,28 @@ public:
     repaint();
   }
   bool getActive() const { return isActive; }
+  bool isDragging() const { return currentDragMode != DragMode::None; }
 
+  void updateFromMapping(const KeyMapping &m) {
+    currentMapping = m;
+    repaint();
+  }
   const KeyMapping &getMapping() const { return currentMapping; }
 
+  std::function<void(bool &stickyTop, bool &stickyBottom)> onDragStart;
   std::function<void(const KeyMapping &)> onBoundsChanged;
   std::function<void(const KeyMapping &)> onDragFinished;
   std::function<void(const KeyMapping &)> onClear;
+  std::function<void()> onErase;
   std::function<void(const KeyMapping &)> onAudition;
+  std::function<void(const KeyMapping &)> onAuditionEnd;
   std::function<void()> onSelect;
+  std::function<void(int)> onRequestMove; // delta notes (horizontal drag)
 
 private:
   KeyMapping currentMapping;
   int parentNoteIndex;
-
-  SampleRegion *gluedTopNeighbor = nullptr;
-  SampleRegion *gluedBottomNeighbor = nullptr;
+  int micLayer = 0;
 
   bool isHovering = false;
   bool isActive = false;

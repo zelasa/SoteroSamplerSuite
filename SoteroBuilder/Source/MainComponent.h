@@ -4,10 +4,9 @@
 #include "../../Common/SoteroFormat.h"
 #include "../../Common/SoteroViews.h"
 #include "../../SamplerPlayer/Source/SoteroSamplerVoice.h"
+#include "ADSRVisualizer.h"
 #include "SampleRegion.h"
-#include <juce_audio_utils/juce_audio_utils.h>
-#include <juce_dsp/juce_dsp.h>
-#include <juce_gui_basics/juce_gui_basics.h>
+#include <JuceHeader.h>
 #include <memory>
 
 namespace sotero {
@@ -56,15 +55,22 @@ public:
     }
   };
 
-  struct KeyColumn : public juce::Component {
+  struct KeyColumn : public juce::Component,
+                     public juce::FileDragAndDropTarget {
+    int noteNumber = 0;
+    int colIndex = 0;
+    int micLayer = 0;
     juce::OwnedArray<SampleRegion> regions;
-    int noteNumber = 60;
     std::function<void()> onBackgroundClick;
+    std::function<void(const juce::StringArray &, int)> onFilesDropped;
 
-    KeyColumn(int note) : noteNumber(note) {}
+    KeyColumn(int note, int index, int layer)
+        : noteNumber(note), colIndex(index), micLayer(layer) {
+      setInterceptsMouseClicks(true, true);
+    }
 
     void addRegion(const KeyMapping &mapping) {
-      auto *region = new SampleRegion(mapping, noteNumber - 60);
+      auto *region = new SampleRegion(mapping, noteNumber - 60, micLayer);
       regions.add(region);
       addAndMakeVisible(region);
       resized();
@@ -76,15 +82,15 @@ public:
     }
 
     void paint(juce::Graphics &g) override {
-      bool isBlack = juce::MidiMessage::isMidiNoteBlack(noteNumber);
-      g.setColour(isBlack ? juce::Colours::white.withAlpha(0.02f)
-                          : juce::Colours::transparentWhite);
+      // Alternating background regardless of black/white keys
+      // Professional gray tones: #282828 and #333333
+      bool isOdd = (colIndex % 2) != 0;
+      g.setColour(isOdd ? juce::Colour(0xff282828) : juce::Colour(0xff333333));
       g.fillAll();
 
-      if (isBlack) {
-        g.setColour(juce::Colours::white.withAlpha(0.05f));
-        g.drawRect(getLocalBounds(), 1.0f);
-      }
+      // Subtle vertical divider
+      g.setColour(juce::Colours::white.withAlpha(0.05f));
+      g.drawRect(getLocalBounds(), 1.0f);
 
       // Draw faint velocity reference lines every 16 steps
       g.setColour(juce::Colours::white.withAlpha(0.05f));
@@ -108,8 +114,18 @@ public:
 
         float height = yBottom - yTop;
 
-        region->setBounds(0, (int)yTop, getWidth(), (int)height);
+        region->setBounds(0, (int)yTop, getWidth(),
+                          (int)juce::jmax(1.0f, height));
       }
+    }
+
+    // --- FileDragAndDropTarget Overrides ---
+    bool isInterestedInFileDrag(const juce::StringArray &files) override {
+      return true;
+    }
+    void filesDropped(const juce::StringArray &files, int x, int y) override {
+      if (onFilesDropped)
+        onFilesDropped(files, y);
     }
 
     void mouseDown(const juce::MouseEvent &) override {
@@ -199,14 +215,59 @@ private:
   juce::dsp::StateVariableTPTFilter<float> masterToneFilter;
 
   std::unique_ptr<juce::FileChooser> chooser;
-  // --- Library Info Section ---
-  juce::Label titleLabel{"BuilderTitle", "SOTERO BUILDER"};
-  juce::TextEditor nameEditor;
-  juce::TextEditor authorEditor;
-  juce::TextButton importButton{"IMPORT"};
-  juce::TextButton exportButton{"EXPORT"};
-  juce::ToggleButton enableADSRCheckbox{"Enable ADSR ENVs"};
-  juce::ToggleButton enableFilterCheckbox{"Enable Filters"};
+  // --- UI Modular Panels ---
+
+  // 1. Header Area
+  struct HeaderPanel : public juce::Component {
+    juce::Label titleLabel{"Title", "SOTEROPOLYSAMPLES - DEV"};
+    juce::TextButton devModeBtn{"DEVELOPER"}, userModeBtn{"USER PLAYER"};
+    juce::TextButton saveBtn{"SAVE"}, loadBtn{"LOAD"}, newBtn{"NEW"},
+        closeBtn{"CLOSE"};
+
+    // Spec: "TO PLAYER" Master toggle
+    juce::ToggleButton toPlayerToggle{"TO PLAYER"};
+
+    HeaderPanel() {
+      addAndMakeVisible(titleLabel);
+      addAndMakeVisible(devModeBtn);
+      addAndMakeVisible(userModeBtn);
+      addAndMakeVisible(saveBtn);
+      addAndMakeVisible(loadBtn);
+      addAndMakeVisible(newBtn);
+      addAndMakeVisible(closeBtn);
+      addAndMakeVisible(toPlayerToggle);
+
+      titleLabel.setFont(juce::Font(22.0f, juce::Font::bold));
+      titleLabel.setJustificationType(juce::Justification::centred);
+      titleLabel.setColour(juce::Label::textColourId, juce::Colours::yellow);
+
+      toPlayerToggle.setColour(juce::ToggleButton::textColourId,
+                               juce::Colours::grey);
+    }
+
+    void resized() override {
+      auto r = getLocalBounds().reduced(5);
+
+      // Upper Right: Mode and Project
+      auto rightArea = r.removeFromRight(350);
+      auto topRow = rightArea.removeFromTop(25);
+      devModeBtn.setBounds(topRow.removeFromLeft(125).reduced(2));
+      userModeBtn.setBounds(topRow.reduced(2));
+
+      auto bottomRow = rightArea.reduced(0, 2);
+      float btnW = bottomRow.getWidth() / 4.0f;
+      saveBtn.setBounds(bottomRow.removeFromLeft(btnW).reduced(2));
+      loadBtn.setBounds(bottomRow.removeFromLeft(btnW).reduced(2));
+      newBtn.setBounds(bottomRow.removeFromLeft(btnW).reduced(2));
+      closeBtn.setBounds(bottomRow.reduced(2));
+
+      // Center-ish: Title
+      titleLabel.setBounds(r.removeFromTop(30));
+
+      // Toggle
+      toPlayerToggle.setBounds(r.removeFromRight(100).reduced(2));
+    }
+  } headerPanel;
 
   // --- Octave Selector ---
   juce::ComboBox octaveSelector;
@@ -215,28 +276,111 @@ private:
   // --- Sculpting Panel ---
   struct SculptingPanel : public juce::Component {
     juce::Slider attackSlider, decaySlider, sustainSlider, releaseSlider;
-    juce::Slider cutoffSlider, resSlider;
+    juce::TextEditor attackInput, decayInput, sustainInput, releaseInput;
+    juce::Slider cutoffSlider, resSlider, velSensSlider;
     juce::ComboBox filterTypeSelector;
-    juce::Label title{"Sculpting", "SCULPTING TOOLS"};
+    juce::ToggleButton velToFilterToggle{"ON/OFF"};
+    juce::Label title{"Sculpting", "AMP ENVELOPE"};
+    juce::Label filterTitle{"Filter", "FILTER TOOLS"};
+    ADSRVisualizer adsrVisualizer;
 
     SculptingPanel() {
       addAndMakeVisible(title);
+      addAndMakeVisible(adsrVisualizer);
+
       addAndMakeVisible(attackSlider);
       addAndMakeVisible(decaySlider);
       addAndMakeVisible(sustainSlider);
       addAndMakeVisible(releaseSlider);
+
+      auto setupEditor = [](juce::TextEditor &ed) {
+        ed.setJustification(juce::Justification::centred);
+        ed.setColour(juce::TextEditor::backgroundColourId,
+                     juce::Colours::transparentWhite);
+        ed.setColour(juce::TextEditor::outlineColourId,
+                     juce::Colours::yellow.withAlpha(0.2f));
+        ed.setColour(juce::TextEditor::focusedOutlineColourId,
+                     juce::Colours::yellow);
+        ed.setColour(juce::TextEditor::textColourId, juce::Colours::yellow);
+        ed.setInputRestrictions(5, "0123456789.");
+      };
+
+      setupEditor(attackInput);
+      setupEditor(decayInput);
+      setupEditor(sustainInput);
+      setupEditor(releaseInput);
+
+      addAndMakeVisible(filterTitle);
       addAndMakeVisible(filterTypeSelector);
       addAndMakeVisible(cutoffSlider);
       addAndMakeVisible(resSlider);
+      addAndMakeVisible(velSensSlider);
+      addAndMakeVisible(velToFilterToggle);
 
-      filterTypeSelector.addItem("None", 1);
-      filterTypeSelector.addItem("Low Pass", 2);
-      filterTypeSelector.addItem("High Pass", 3);
-      filterTypeSelector.addItem("Band Pass", 4);
+      // Spec: yellow graph is a custom draw in paint
+      attackSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+      attackSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
+      decaySlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+      decaySlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
+      sustainSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+      sustainSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
+      releaseSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+      releaseSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
+
+      cutoffSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+      resSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+      velSensSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
     }
     void resized() override;
     void paint(juce::Graphics &g) override;
   } sculptingPanel;
+
+  // --- Waveform Editor (Spec Dual) ---
+  struct WaveformPanel : public juce::Component {
+    juce::Colour bgColor;
+    juce::String title;
+    juce::ToggleButton toPlayerToggle{"TO PLAYER"};
+
+    WaveformPanel(juce::Colour c, juce::String t) : bgColor(c), title(t) {
+      addAndMakeVisible(toPlayerToggle);
+      toPlayerToggle.setColour(juce::ToggleButton::textColourId,
+                               juce::Colours::white);
+    }
+
+    void paint(juce::Graphics &g) override;
+    void resized() override;
+  };
+
+  std::unique_ptr<WaveformPanel> waveform1, waveform2;
+
+  // --- Advanced FX & Loops (Placeholder) ---
+  struct AdvancedPanel : public juce::Component {
+    void paint(juce::Graphics &g) override {
+      auto r = getLocalBounds().reduced(2);
+      g.setColour(juce::Colour(0xff0a0a0a));
+      g.fillRoundedRectangle(r.toFloat(), 4.0f);
+      g.setColour(juce::Colours::white.withAlpha(0.1f));
+      g.drawRoundedRectangle(r.toFloat(), 4.0f, 1.0f);
+
+      g.setColour(juce::Colours::white.withAlpha(0.3f));
+      g.drawFittedText("ADVANCED FX & LOOPS", getLocalBounds(),
+                       juce::Justification::centred, 1);
+    }
+  } advancedPanel;
+
+  // 5. Metadata & Monitoring Panel
+  struct MetadataPanel : public juce::Component {
+    juce::TextEditor nameEditor, authorEditor, dateEditor, infoEditor;
+    juce::Label nameLabel, authorLabel, dateLabel, infoLabel;
+    juce::ImageComponent artworkDrop;
+    juce::Label artworkLabel{"ArtLabel", "IMAGE DROP"};
+
+    MetadataPanel();
+    void resized() override;
+    void paint(juce::Graphics &g) override;
+
+    juce::Rectangle<int> vuL, vuR;
+  } metadataPanel;
 
   // --- Grid Mapper Section ---
   struct LayerSlot : public juce::Component {
@@ -290,23 +434,21 @@ private:
   class SoteroSynthesiser : public juce::Synthesiser {
   public:
     void noteOn(int midiChannel, int midiNoteNumber, float velocity) override {
-      const juce::ScopedLock sl(
-          lock); // Lock for thread-safety during iteration
+      const juce::ScopedLock sl(lock);
       const int v = juce::jlimit(1, 127, (int)(velocity * 127.0f));
+
       for (auto *sound : sounds) {
         if (sound->appliesToNote(midiNoteNumber) &&
             sound->appliesToChannel(midiChannel)) {
           if (auto *ss =
                   dynamic_cast<const sotero::SoteroSamplerSound *>(sound)) {
+            // Apply our custom Velocity check!
             if (ss->appliesToVelocity(v)) {
-              for (auto *voice : voices) {
-                if (voice->canPlaySound(sound)) {
-                  if (!voice->isVoiceActive()) {
-                    startVoice(voice, sound, midiChannel, midiNoteNumber,
-                               velocity);
-                    return;
-                  }
-                }
+              // If it passes, ask JUCE to find us a voice (it handles stealing
+              // automatically)
+              if (auto *voice =
+                      findFreeVoice(sound, midiChannel, midiNoteNumber, true)) {
+                startVoice(voice, sound, midiChannel, midiNoteNumber, velocity);
               }
             }
           }
@@ -315,37 +457,117 @@ private:
     }
   };
 
-  juce::OwnedArray<KeyColumn> keyColumns;
-  std::unique_ptr<SemiToneKeyboard> keyboard;
+  // --- Side-by-Side Mapping Panels ---
+  struct MappingPanel : public juce::Component {
+    struct LayerView : public juce::Component {
+      juce::OwnedArray<KeyColumn> columns;
+      std::unique_ptr<SemiToneKeyboard> keyboard;
+      juce::Label label;
+      juce::ToggleButton toPlayerToggle{"TO PLAYER"};
+      juce::Colour themeColor;
+      int micLayer;
+
+      LayerView(juce::Colour c, juce::String name, int layerIdx)
+          : micLayer(layerIdx), themeColor(c) {
+        label.setText(name, juce::dontSendNotification);
+        label.setColour(juce::Label::textColourId, c);
+        addAndMakeVisible(label);
+        addAndMakeVisible(toPlayerToggle);
+
+        for (int i = 0; i < 12; ++i)
+          columns.add(new KeyColumn(60 + i, i, micLayer));
+
+        for (auto *col : columns)
+          addAndMakeVisible(col);
+
+        keyboard = std::make_unique<SemiToneKeyboard>();
+        addAndMakeVisible(keyboard.get());
+      }
+
+      void resized() override {
+        auto r = getLocalBounds();
+
+        // 1. Header (Label + Toggle)
+        auto headerArea = r.removeFromTop(25);
+        toPlayerToggle.setBounds(headerArea.removeFromRight(100).reduced(2));
+        label.setBounds(headerArea.reduced(5, 0));
+
+        // 2. Keyboard (Full width at bottom)
+        auto bottomArea = r.removeFromBottom(40);
+        keyboard->setBounds(bottomArea);
+
+        // 3. Grid Columns (Remaining area)
+        float colW = (float)r.getWidth() / 12.0f;
+        for (int i = 0; i < 12; ++i)
+          columns[i]->setBounds(juce::roundToInt(i * colW), r.getY(),
+                                juce::roundToInt(colW), r.getHeight());
+      }
+    };
+
+    std::unique_ptr<LayerView> layer1, layer2;
+    juce::ComboBox octaveSelector;
+    juce::ToggleButton layerSyncLock{"SYNC LAYERS"};
+    int currentOctave = 3;
+
+    MappingPanel() {
+      layerSyncLock.setTooltip("When ON, moving or resizing a sample in one "
+                               "layer will replicate to the other.");
+      layerSyncLock.setColour(juce::ToggleButton::textColourId,
+                              juce::Colours::orange);
+      addAndMakeVisible(layerSyncLock);
+      layer1 = std::make_unique<LayerView>(juce::Colours::cyan,
+                                           "LAYER 1 (MIC 1)", 0);
+      layer2 =
+          std::make_unique<LayerView>(juce::Colours::red, "LAYER 2 (MIC 2)", 1);
+      addAndMakeVisible(layer1.get());
+      addAndMakeVisible(layer2.get());
+      addAndMakeVisible(octaveSelector);
+      addAndMakeVisible(layerSyncLock);
+    }
+
+    void resized() override;
+
+    void updateOctave(int newOctave);
+  } mappingPanel;
 
   // --- Data ---
   LibraryMetadata libraryData;
+  juce::Image currentArtwork;
   int activeMappingIndex = -1;
   juce::File lastBrowseDirectory;
   void updateOctave(int newOctave);
 
   juce::File currentLibraryFile;
+  bool dragStickyTop = false;
+  bool dragStickyBottom = false;
 
   void updateGridUI();
   void updateMetadataFromUI();
   void rebuildSynth();
   void auditionSample(const juce::String &path, int midiNote, int velocity);
+  void auditionSampleOff(int midiNote);
   void deselectAllRegions();
 
   // --- ISoteroAudioEngine Implementation ---
   juce::AudioProcessorValueTreeState &getAPVTS() override { return *apvts; }
   juce::MidiKeyboardState &getKeyboardState() override { return keyboardState; }
+
   float getLevelL() const override { return lastLevelL.load(); }
   float getLevelR() const override { return lastLevelR.load(); }
+
   juce::String getLibraryName() const override { return libraryData.name; }
   juce::String getLibraryAuthor() const override { return libraryData.author; }
+  juce::String getLibraryDescription() const override {
+    return libraryData.description;
+  }
+  juce::Image getLibraryArtwork() const override { return currentArtwork; }
+  bool isLibraryLoaded() const override { return true; }
+
   int getLastMidiNote() const override { return lastMidiNote.load(); }
   int getLastMidiVelocity() const override { return lastMidiVelocity.load(); }
 
   // --- UI ---
-  juce::TabbedComponent tabs{juce::TabbedButtonBar::TabsAtTop};
   std::unique_ptr<juce::Component> editView;
-  std::unique_ptr<SoteroPlayerUI> playerUI;
 
   // --- Audio ---
   juce::AudioFormatManager formatManager;
@@ -362,6 +584,14 @@ private:
 
   std::atomic<float> lastLevelL{0.0f}, lastLevelR{0.0f};
   std::atomic<int> lastMidiNote{-1}, lastMidiVelocity{-1};
+
+  void alignLayers();
+  bool isRangeFree(int note, int micLayer, int lo, int hi, int excludeIndex);
+  void resolveCollisions(int note, int micLayer, int &targetLo, int &targetHi,
+                         int excludeIndex, bool allowCrossSync = true,
+                         bool isPrimaryTarget = true);
+  void updateColumnRegions(int note, int layer);
+  int findCounterpart(int sourceIndex);
 
   juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
 

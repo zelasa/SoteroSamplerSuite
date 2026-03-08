@@ -5,142 +5,274 @@
 #include <thread>
 
 namespace sotero {
+
+// MainComponent implementation
 MainComponent::MainComponent()
     : apvts(std::make_unique<juce::AudioProcessorValueTreeState>(
           dummyProcessor, nullptr, "Parameters", createParameterLayout())) {
   libraryData.mappings.clear();
 
-  editView = std::make_unique<BuilderView>();
-  static_cast<BuilderView *>(editView.get())->onBackgroundClick = [this] {
-    deselectAllRegions();
+  // --- BUILDERUI Modular Panels ---
+  addAndMakeVisible(headerPanel);
+
+  waveform1 =
+      std::make_unique<WaveformPanel>(juce::Colours::cyan, "MIC 1 - RESOURCE");
+  waveform2 =
+      std::make_unique<WaveformPanel>(juce::Colours::red, "MIC 2 - RESOURCE");
+  addAndMakeVisible(waveform1.get());
+  addAndMakeVisible(waveform2.get());
+
+  addAndMakeVisible(sculptingPanel);
+  addAndMakeVisible(mappingPanel);
+  addAndMakeVisible(metadataPanel);
+  addAndMakeVisible(advancedPanel);
+
+  // --- Sculpting Panel Wiring ---
+  auto updateADSRVisual = [this] {
+    sculptingPanel.adsrVisualizer.setParams(
+        (float)sculptingPanel.attackSlider.getValue() /
+            5.0f, // Normalize for viz
+        (float)sculptingPanel.decaySlider.getValue() / 5.0f,
+        (float)sculptingPanel.sustainSlider.getValue(),
+        (float)sculptingPanel.releaseSlider.getValue() / 5.0f);
   };
 
-  // --- BUILDERUI (Edit View) ---
-  editView->addAndMakeVisible(titleLabel);
-  titleLabel.setFont(juce::Font(24.0f, juce::Font::bold));
-  titleLabel.setJustificationType(juce::Justification::centred);
+  auto &sp = sculptingPanel;
 
-  nameEditor.setTextToShowWhenEmpty("Library Name", juce::Colours::grey);
-  authorEditor.setTextToShowWhenEmpty("Author Name", juce::Colours::grey);
-  editView->addAndMakeVisible(nameEditor);
-  editView->addAndMakeVisible(authorEditor);
-
-  enableADSRCheckbox.setToggleState(libraryData.enableADSR,
-                                    juce::dontSendNotification);
-  enableADSRCheckbox.onClick = [this] {
-    libraryData.enableADSR = enableADSRCheckbox.getToggleState();
+  // Attack
+  sp.attackSlider.setRange(0.001, 5.0, 0.001);
+  sp.attackSlider.onValueChange = [this, updateADSRVisual] {
+    sculptingPanel.attackInput.setText(
+        juce::String(sculptingPanel.attackSlider.getValue(), 3),
+        juce::dontSendNotification);
+    updateADSRVisual();
   };
-  editView->addAndMakeVisible(enableADSRCheckbox);
-
-  enableFilterCheckbox.setToggleState(libraryData.enableFilter,
-                                      juce::dontSendNotification);
-  enableFilterCheckbox.onClick = [this] {
-    libraryData.enableFilter = enableFilterCheckbox.getToggleState();
+  sp.attackInput.onReturnKey = [this] {
+    sculptingPanel.attackSlider.setValue(
+        sculptingPanel.attackInput.getText().getFloatValue(),
+        juce::sendNotification);
   };
-  editView->addAndMakeVisible(enableFilterCheckbox);
+  sp.adsrVisualizer.onAttackChange = [this](float val) {
+    sculptingPanel.attackSlider.setValue(val * 5.0f, juce::sendNotification);
+  };
 
-  for (int i = 0; i < 12; ++i) {
-    auto *col = keyColumns.add(new KeyColumn(60 + i));
-    col->onBackgroundClick = [this] { deselectAllRegions(); };
-    editView->addAndMakeVisible(col);
-  }
+  // Decay
+  sp.decaySlider.setRange(0.001, 5.0, 0.001);
+  sp.decaySlider.onValueChange = [this, updateADSRVisual] {
+    sculptingPanel.decayInput.setText(
+        juce::String(sculptingPanel.decaySlider.getValue(), 3),
+        juce::dontSendNotification);
+    updateADSRVisual();
+  };
+  sp.decayInput.onReturnKey = [this] {
+    sculptingPanel.decaySlider.setValue(
+        sculptingPanel.decayInput.getText().getFloatValue(),
+        juce::sendNotification);
+  };
+  sp.adsrVisualizer.onDecayChange = [this](float val) {
+    sculptingPanel.decaySlider.setValue(val * 5.0f, juce::sendNotification);
+  };
 
-  keyboard = std::make_unique<SemiToneKeyboard>();
-  keyboard->onKeyPress = [this](int note) { synth.noteOn(1, note, 0.8f); };
-  keyboard->onBackgroundClick = [this] { deselectAllRegions(); }; // Added line
-  editView->addAndMakeVisible(keyboard.get());
+  // Sustain
+  sp.sustainSlider.setRange(0.0, 1.0, 0.01);
+  sp.sustainSlider.onValueChange = [this, updateADSRVisual] {
+    sculptingPanel.sustainInput.setText(
+        juce::String(sculptingPanel.sustainSlider.getValue(), 2),
+        juce::dontSendNotification);
+    updateADSRVisual();
+  };
+  sp.sustainInput.onReturnKey = [this] {
+    sculptingPanel.sustainSlider.setValue(
+        sculptingPanel.sustainInput.getText().getFloatValue(),
+        juce::sendNotification);
+  };
+  sp.adsrVisualizer.onSustainChange = [this](float val) {
+    sculptingPanel.sustainSlider.setValue(val, juce::sendNotification);
+  };
 
-  importButton.onClick = [this] {
+  // Release
+  sp.releaseSlider.setRange(0.001, 5.0, 0.001);
+  sp.releaseSlider.onValueChange = [this, updateADSRVisual] {
+    sculptingPanel.releaseInput.setText(
+        juce::String(sculptingPanel.releaseSlider.getValue(), 3),
+        juce::dontSendNotification);
+    updateADSRVisual();
+  };
+  sp.releaseInput.onReturnKey = [this] {
+    sculptingPanel.releaseSlider.setValue(
+        sculptingPanel.releaseInput.getText().getFloatValue(),
+        juce::sendNotification);
+  };
+  sp.adsrVisualizer.onReleaseChange = [this](float val) {
+    sculptingPanel.releaseSlider.setValue(val * 5.0f, juce::sendNotification);
+  };
+
+  // --- Project Controls Setup ---
+  headerPanel.loadBtn.onClick = [this] {
     chooser = std::make_unique<juce::FileChooser>(
-        "Open Sotero Library...", lastBrowseDirectory, "*.spsa;*.sotero");
-    chooser->launchAsync(juce::FileBrowserComponent::openMode |
-                             juce::FileBrowserComponent::canSelectFiles,
-                         [this](const juce::FileChooser &fc) {
-                           auto file = fc.getResult();
-                           if (file.existsAsFile()) {
-                             loadSoteroLibrary(file);
-                           }
-                         });
-  };
-  editView->addAndMakeVisible(importButton);
+        "Select a Sotero Library...",
+        juce::File::getSpecialLocation(juce::File::userHomeDirectory),
+        "*.sotero");
 
-  exportButton.onClick = [this] {
+    auto flags = juce::FileBrowserComponent::openMode |
+                 juce::FileBrowserComponent::canSelectFiles;
+    chooser->launchAsync(flags, [this](const juce::FileChooser &fc) {
+      auto result = fc.getResult();
+      if (result.existsAsFile())
+        loadSoteroLibrary(result);
+    });
+  };
+
+  headerPanel.saveBtn.onClick = [this] {
     updateMetadataFromUI();
     chooser = std::make_unique<juce::FileChooser>(
         "Save Sotero Library...",
         juce::File::getSpecialLocation(juce::File::userDesktopDirectory)
             .getChildFile(libraryData.name + ".spsa"),
         "*.spsa;*.sotero");
-    chooser->launchAsync(juce::FileBrowserComponent::saveMode |
-                             juce::FileBrowserComponent::warnAboutOverwriting,
-                         [this](const juce::FileChooser &fc) {
-                           auto file = fc.getResult();
-                           if (file != juce::File{}) {
-                             if (sotero::SoteroArchive::write(
-                                     file, libraryData, currentLibraryFile)) {
-                               currentLibraryFile = file;
-                             }
-                           }
-                         });
+
+    auto flags = juce::FileBrowserComponent::saveMode |
+                 juce::FileBrowserComponent::warnAboutOverwriting;
+    chooser->launchAsync(flags, [this](const juce::FileChooser &fc) {
+      auto result = fc.getResult();
+      if (result != juce::File{})
+        sotero::SoteroArchive::write(result, libraryData, currentLibraryFile);
+    });
   };
-  exportButton.setColour(juce::TextButton::buttonColourId,
-                         juce::Colours::orange.darker(0.5f));
-  editView->addAndMakeVisible(exportButton);
 
-  // --- PLAYER UI ---
-  playerUI = std::make_unique<SoteroPlayerUI>(*this);
-  auto logoImg = juce::ImageFileFormat::loadFrom(BinaryData::logo_png,
-                                                 BinaryData::logo_pngSize);
-  playerUI->setLogo(logoImg);
+  headerPanel.newBtn.onClick = [this] {
+    libraryData = LibraryMetadata();
+    libraryData.mappings.clear();
+    updateGridUI();
+  };
 
-  // --- TABS ---
-  addAndMakeVisible(tabs);
-  tabs.addTab("EDIT", juce::Colour(0xff121212), editView.get(), false);
-  tabs.addTab("PLAYER", juce::Colour(0xff121212), playerUI.get(), false);
+  // --- Octave / Mapping Setup ---
+  for (int i = -2; i <= 8; ++i) {
+    mappingPanel.octaveSelector.addItem("Octave C" + juce::String(i), i + 3);
+  }
+  mappingPanel.octaveSelector.setSelectedId(mappingPanel.currentOctave + 3);
+  mappingPanel.octaveSelector.onChange = [this] {
+    updateOctave(mappingPanel.octaveSelector.getSelectedId() - 3);
+  };
 
-  // Audio Initialization
+  // --- Mapping / KeyColumn Callbacks ---
+  auto setupCol = [this](KeyColumn *col) {
+    col->onFilesDropped = [this, col](const juce::StringArray &files,
+                                      int localY) {
+      if (files.size() == 0)
+        return;
+
+      float dropVelocityNormalized =
+          1.0f - ((float)localY / (float)col->getHeight());
+      int targetVelocity =
+          juce::jlimit(0, 127, (int)(dropVelocityNormalized * 127.0f));
+
+      int span = 20;
+      int velLow = juce::jlimit(0, 127, targetVelocity - span / 2);
+      int velHigh = juce::jlimit(0, 127, targetVelocity + span / 2);
+
+      for (int i = 0; i < files.size(); ++i) {
+        KeyMapping m;
+        m.midiNote = col->noteNumber;
+        m.micLayer = col->micLayer;
+        m.samplePath = files[i];
+        m.fileName = juce::File(files[i]).getFileName();
+        m.velocityLow = juce::jlimit(0, 126, velLow);
+        m.velocityHigh = juce::jlimit(m.velocityLow + 1, 127, velHigh);
+
+        // --- PREVENT STACKING ---
+        // Replace existing mappings on this note/layer that overlap this
+        // velocity zone
+        for (int j = libraryData.mappings.size() - 1; j >= 0; --j) {
+          auto &existing = libraryData.mappings.getReference(j);
+          if (existing.midiNote == m.midiNote &&
+              existing.micLayer == m.micLayer) {
+            if (existing.velocityLow <= m.velocityHigh &&
+                existing.velocityHigh >= m.velocityLow) {
+              existing.samplePath = ""; // Mark for removal in updateGridUI
+            }
+          }
+        }
+        libraryData.mappings.add(m);
+
+        velHigh = velLow - 1;
+        velLow = juce::jlimit(0, 127, velHigh - span);
+      }
+
+      updateGridUI();
+      rebuildSynth();
+    };
+  };
+
+  if (mappingPanel.layer1) {
+    for (auto *col : mappingPanel.layer1->columns)
+      setupCol(col);
+  }
+  if (mappingPanel.layer2) {
+    for (auto *col : mappingPanel.layer2->columns)
+      setupCol(col);
+  }
+
+  updateGridUI();
+
+  if (mappingPanel.layer1 && mappingPanel.layer1->keyboard) {
+    mappingPanel.layer1->keyboard->onKeyPress = [this](int note) {
+      synth.noteOn(1, note + (mappingPanel.currentOctave * 12), 0.8f);
+    };
+  }
+  if (mappingPanel.layer2 && mappingPanel.layer2->keyboard) {
+    mappingPanel.layer2->keyboard->onKeyPress = [this](int note) {
+      synth.noteOn(1, note + (mappingPanel.currentOctave * 12), 0.8f);
+    };
+  }
+
+  // --- Audio Setup ---
   formatManager.registerBasicFormats();
   for (int i = 0; i < 16; ++i)
     synth.addVoice(new sotero::SoteroSamplerVoice());
 
+  // --- TO PLAYER Toggles Wiring (Independent Layers) ---
+  auto updateLayerBypass = [this](int layerIdx) {
+    bool isEnabled = (layerIdx == 0)
+                         ? mappingPanel.layer1->toPlayerToggle.getToggleState()
+                         : mappingPanel.layer2->toPlayerToggle.getToggleState();
+
+    // Header toggle shows an "overall" state (e.g., ON if ANY is ON, or just
+    // syncs if preferred) User requested independent clicking, so we just
+    // trigger rebuild.
+    rebuildSynth();
+  };
+
+  mappingPanel.layer1->toPlayerToggle.onStateChange =
+      [this, updateLayerBypass] { updateLayerBypass(0); };
+  mappingPanel.layer2->toPlayerToggle.onStateChange =
+      [this, updateLayerBypass] { updateLayerBypass(1); };
+
+  // Sync Global Header toggle to Layer 1 for now, or make it a "Master" toggle
+  // that overrides
+  headerPanel.toPlayerToggle.onStateChange = [this] {
+    bool state = headerPanel.toPlayerToggle.getToggleState();
+    mappingPanel.layer1->toPlayerToggle.setToggleState(state,
+                                                       juce::sendNotification);
+    mappingPanel.layer2->toPlayerToggle.setToggleState(state,
+                                                       juce::sendNotification);
+  };
+
   setAudioChannels(0, 2);
   lastBrowseDirectory =
       juce::File::getSpecialLocation(juce::File::userHomeDirectory);
-  setSize(1100, 850); // Increased size to match Player Editor
+  setSize(1100, 850);
 
-  // Register as MIDI callback
-  auto midiInputs = juce::MidiInput::getAvailableDevices();
-  for (auto &device : midiInputs) {
-    if (deviceManager.isMidiInputDeviceEnabled(device.identifier))
-      deviceManager.addMidiInputDeviceCallback(device.identifier, this);
-  }
-
-  // --- Octave Selector ---
-  editView->addAndMakeVisible(octaveSelector);
-  for (int i = -2; i <= 8; ++i) {
-    octaveSelector.addItem("Octave C" + juce::String(i),
-                           i + 3); // 1-indexed for combo
-  }
-  octaveSelector.setSelectedId(currentOctave + 3);
-  octaveSelector.onChange = [this] {
-    updateOctave(octaveSelector.getSelectedId() - 3);
+  mappingPanel.layerSyncLock.onStateChange = [this] {
+    if (mappingPanel.layerSyncLock.getToggleState()) {
+      alignLayers();
+    }
   };
-
-  // --- Sculpting Panel ---
-  editView->addAndMakeVisible(sculptingPanel);
-  sculptingPanel.attackSlider.setRange(0.0, 10.0, 0.01);
-  sculptingPanel.releaseSlider.setRange(0.01, 10.0, 0.01);
-  sculptingPanel.cutoffSlider.setRange(20.0, 20000.0, 1.0);
-  sculptingPanel.cutoffSlider.setSkewFactorFromMidPoint(1000.0);
-
-  // Update Sculpting Panel when region is selected
-  // (Logic will be integrated into updateGridUI)
 
   updateGridUI();
 }
 
 MainComponent::~MainComponent() {
-  playerUI.reset();
   deviceManager.removeMidiInputDeviceCallback({}, this);
   shutdownAudio();
 }
@@ -215,6 +347,26 @@ void MainComponent::getNextAudioBlock(
 
   // Apply Effects
   auto &buffer = *bufferToFill.buffer;
+
+  // --- EFFECT BYPASS (Pure Audition) ---
+  if (!headerPanel.toPlayerToggle.getToggleState()) {
+    // Apply ONLY basic Master Gain
+    float masterGain = juce::Decibels::decibelsToGain(
+        (float)*apvts->getRawParameterValue("masterVol"));
+    buffer.applyGain(bufferToFill.startSample, bufferToFill.numSamples,
+                     masterGain);
+
+    if (bufferToFill.numSamples > 0) {
+      lastLevelL.store(buffer.getMagnitude(0, bufferToFill.startSample,
+                                           bufferToFill.numSamples));
+      lastLevelR.store(buffer.getNumChannels() > 1
+                           ? buffer.getMagnitude(1, bufferToFill.startSample,
+                                                 bufferToFill.numSamples)
+                           : lastLevelL.load());
+    }
+    return;
+  }
+
   int compType = (int)*apvts->getRawParameterValue("masterComp");
   if (compType > 0) {
     masterCompressor.setThreshold(*apvts->getRawParameterValue("compThresh"));
@@ -312,13 +464,20 @@ void MainComponent::rebuildSynth() {
           juce::BigInteger range;
           range.setBit(m.midiNote);
 
+          bool bypassLayer1 =
+              !mappingPanel.layer1->toPlayerToggle.getToggleState();
+          bool bypassLayer2 =
+              !mappingPanel.layer2->toPlayerToggle.getToggleState();
+          bool isBypassed = (m.micLayer == 0) ? bypassLayer1 : bypassLayer2;
+
           newSounds.add(new sotero::SoteroSamplerSound(
               m.samplePath, *reader, range, m.midiNote, 0.01, 0.1, 10.0,
               m.chokeGroup, m.velocityLow, m.velocityHigh, m.sampleStart,
               m.sampleEnd, m.fadeIn, m.fadeOut, m.volumeMultiplier,
               m.fineTuneCents, m.micLayer, m.adsrAttack, m.adsrDecay,
               m.adsrSustain, m.adsrRelease, m.filterType, m.filterCutoff,
-              m.filterResonance));
+              m.filterResonance, libraryData.enableADSR && !isBypassed,
+              libraryData.enableFilter && !isBypassed));
         }
       }
     }
@@ -343,9 +502,20 @@ void MainComponent::auditionSample(const juce::String &path, int midiNote,
   synth.noteOn(1, midiNote, (float)velocity / 127.0f);
 }
 
+void MainComponent::auditionSampleOff(int midiNote) {
+  const juce::ScopedLock sl(synthLock);
+  // Synth note off ensures the ADSR enters release phase and frees polyphony
+  synth.noteOff(1, midiNote, 0.0f, true);
+}
+
 void MainComponent::updateGridUI() {
-  for (auto *col : keyColumns) {
-    col->clearRegions();
+  if (mappingPanel.layer1) {
+    for (auto *col : mappingPanel.layer1->columns)
+      col->clearRegions();
+  }
+  if (mappingPanel.layer2) {
+    for (auto *col : mappingPanel.layer2->columns)
+      col->clearRegions();
   }
 
   for (int mIndex = 0; mIndex < libraryData.mappings.size(); ++mIndex) {
@@ -353,28 +523,44 @@ void MainComponent::updateGridUI() {
     if (mapping.samplePath.isEmpty())
       continue;
 
-    int baseNote = (currentOctave + 2) * 12;
+    int baseNote = (mappingPanel.currentOctave + 3) * 12;
     int colIndex = mapping.midiNote - baseNote;
-    if (colIndex >= 0 && colIndex < 12) {
-      auto *col = keyColumns[colIndex];
-      col->addRegion(mapping);
 
+    if (colIndex >= 0 && colIndex < 12) {
+      KeyColumn *col = nullptr;
+      if (mapping.micLayer == 0 && mappingPanel.layer1)
+        col = mappingPanel.layer1->columns[colIndex];
+      else if (mapping.micLayer == 1 && mappingPanel.layer2)
+        col = mappingPanel.layer2->columns[colIndex];
+
+      if (col == nullptr)
+        continue;
+
+      col->addRegion(mapping);
       auto *region = col->regions.getLast();
 
-      region->onAudition = [this, mIndex](const KeyMapping &m) {
+      region->onAudition = [this](const KeyMapping &m) {
         auditionSample(m.samplePath, m.midiNote,
                        (m.velocityLow + m.velocityHigh) / 2);
+      };
+      region->onAuditionEnd = [this](const KeyMapping &m) {
+        auditionSampleOff(m.midiNote);
       };
 
       if (mIndex == activeMappingIndex)
         region->setActive(true);
 
       region->onSelect = [this, mIndex]() {
-        deselectAllRegions();
+        // Deselect others visually without destroying everything
         activeMappingIndex = mIndex;
+        for (auto *l : {mappingPanel.layer1.get(), mappingPanel.layer2.get()})
+          if (l)
+            for (auto *c : l->columns)
+              for (auto *r : c->regions)
+                r->setActive(false);
 
-        // Update Sculpting Panel
         auto &m = libraryData.mappings.getReference(mIndex);
+
         sculptingPanel.attackSlider.setValue(m.adsrAttack,
                                              juce::dontSendNotification);
         sculptingPanel.decaySlider.setValue(m.adsrDecay,
@@ -390,7 +576,6 @@ void MainComponent::updateGridUI() {
         sculptingPanel.resSlider.setValue(m.filterResonance,
                                           juce::dontSendNotification);
 
-        // Connect Sliders to data
         auto updateData = [this, mIndex]() {
           if (mIndex >= 0 && mIndex < libraryData.mappings.size()) {
             auto &ref = libraryData.mappings.getReference(mIndex);
@@ -402,8 +587,7 @@ void MainComponent::updateGridUI() {
                 sculptingPanel.filterTypeSelector.getSelectedId() - 1;
             ref.filterCutoff = (float)sculptingPanel.cutoffSlider.getValue();
             ref.filterResonance = (float)sculptingPanel.resSlider.getValue();
-
-            rebuildSynth(); // Immediate feedback
+            rebuildSynth();
           }
         };
 
@@ -414,38 +598,147 @@ void MainComponent::updateGridUI() {
         sculptingPanel.filterTypeSelector.onChange = updateData;
         sculptingPanel.cutoffSlider.onValueChange = updateData;
         sculptingPanel.resSlider.onValueChange = updateData;
+        updateData(); // Apply initial values and rebuild synth
+        // Do NOT call updateGridUI() here as it destroys the very sliders we
+        // are using! Instead, just repaint the regions to show the active state
+        // if needed
+        for (auto *l : {mappingPanel.layer1.get(), mappingPanel.layer2.get()})
+          if (l)
+            for (auto *c : l->columns)
+              for (auto *r : c->regions)
+                r->repaint();
       };
 
-      region->onClear = [this, mIndex](const KeyMapping &) {
-        // Mark as deleted by clearing path, then update UI and synth
-        // We do this asynchronously to avoid deleting the component while we're
-        // inside its mouseDown handler.
-        juce::MessageManager::callAsync([this, mIndex]() {
-          if (mIndex >= 0 && mIndex < libraryData.mappings.size()) {
-            libraryData.mappings.getReference(mIndex).samplePath = "";
-            updateGridUI();
-            rebuildSynth();
-          }
-        });
-      };
-
-      juce::Component::SafePointer<KeyColumn> safeCol(col);
-      region->onBoundsChanged = [this, mIndex, safeCol](const KeyMapping &m) {
+      region->onErase = [this, mIndex]() {
         if (mIndex >= 0 && mIndex < libraryData.mappings.size()) {
-          auto &ref = libraryData.mappings.getReference(mIndex);
-          ref.velocityLow = m.velocityLow;
-          ref.velocityHigh = m.velocityHigh;
-          ref.samplePath = m.samplePath; // Sync path for live eraser support
+          auto &orig = libraryData.mappings.getReference(mIndex);
+          int oldNote = orig.midiNote;
+          int oldLo = orig.velocityLow;
+          int oldHi = orig.velocityHigh;
+          orig.samplePath = "";
 
-          if (safeCol != nullptr)
-            safeCol->resized(); // Liquid smooth UI update with safety
+          if (mappingPanel.layerSyncLock.getToggleState()) {
+            int otherLayer = 1 - orig.micLayer;
+            for (int j = 0; j < libraryData.mappings.size(); ++j) {
+              auto &other = libraryData.mappings.getReference(j);
+              if (other.micLayer == otherLayer && other.midiNote == oldNote &&
+                  other.velocityLow == oldLo && other.velocityHigh == oldHi &&
+                  other.samplePath.isNotEmpty()) {
+                other.samplePath = "";
+                break;
+              }
+            }
+          }
         }
       };
 
-      region->onDragFinished = [this](const KeyMapping &m) {
-        juce::MessageManager::callAsync([this]() {
-          updateGridUI(); // Ensure all components reflect the resolved bounds
-          rebuildSynth(); // Heavy work only when interaction ends
+      region->onDragStart = [this](bool top, bool bottom) {
+        dragStickyTop = top;
+        dragStickyBottom = bottom;
+      };
+
+      region->onClear = [this, mIndex](const KeyMapping &) {
+        if (mIndex >= 0 && mIndex < libraryData.mappings.size()) {
+          libraryData.mappings.getReference(mIndex).samplePath = "";
+          // Async call to avoid destroying 'this' inside its own event handler
+          juce::MessageManager::callAsync([this] {
+            updateGridUI();
+            rebuildSynth();
+          });
+        }
+      };
+
+      juce::Component::SafePointer<KeyColumn> safeCol(col);
+      region->onBoundsChanged = [this, mIndex, safeCol,
+                                 region](const KeyMapping &m) {
+        if (mIndex >= 0 && mIndex < libraryData.mappings.size()) {
+          auto &ref = libraryData.mappings.getReference(mIndex);
+          int targetLo = m.velocityLow;
+          int targetHi = m.velocityHigh;
+
+          bool syncActive = mappingPanel.layerSyncLock.getToggleState();
+          int otherIndex = syncActive ? findCounterpart(mIndex) : -1;
+
+          // 1. Resolve collisions in primary layer (with push-back)
+          resolveCollisions(ref.midiNote, ref.micLayer, targetLo, targetHi,
+                            mIndex, true, true);
+
+          // 2. Resolve collisions in other layer if sync is on
+          if (syncActive && otherIndex != -1) {
+            auto &other = libraryData.mappings.getReference(otherIndex);
+            other.velocityLow = targetLo;
+            other.velocityHigh = targetHi;
+            // Also pushes back if other hits bound
+            resolveCollisions(other.midiNote, other.micLayer, other.velocityLow,
+                              other.velocityHigh, otherIndex, true, false);
+            // Correct the primary mapping too if other pushed back
+            targetLo = other.velocityLow;
+            targetHi = other.velocityHigh;
+          }
+
+          // 3. Apply changes back to data
+          ref.velocityLow = targetLo;
+          ref.velocityHigh = targetHi;
+
+          // 4. Update the actual UI components from the new data
+          // IMPORTANT: Even if 'region' is dragging, we want to update its
+          // internal 'currentMapping' to reflect any push-back/capping
+          // that resolveCollisions performed.
+          region->updateFromMapping(ref);
+
+          updateColumnRegions(ref.midiNote, ref.micLayer);
+          if (syncActive && otherIndex != -1) {
+            auto &other = libraryData.mappings.getReference(otherIndex);
+            updateColumnRegions(other.midiNote, other.micLayer);
+          }
+        }
+      };
+
+      region->onRequestMove = [this, mIndex](int deltaNote) {
+        if (mIndex >= 0 && mIndex < libraryData.mappings.size()) {
+          auto &ref = libraryData.mappings.getReference(mIndex);
+          int oldNote = ref.midiNote;
+          int oldLo = ref.velocityLow;
+          int oldHi = ref.velocityHigh;
+          int targetNote = juce::jlimit(0, 127, oldNote + deltaNote);
+
+          if (targetNote == oldNote)
+            return;
+
+          bool syncActive = mappingPanel.layerSyncLock.getToggleState();
+          int otherIndex = syncActive ? findCounterpart(mIndex) : -1;
+
+          // 1. Resolve collisions in primary layer at destination
+          resolveCollisions(targetNote, ref.micLayer, oldLo, oldHi, mIndex,
+                            true, true);
+
+          // 2. If sync is on, resolve in other layer at destination
+          if (syncActive && otherIndex != -1) {
+            auto &other = libraryData.mappings.getReference(otherIndex);
+            other.midiNote = targetNote;
+            resolveCollisions(targetNote, other.micLayer, oldLo, oldHi,
+                              otherIndex, true, false);
+          }
+
+          // 3. Apply changes
+          ref.midiNote = targetNote;
+          if (syncActive && otherIndex != -1) {
+            libraryData.mappings.getReference(otherIndex).midiNote = targetNote;
+          }
+
+          juce::MessageManager::callAsync([this] {
+            updateGridUI();
+            rebuildSynth();
+          });
+        }
+      };
+
+      region->onDragFinished = [this](const KeyMapping &) {
+        dragStickyTop = false;
+        dragStickyBottom = false;
+        juce::MessageManager::callAsync([this] {
+          updateGridUI();
+          rebuildSynth();
         });
       };
     }
@@ -453,8 +746,8 @@ void MainComponent::updateGridUI() {
 }
 
 void MainComponent::updateMetadataFromUI() {
-  libraryData.name = nameEditor.getText();
-  libraryData.author = authorEditor.getText();
+  libraryData.name = metadataPanel.nameEditor.getText();
+  libraryData.author = metadataPanel.authorEditor.getText();
 }
 
 void MainComponent::paint(juce::Graphics &g) {
@@ -465,23 +758,27 @@ void MainComponent::paint(juce::Graphics &g) {
 
 void MainComponent::deselectAllRegions() {
   activeMappingIndex = -1;
-  for (auto *col : keyColumns) {
-    for (auto *region : col->regions) {
-      region->setActive(false);
+  if (mappingPanel.layer1) {
+    for (auto *col : mappingPanel.layer1->columns) {
+      for (auto *region : col->regions)
+        region->setActive(false);
+    }
+  }
+  if (mappingPanel.layer2) {
+    for (auto *col : mappingPanel.layer2->columns) {
+      for (auto *region : col->regions)
+        region->setActive(false);
     }
   }
 }
 
 void MainComponent::updateOctave(int newOctave) {
-  currentOctave = newOctave;
-  int baseNote = (currentOctave + 2) * 12; // C-2 is 0, so C0 is 24, C3 is 60
-
-  for (int i = 0; i < 12; ++i) {
-    keyColumns[i]->noteNumber = baseNote + i;
-  }
-
+  mappingPanel.updateOctave(newOctave);
   updateGridUI();
-  keyboard->repaint();
+  if (mappingPanel.layer1 && mappingPanel.layer1->keyboard)
+    mappingPanel.layer1->keyboard->repaint();
+  if (mappingPanel.layer2 && mappingPanel.layer2->keyboard)
+    mappingPanel.layer2->keyboard->repaint();
 }
 
 void MainComponent::loadSoteroLibrary(const juce::File &file) {
@@ -491,12 +788,22 @@ void MainComponent::loadSoteroLibrary(const juce::File &file) {
   if (imported.mappings.size() > 0) {
     currentLibraryFile = file;
     libraryData = imported;
-    nameEditor.setText(libraryData.name);
-    authorEditor.setText(libraryData.author);
-    enableADSRCheckbox.setToggleState(libraryData.enableADSR,
-                                      juce::dontSendNotification);
-    enableFilterCheckbox.setToggleState(libraryData.enableFilter,
-                                        juce::dontSendNotification);
+    metadataPanel.nameEditor.setText(libraryData.name);
+    metadataPanel.authorEditor.setText(libraryData.author);
+
+    // Load artwork if present
+    currentArtwork = juce::Image(); // Reset
+    if (libraryData.artworkPath.isNotEmpty()) {
+      auto artData =
+          sotero::SoteroArchive::extractResource(file, libraryData.artworkPath);
+      if (artData.getSize() > 0) {
+        currentArtwork = juce::ImageFileFormat::loadFrom(artData.getData(),
+                                                         artData.getSize());
+      }
+    }
+
+    // Updated to use modular sculptingPanel
+    // (Note: libraryData.enableADSR etc. will be mapped to UI in Phase 7)
     updateGridUI();
     rebuildSynth();
   }
@@ -539,148 +846,445 @@ MainComponent::createParameterLayout() {
 }
 
 void MainComponent::resized() {
-  tabs.setBounds(getLocalBounds());
+  auto r = getLocalBounds();
+  headerPanel.setBounds(r.removeFromTop(70));
 
-  // Edit View Layout
-  auto r = editView->getLocalBounds().reduced(20);
-  titleLabel.setBounds(r.removeFromTop(40));
+  // Top Area (Waveforms + ADSR)
+  auto topArea = r.removeFromTop(220);
+  int waveformW = topArea.getWidth() / 4;
 
-  auto infoArea = r.removeFromTop(40);
-  nameEditor.setBounds(infoArea.removeFromLeft(r.getWidth() / 4).reduced(5));
-  authorEditor.setBounds(infoArea.removeFromLeft(r.getWidth() / 4).reduced(5));
-  enableADSRCheckbox.setBounds(
-      infoArea.removeFromLeft(r.getWidth() / 6).reduced(5));
-  enableFilterCheckbox.setBounds(
-      infoArea.removeFromLeft(r.getWidth() / 6).reduced(5));
-  octaveSelector.setBounds(infoArea.reduced(5));
+  if (waveform1)
+    waveform1->setBounds(topArea.removeFromLeft(waveformW).reduced(2));
+  if (waveform2)
+    waveform2->setBounds(topArea.removeFromLeft(waveformW).reduced(2));
+  sculptingPanel.setBounds(topArea.reduced(2));
 
-  r.removeFromTop(10);
+  // Bottom Area (Mapping + Workspace)
+  auto bottomArea = r;
+  mappingPanel.setBounds(
+      bottomArea.removeFromLeft(bottomArea.getWidth() * 0.65f).reduced(2));
 
-  auto mainArea = r.removeFromBottom(r.getHeight() - 10);
-  auto sidePanel = mainArea.removeFromRight(250).reduced(10);
-  sculptingPanel.setBounds(sidePanel);
+  auto workspaceArea = bottomArea;
+  advancedPanel.setBounds(
+      workspaceArea.removeFromTop(workspaceArea.getHeight() * 0.45f)
+          .reduced(2));
+  metadataPanel.setBounds(workspaceArea.reduced(2));
+}
 
-  auto footerArea = mainArea.removeFromBottom(150);
-  keyboard->setBounds(footerArea.removeFromBottom(80));
+MainComponent::MetadataPanel::MetadataPanel() {
+  addAndMakeVisible(nameEditor);
+  addAndMakeVisible(authorEditor);
+  addAndMakeVisible(dateEditor);
+  addAndMakeVisible(infoEditor);
+  addAndMakeVisible(nameLabel);
+  addAndMakeVisible(authorLabel);
+  addAndMakeVisible(dateLabel);
+  addAndMakeVisible(infoLabel);
+  addAndMakeVisible(artworkDrop);
+  addAndMakeVisible(artworkLabel);
 
-  auto buttonArea = footerArea.reduced(5);
-  exportButton.setBounds(buttonArea.removeFromRight(120).withHeight(35));
-  importButton.setBounds(buttonArea.removeFromRight(120).withHeight(35));
+  nameLabel.setText("LIBRARY NAME", juce::dontSendNotification);
+  nameLabel.setColour(juce::Label::textColourId, juce::Colours::cyan);
+  authorLabel.setText("AUTHOR", juce::dontSendNotification);
+  authorLabel.setColour(juce::Label::textColourId, juce::Colours::cyan);
 
-  mainArea.removeFromBottom(10);
-  float colWidth = (float)mainArea.getWidth() / 12.0f;
-  for (int i = 0; i < 12; ++i) {
-    keyColumns[i]->setBounds((int)(mainArea.getX() + i * colWidth),
-                             mainArea.getY(), (int)colWidth,
-                             mainArea.getHeight());
-  }
+  artworkLabel.setJustificationType(juce::Justification::centred);
+  artworkLabel.setColour(juce::Label::textColourId, juce::Colours::grey);
+}
+
+void MainComponent::MetadataPanel::resized() {
+  auto r = getLocalBounds().reduced(5);
+
+  auto artworkArea = r.removeFromTop(120);
+  auto artSquare = artworkArea.removeFromLeft(120);
+  artworkDrop.setBounds(artSquare);
+  artworkLabel.setBounds(artSquare);
+
+  auto fields = artworkArea.reduced(10, 0);
+  nameLabel.setBounds(fields.removeFromTop(20));
+  nameEditor.setBounds(fields.removeFromTop(25));
+  fields.removeFromTop(5);
+  authorLabel.setBounds(fields.removeFromTop(20));
+  authorEditor.setBounds(fields.removeFromTop(30));
+}
+
+void MainComponent::MetadataPanel::paint(juce::Graphics &g) {
+  g.setColour(juce::Colours::black.withAlpha(0.2f));
+  g.fillRoundedRectangle(getLocalBounds().toFloat(), 4.0f);
+  g.setColour(juce::Colours::white.withAlpha(0.1f));
+  g.drawRoundedRectangle(getLocalBounds().toFloat(), 4.0f, 1.0f);
+}
+
+void MainComponent::WaveformPanel::paint(juce::Graphics &g) {
+  auto r = getLocalBounds().reduced(2).toFloat();
+  g.setColour(bgColor.withAlpha(0.1f));
+  g.fillRoundedRectangle(r, 4.0f);
+  g.setColour(bgColor.withAlpha(0.3f));
+  g.drawRoundedRectangle(r, 4.0f, 1.0f);
+
+  g.setColour(juce::Colours::white.withAlpha(0.6f));
+  g.setFont(juce::Font(14.0f, juce::Font::bold));
+  g.drawText(title, getLocalBounds().removeFromTop(25).reduced(10, 0),
+             juce::Justification::left);
+
+  // Waveform placeholder logic
+  g.setColour(bgColor.withAlpha(0.5f));
+  auto waveR = getLocalBounds().reduced(10, 30);
+  g.drawHorizontalLine(waveR.getCentreY(), (float)waveR.getX(),
+                       (float)waveR.getRight());
 }
 
 void MainComponent::SculptingPanel::paint(juce::Graphics &g) {
-  g.setColour(juce::Colours::black.withAlpha(0.2f));
-  g.fillRoundedRectangle(getLocalBounds().toFloat(), 5.0f);
-  g.setColour(juce::Colours::white.withAlpha(0.1f));
-  g.drawRoundedRectangle(getLocalBounds().toFloat(), 5.0f, 1.0f);
+  auto r = getLocalBounds().reduced(5);
+  g.setColour(juce::Colour(0xff0a0a0a));
+  g.fillRoundedRectangle(r.toFloat(), 4.0f);
+}
+
+void MainComponent::WaveformPanel::resized() {
+  toPlayerToggle.setBounds(getWidth() - 100, 5, 90, 20);
 }
 
 void MainComponent::SculptingPanel::resized() {
-  auto r = getLocalBounds().reduced(10);
-  title.setBounds(r.removeFromTop(30));
-  r.removeFromTop(10);
+  auto r = getLocalBounds().reduced(5);
+  auto graphArea = r.removeFromTop(120); // ADSR visualizer area
+  adsrVisualizer.setBounds(graphArea.reduced(5));
 
-  auto adsrArea = r.removeFromTop(120);
-  int sliderW = adsrArea.getWidth() / 4;
-  attackSlider.setBounds(adsrArea.removeFromLeft(sliderW).reduced(2));
-  decaySlider.setBounds(adsrArea.removeFromLeft(sliderW).reduced(2));
-  sustainSlider.setBounds(adsrArea.removeFromLeft(sliderW).reduced(2));
-  releaseSlider.setBounds(adsrArea.reduced(2));
+  auto slidersArea = r;
+  float w = slidersArea.getWidth() / 4.0f;
 
-  r.removeFromTop(20);
-  filterTypeSelector.setBounds(r.removeFromTop(30));
-  r.removeFromTop(10);
-  cutoffSlider.setBounds(r.removeFromTop(40));
-  resSlider.setBounds(r.removeFromTop(40));
+  auto row1 = slidersArea.removeFromTop(70);
+  auto aArea = row1.removeFromLeft(w).reduced(2);
+  attackSlider.setBounds(aArea.removeFromTop(aArea.getHeight() - 20));
+  attackInput.setBounds(aArea);
+
+  auto dArea = row1.removeFromLeft(w).reduced(2);
+  decaySlider.setBounds(dArea.removeFromTop(dArea.getHeight() - 20));
+  decayInput.setBounds(dArea);
+
+  auto sArea = row1.removeFromLeft(w).reduced(2);
+  sustainSlider.setBounds(sArea.removeFromTop(sArea.getHeight() - 20));
+  sustainInput.setBounds(sArea);
+
+  auto rArea = row1.reduced(2);
+  releaseSlider.setBounds(rArea.removeFromTop(rArea.getHeight() - 20));
+  releaseInput.setBounds(rArea);
+
+  auto row2 = slidersArea;
+  filterTypeSelector.setBounds(row2.removeFromLeft(w).reduced(2));
+  cutoffSlider.setBounds(row2.removeFromLeft(w).reduced(2));
+  resSlider.setBounds(row2.removeFromLeft(w).reduced(2));
+  velSensSlider.setBounds(row2.reduced(2));
 }
 
-void MainComponent::filesDropped(const juce::StringArray &files, int x, int y) {
-  if (files.size() > 0) {
-    for (int i = 0; i < keyColumns.size(); ++i) {
-      auto *col = keyColumns[i];
-      auto colBounds = col->getBounds();
+void MainComponent::MappingPanel::resized() {
+  auto r = getLocalBounds().reduced(5);
 
-      if (colBounds.contains(x, y)) {
-        int targetNote = col->noteNumber;
-        int localY = y - colBounds.getY();
-        float dropVelocityNormalized =
-            1.0f - ((float)localY / (float)colBounds.getHeight());
-        int targetVelocity =
-            juce::jlimit(0, 127, (int)(dropVelocityNormalized * 127.0f));
+  // Bar at the bottom for controls
+  auto ctrlBar = r.removeFromBottom(25);
+  octaveSelector.setBounds(ctrlBar.removeFromLeft(125).reduced(2));
+  layerSyncLock.setBounds(ctrlBar.removeFromLeft(125).reduced(2));
 
-        int span = 20; // Default span
-        int velLow = juce::jlimit(0, 127, targetVelocity - span / 2);
-        int velHigh = juce::jlimit(0, 127, targetVelocity + span / 2);
+  int gap = 24;
+  auto layerArea = r;
+  int w = (layerArea.getWidth() - gap) / 2;
 
-        for (int f = 0; f < files.size(); ++f) {
-          // Adjust bounds if they overlap existing regions
-          bool overlap = true;
-          int attempts = 0;
-          while (overlap && attempts < 10) {
-            overlap = false;
-            for (int mapIdx = 0; mapIdx < libraryData.mappings.size();
-                 ++mapIdx) {
-              const auto &mCheck = libraryData.mappings.getReference(mapIdx);
-              if (mCheck.midiNote == targetNote &&
-                  mCheck.samplePath.isNotEmpty()) {
-                // Check for overlap
-                if (velLow <= mCheck.velocityHigh &&
-                    velHigh >= mCheck.velocityLow) {
-                  overlap = true;
+  if (layer1)
+    layer1->setBounds(layerArea.removeFromLeft(w).reduced(2));
 
-                  // If dropping above an existing region, push up. Otherwise,
-                  // push down.
-                  if (targetVelocity >=
-                      (mCheck.velocityLow + mCheck.velocityHigh) / 2) {
-                    velLow = mCheck.velocityHigh + 1;
-                    velHigh = velLow + span;
-                  } else {
-                    velHigh = mCheck.velocityLow - 1;
-                    velLow = velHigh - span;
-                  }
+  layerArea.removeFromLeft(gap);
 
-                  // constrain loop
-                  velHigh = juce::jlimit(1, 127, velHigh);
-                  velLow = juce::jlimit(0, velHigh - 1, velLow);
-                  break;
-                }
-              }
-            }
-            attempts++;
-          }
+  if (layer2)
+    layer2->setBounds(layerArea.reduced(2));
+}
 
-          KeyMapping m;
-          m.midiNote = targetNote;
-          m.samplePath = files[f];
-          m.fileName = juce::File(files[f]).getFileName();
-          m.velocityLow = velLow;
-          m.velocityHigh = velHigh;
-          m.chokeGroup = 0;
+void MainComponent::MappingPanel::updateOctave(int newOctave) {
+  currentOctave = newOctave;
+  int baseNote = (currentOctave + 3) * 12; // C3 is octave 0 internally (60)
+  if (layer1) {
+    for (int i = 0; i < 12; ++i)
+      layer1->columns[i]->noteNumber = baseNote + i;
+  }
+  if (layer2) {
+    for (int i = 0; i < 12; ++i)
+      layer2->columns[i]->noteNumber = baseNote + i;
+  }
+}
 
-          libraryData.mappings.add(m);
+void MainComponent::alignLayers() {
+  for (int note = 0; note < 128; ++note) {
+    juce::Array<int> l1Indices, l2Indices;
+    for (int i = 0; i < libraryData.mappings.size(); ++i) {
+      auto &m = libraryData.mappings.getReference(i);
+      if (m.samplePath.isEmpty() || m.midiNote != note)
+        continue;
+      if (m.micLayer == 0)
+        l1Indices.add(i);
+      else if (m.micLayer == 1)
+        l2Indices.add(i);
+    }
 
-          // Shift velocity down for subsequent files if multiple dropped
-          velHigh = velLow - 1;
-          velLow = juce::jlimit(0, 127, velHigh - span);
-        }
+    // Sort by velocityLow
+    auto sortByVel = [this](int a, int b) {
+      return libraryData.mappings.getReference(a).velocityLow <
+             libraryData.mappings.getReference(b).velocityLow;
+    };
+    std::sort(l1Indices.begin(), l1Indices.end(), sortByVel);
+    std::sort(l2Indices.begin(), l2Indices.end(), sortByVel);
 
-        updateGridUI();
-        rebuildSynth();
+    // Link 1-to-1 by rank
+    // Link 1-to-1 by rank
+    int count = juce::jmin(l1Indices.size(), l2Indices.size());
+    for (int k = 0; k < count; ++k) {
+      auto &m1 = libraryData.mappings.getReference(l1Indices[k]);
+      auto &m2 = libraryData.mappings.getReference(l2Indices[k]);
 
-        // Audition the first dropped file
-        auditionSample(files[0], targetNote, targetVelocity);
-        return;
+      int targetLo = m1.velocityLow;
+      int targetHi = m1.velocityHigh;
+
+      // Resolve collisions in Layer 2 for the target range before snapping
+      // Use allowCrossSync = false here because we are already in a batch sync
+      // operation
+      resolveCollisions(note, 1, targetLo, targetHi, l2Indices[k], false);
+
+      m2.velocityLow = targetLo;
+      m2.velocityHigh = targetHi;
+    }
+  }
+  updateGridUI();
+  rebuildSynth();
+}
+
+int MainComponent::findCounterpart(int mIndex) {
+  if (mIndex < 0 || mIndex >= libraryData.mappings.size())
+    return -1;
+  auto &src = libraryData.mappings.getReference(mIndex);
+
+  juce::Array<int> srcIndices, dstIndices;
+  for (int i = 0; i < libraryData.mappings.size(); ++i) {
+    auto &m = libraryData.mappings.getReference(i);
+    if (m.samplePath.isEmpty() || m.midiNote != src.midiNote)
+      continue;
+    if (m.micLayer == src.micLayer)
+      srcIndices.add(i);
+    else
+      dstIndices.add(i);
+  }
+
+  // Sort both by velocity
+  auto sortByVel = [this](int a, int b) {
+    return libraryData.mappings.getReference(a).velocityLow <
+           libraryData.mappings.getReference(b).velocityLow;
+  };
+  std::sort(srcIndices.begin(), srcIndices.end(), sortByVel);
+  std::sort(dstIndices.begin(), dstIndices.end(), sortByVel);
+
+  int rank = srcIndices.indexOf(mIndex);
+  if (rank >= 0 && rank < dstIndices.size()) {
+    return dstIndices[rank];
+  }
+  return -1;
+}
+
+bool MainComponent::isRangeFree(int note, int micLayer, int lo, int hi,
+                                int excludeIndex) {
+  for (int i = 0; i < libraryData.mappings.size(); ++i) {
+    if (i == excludeIndex)
+      continue;
+    const auto &m = libraryData.mappings.getReference(i);
+    if (m.samplePath.isEmpty())
+      continue;
+    if (m.midiNote == note && m.micLayer == micLayer) {
+      if (!(hi < m.velocityLow || lo > m.velocityHigh))
+        return false;
+    }
+  }
+  return true;
+}
+
+void MainComponent::resolveCollisions(int note, int micLayer, int &targetLo,
+                                      int &targetHi, int excludeIndex,
+                                      bool allowCrossSync,
+                                      bool isPrimaryTarget) {
+  static int depth = 0;
+  if (++depth > 128) {
+    --depth;
+    return;
+  }
+
+  bool syncActive =
+      allowCrossSync && mappingPanel.layerSyncLock.getToggleState();
+
+  // 1. Identify and categorize neighbors
+  struct Neighbor {
+    int index;
+    int lo, hi;
+    bool operator==(const Neighbor &other) const {
+      return index == other.index;
+    }
+  };
+  juce::Array<Neighbor> above, below;
+
+  for (int i = 0; i < libraryData.mappings.size(); ++i) {
+    if (i == excludeIndex)
+      continue;
+    auto &m = libraryData.mappings.getReference(i);
+    if (m.samplePath.isEmpty() || m.midiNote != note || m.micLayer != micLayer)
+      continue;
+
+    // Strict positional categorization
+    if (m.velocityLow >= targetHi ||
+        (m.velocityLow > targetLo && m.velocityHigh > targetHi))
+      above.add({i, m.velocityLow, m.velocityHigh});
+    else
+      below.add({i, m.velocityLow, m.velocityHigh});
+  }
+
+  // 2. Sort outward from target
+  std::sort(above.begin(), above.end(),
+            [](const Neighbor &a, const Neighbor &b) { return a.lo < b.lo; });
+  std::sort(below.begin(), below.end(),
+            [](const Neighbor &a, const Neighbor &b) { return a.hi > b.hi; });
+
+  auto syncNeighbor = [this, note, micLayer, syncActive](int idx) {
+    if (syncActive) {
+      int otherIdx = findCounterpart(idx);
+      if (otherIdx != -1) {
+        auto &orig = libraryData.mappings.getReference(idx);
+        auto &other = libraryData.mappings.getReference(otherIdx);
+        other.velocityLow = orig.velocityLow;
+        other.velocityHigh = orig.velocityHigh;
+        resolveCollisions(note, 1 - micLayer, other.velocityLow,
+                          other.velocityHigh, otherIdx, true, false);
+      }
+    }
+  };
+
+  // 3. Resolve Above (Stick/Glue then Push)
+  for (auto &c : above) {
+    auto &m = libraryData.mappings.getReference(c.index);
+
+    // ADHESIVE (PULL): If we were glued at start
+    bool shouldPull =
+        isPrimaryTarget && dragStickyTop && (above.indexOf(c) == 0);
+
+    if (targetHi >= m.velocityLow || shouldPull) {
+      int oldLo = m.velocityLow;
+      int oldHi = m.velocityHigh;
+
+      // GLUE LOGIC: Move the neighbor's bottom edge (resize it)
+      int newMLo = targetHi + 1;
+      int newMHi = oldHi; // Default: Keep top edge (Resize)
+
+      // If neighbor would be squashed, it MUST push
+      if (newMHi <= newMLo) {
+        int mRange = juce::jmax(1, oldHi - oldLo);
+        newMHi = juce::jlimit(0, 127, newMLo + mRange);
+        if (newMHi == 127)
+          newMLo = 127 - mRange;
+      }
+
+      resolveCollisions(note, micLayer, newMLo, newMHi, c.index, allowCrossSync,
+                        false);
+      m.velocityLow = newMLo;
+      m.velocityHigh = newMHi;
+
+      if (m.velocityLow <= targetHi) {
+        targetHi = juce::jmax(0, m.velocityLow - 1);
+        if (targetLo > targetHi)
+          targetLo = targetHi;
+      }
+
+      if (m.velocityLow != oldLo || m.velocityHigh != oldHi)
+        syncNeighbor(c.index);
+    }
+  }
+
+  // 4. Resolve Below (Stick/Glue then Push)
+  for (auto &c : below) {
+    auto &m = libraryData.mappings.getReference(c.index);
+
+    // ADHESIVE (PULL): If we were glued at start
+    bool shouldPull =
+        isPrimaryTarget && dragStickyBottom && (below.indexOf(c) == 0);
+
+    if (targetLo <= m.velocityHigh || shouldPull) {
+      int oldLo = m.velocityLow;
+      int oldHi = m.velocityHigh;
+
+      // GLUE LOGIC: Move the neighbor's top edge (resize it)
+      int newMHi = targetLo - 1;
+      int newMLo = oldLo; // Default: Keep bottom edge (Resize)
+
+      // If neighbor would be squashed, it MUST push
+      if (newMLo >= newMHi) {
+        int mRange = juce::jmax(1, oldHi - oldLo);
+        newMLo = juce::jlimit(0, 127, newMHi - mRange);
+        if (newMLo == 0)
+          newMHi = mRange;
+      }
+
+      resolveCollisions(note, micLayer, newMLo, newMHi, c.index, allowCrossSync,
+                        false);
+      m.velocityLow = newMLo;
+      m.velocityHigh = newMHi;
+
+      if (m.velocityHigh >= targetLo) {
+        targetLo = juce::jmin(127, m.velocityHigh + 1);
+        if (targetHi < targetLo)
+          targetHi = targetLo;
+      }
+
+      if (m.velocityLow != oldLo || m.velocityHigh != oldHi)
+        syncNeighbor(c.index);
+    }
+  }
+
+  --depth;
+}
+
+void MainComponent::updateColumnRegions(int note, int layer) {
+  MappingPanel::LayerView *targetLayer =
+      (layer == 0) ? mappingPanel.layer1.get() : mappingPanel.layer2.get();
+  if (!targetLayer)
+    return;
+
+  int baseNote = (mappingPanel.currentOctave + 3) * 12;
+  int colIndex = note - baseNote;
+  if (colIndex < 0 || colIndex >= 12)
+    return;
+
+  KeyColumn *col = targetLayer->columns[colIndex];
+  if (!col)
+    return;
+
+  // Find all mappings for this specific note/layer
+  juce::Array<int> matchingIndices;
+  for (int i = 0; i < libraryData.mappings.size(); ++i) {
+    auto &m = libraryData.mappings.getReference(i);
+    if (m.midiNote == note && m.micLayer == layer &&
+        m.samplePath.isNotEmpty()) {
+      matchingIndices.add(i);
+    }
+  }
+
+  // The order of regions in col->regions matches the order added in
+  // updateGridUI
+  if (matchingIndices.size() == col->regions.size()) {
+    for (int i = 0; i < matchingIndices.size(); ++i) {
+      auto &m = libraryData.mappings.getReference(matchingIndices[i]);
+      auto *region = col->regions[i];
+      if (!region->isDragging()) {
+        region->updateFromMapping(m);
       }
     }
   }
+
+  col->resized(); // Trigger re-layout of the column's regions
+}
+
+void MainComponent::filesDropped(const juce::StringArray &files, int x, int y) {
+  // Global drops are now handled by individual KeyColumns.
+  // We keep this empty or for non-target drops if needed.
 }
 
 } // namespace sotero
