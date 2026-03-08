@@ -36,7 +36,8 @@ target_link_libraries(SamplerPlayer PRIVATE
     juce::juce_gui_extra
     juce::juce_audio_formats
     juce::juce_audio_basics
-    juce::juce_dsp)
+    juce::juce_dsp
+    juce::juce_cryptography)
 
 # 5. Configurações de compilação
 target_compile_definitions(SamplerPlayer PUBLIC

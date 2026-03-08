@@ -8,7 +8,11 @@ SamplerPlayerAudioProcessor::SamplerPlayerAudioProcessor()
           "Output", juce::AudioChannelSet::stereo(), true)),
       apvts(*this, nullptr, "Parameters", createParameterLayout()) {
   formatManager.registerBasicFormats();
-  currentLibraryName = "No Library Loaded";
+  currentMetadata.name = "Empty Library";
+
+  // Add voices to the synth
+  for (int i = 0; i < 16; ++i)
+    synth.addVoice(new sotero::SoteroSamplerVoice());
 }
 
 SamplerPlayerAudioProcessor::~SamplerPlayerAudioProcessor() {}
@@ -42,6 +46,9 @@ void SamplerPlayerAudioProcessor::prepareToPlay(double sampleRate,
 
   masterCompressor.prepare(spec);
   masterReverb.prepare(spec);
+
+  lastProcessSpec = spec;
+  hasPrepared = true;
 
   for (int i = 0; i < synth.getNumVoices(); ++i) {
     if (auto *v = dynamic_cast<sotero::SoteroSamplerVoice *>(synth.getVoice(i)))
@@ -235,6 +242,10 @@ SamplerPlayerAudioProcessor::createParameterLayout() {
 
   params.push_back(std::make_unique<juce::AudioParameterFloat>(
       "masterVol", "Master Volume", -60.0f, 6.0f, 0.0f));
+  params.push_back(std::make_unique<juce::AudioParameterFloat>(
+      "masterPitch", "Master Pitch", -12.0f, 12.0f, 0.0f));
+  params.push_back(std::make_unique<juce::AudioParameterFloat>(
+      "masterTone", "Master Tone", -1.0f, 1.0f, 0.0f));
 
   for (int i = 0; i < 3; ++i) {
     params.push_back(std::make_unique<juce::AudioParameterFloat>(
@@ -252,46 +263,62 @@ void SamplerPlayerAudioProcessor::loadSoteroLibrary(const juce::File &file) {
   if (!file.existsAsFile())
     return;
 
+  // 1. Read Metadata
+  currentMetadata = sotero::SoteroArchive::readMetadata(file);
   currentLibraryFile = file;
 
-  auto metadata = sotero::SoteroArchive::readMetadata(file);
-  if (metadata.name.isEmpty())
-    return;
+  // 2. Extract Artwork if present
+  currentArtwork = juce::Image(); // Reset
+  if (!currentMetadata.artworkPath.isEmpty()) {
+    auto artData = sotero::SoteroArchive::extractResource(
+        file, currentMetadata.artworkPath);
+    if (artData.getSize() > 0) {
+      currentArtwork =
+          juce::ImageFileFormat::loadFrom(artData.getData(), artData.getSize());
+    }
+  }
 
-  currentLibraryName = metadata.name;
-  currentLibraryAuthor = metadata.author;
-
+  // 3. Rebuild Synth
   synth.clearSounds();
-  synth.clearVoices();
 
-  // Add 16 voices for polyphony
-  for (int i = 0; i < 16; ++i)
-    synth.addVoice(new sotero::SoteroSamplerVoice());
+  for (auto &mapping : currentMetadata.mappings) {
+    juce::BigInteger range;
+    range.setBit(mapping.midiNote);
 
-  juce::FileInputStream stream(file);
-  if (!stream.openedOk())
-    return;
-
-  for (const auto &mapping : metadata.mappings) {
+    // Extract sample from archive
     auto sampleData =
-        sotero::SoteroArchive::extractResource(stream, mapping.samplePath);
+        sotero::SoteroArchive::extractResource(file, mapping.samplePath);
+
     if (sampleData.getSize() > 0) {
-      auto reader = formatManager.createReaderFor(
-          std::make_unique<juce::MemoryInputStream>(sampleData, false));
+      auto inputStream =
+          std::make_unique<juce::MemoryInputStream>(sampleData, false);
+      auto reader = std::unique_ptr<juce::AudioFormatReader>(
+          formatManager.createReaderFor(std::move(inputStream)));
 
       if (reader != nullptr) {
-        juce::BigInteger range;
-        range.setBit(mapping.midiNote);
-
-        synth.addSound(new sotero::SoteroSamplerSound(
-            mapping.samplePath, *reader, range, mapping.midiNote, 0.01, 0.1,
-            10.0, mapping.chokeGroup, mapping.velocityLow, mapping.velocityHigh,
+        auto *sound = new sotero::SoteroSamplerSound(
+            mapping.fileName, *reader, range, mapping.midiNote,
+            0.01, // attack
+            0.1,  // release
+            10.0, // max length
+            mapping.chokeGroup, mapping.velocityLow, mapping.velocityHigh,
             mapping.sampleStart, mapping.sampleEnd, mapping.fadeIn,
             mapping.fadeOut, mapping.volumeMultiplier, mapping.fineTuneCents,
-            mapping.micLayer));
+            mapping.micLayer, mapping.adsrAttack, mapping.adsrDecay,
+            mapping.adsrSustain, mapping.adsrRelease, mapping.filterType,
+            mapping.filterCutoff, mapping.filterResonance,
+            currentMetadata.enableADSR, currentMetadata.enableFilter);
 
-        delete reader;
+        synth.addSound(sound);
       }
+    }
+  }
+
+  // Prepare new voices
+  for (int i = 0; i < synth.getNumVoices(); ++i) {
+    if (auto *v =
+            dynamic_cast<sotero::SoteroSamplerVoice *>(synth.getVoice(i))) {
+      v->prepare(lastProcessSpec);
     }
   }
 }

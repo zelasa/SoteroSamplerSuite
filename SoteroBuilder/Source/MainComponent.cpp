@@ -23,18 +23,28 @@ MainComponent::MainComponent()
   addAndMakeVisible(waveform2.get());
 
   addAndMakeVisible(sculptingPanel);
+  sculptingPanel.setEnabled(false);
   addAndMakeVisible(mappingPanel);
   addAndMakeVisible(metadataPanel);
   addAndMakeVisible(advancedPanel);
 
+  startTimerHz(30); // Poll for playhead at 30Hz
+
   // --- Sculpting Panel Wiring ---
   auto updateADSRVisual = [this] {
+    if (activeMappingIndex < 0 ||
+        activeMappingIndex >= libraryData.mappings.size())
+      return;
+
+    auto &m = libraryData.mappings.getReference(activeMappingIndex);
     sculptingPanel.adsrVisualizer.setParams(
-        (float)sculptingPanel.attackSlider.getValue() /
-            5.0f, // Normalize for viz
+        (float)sculptingPanel.attackSlider.getValue() / 5.0f,
         (float)sculptingPanel.decaySlider.getValue() / 5.0f,
         (float)sculptingPanel.sustainSlider.getValue(),
-        (float)sculptingPanel.releaseSlider.getValue() / 5.0f);
+        (float)sculptingPanel.releaseSlider.getValue() / 5.0f,
+        m.adsrAttackCurve, m.adsrDecayCurve, m.adsrReleaseCurve,
+        1.0f // Peak
+    );
   };
 
   auto &sp = sculptingPanel;
@@ -104,7 +114,34 @@ MainComponent::MainComponent()
         juce::sendNotification);
   };
   sp.adsrVisualizer.onReleaseChange = [this](float val) {
-    sculptingPanel.releaseSlider.setValue(val * 5.0f, juce::sendNotification);
+    if (activeMappingIndex >= 0 &&
+        activeMappingIndex < libraryData.mappings.size()) {
+      sculptingPanel.releaseSlider.setValue(val * 5.0f, juce::sendNotification);
+    }
+  };
+  sp.adsrVisualizer.onAttackCurveChange = [this](float val) {
+    if (activeMappingIndex >= 0 &&
+        activeMappingIndex < libraryData.mappings.size()) {
+      libraryData.mappings.getReference(activeMappingIndex).adsrAttackCurve =
+          val;
+      rebuildSynth();
+    }
+  };
+  sp.adsrVisualizer.onDecayCurveChange = [this](float val) {
+    if (activeMappingIndex >= 0 &&
+        activeMappingIndex < libraryData.mappings.size()) {
+      libraryData.mappings.getReference(activeMappingIndex).adsrDecayCurve =
+          val;
+      rebuildSynth();
+    }
+  };
+  sp.adsrVisualizer.onReleaseCurveChange = [this](float val) {
+    if (activeMappingIndex >= 0 &&
+        activeMappingIndex < libraryData.mappings.size()) {
+      libraryData.mappings.getReference(activeMappingIndex).adsrReleaseCurve =
+          val;
+      rebuildSynth();
+    }
   };
 
   // --- Project Controls Setup ---
@@ -141,6 +178,7 @@ MainComponent::MainComponent()
   };
 
   headerPanel.newBtn.onClick = [this] {
+    deselectAllRegions();
     libraryData = LibraryMetadata();
     libraryData.mappings.clear();
     updateGridUI();
@@ -475,7 +513,8 @@ void MainComponent::rebuildSynth() {
               m.chokeGroup, m.velocityLow, m.velocityHigh, m.sampleStart,
               m.sampleEnd, m.fadeIn, m.fadeOut, m.volumeMultiplier,
               m.fineTuneCents, m.micLayer, m.adsrAttack, m.adsrDecay,
-              m.adsrSustain, m.adsrRelease, m.filterType, m.filterCutoff,
+              m.adsrSustain, m.adsrRelease, m.adsrAttackCurve, m.adsrDecayCurve,
+              m.adsrReleaseCurve, m.filterType, m.filterCutoff,
               m.filterResonance, libraryData.enableADSR && !isBypassed,
               libraryData.enableFilter && !isBypassed));
         }
@@ -559,6 +598,7 @@ void MainComponent::updateGridUI() {
               for (auto *r : c->regions)
                 r->setActive(false);
 
+        sculptingPanel.setEnabled(true);
         auto &m = libraryData.mappings.getReference(mIndex);
 
         sculptingPanel.attackSlider.setValue(m.adsrAttack,
@@ -569,6 +609,12 @@ void MainComponent::updateGridUI() {
                                               juce::dontSendNotification);
         sculptingPanel.releaseSlider.setValue(m.adsrRelease,
                                               juce::dontSendNotification);
+
+        sculptingPanel.adsrVisualizer.setParams(
+            m.adsrAttack / 5.0f, m.adsrDecay / 5.0f, m.adsrSustain,
+            m.adsrRelease / 5.0f, m.adsrAttackCurve, m.adsrDecayCurve,
+            m.adsrReleaseCurve, 1.0f);
+
         sculptingPanel.filterTypeSelector.setSelectedId(
             m.filterType + 1, juce::dontSendNotification);
         sculptingPanel.cutoffSlider.setValue(m.filterCutoff,
@@ -745,6 +791,21 @@ void MainComponent::updateGridUI() {
   }
 }
 
+void MainComponent::timerCallback() {
+  const juce::ScopedLock sl(synthLock);
+  float latestTime = -1.0f;
+
+  for (int i = 0; i < synth.getNumVoices(); ++i) {
+    if (auto *v = dynamic_cast<SoteroSamplerVoice *>(synth.getVoice(i))) {
+      if (v->isVoiceActive()) {
+        latestTime = v->getADSRProgress(); // I need to add this method to Voice
+      }
+    }
+  }
+
+  sculptingPanel.adsrVisualizer.setPlayheadTime(latestTime);
+}
+
 void MainComponent::updateMetadataFromUI() {
   libraryData.name = metadataPanel.nameEditor.getText();
   libraryData.author = metadataPanel.authorEditor.getText();
@@ -758,6 +819,16 @@ void MainComponent::paint(juce::Graphics &g) {
 
 void MainComponent::deselectAllRegions() {
   activeMappingIndex = -1;
+  sculptingPanel.setEnabled(false);
+
+  // Reset ADSR visualizer and sliders to default
+  sculptingPanel.attackSlider.setValue(0.1, juce::dontSendNotification);
+  sculptingPanel.decaySlider.setValue(0.1, juce::dontSendNotification);
+  sculptingPanel.sustainSlider.setValue(1.0, juce::dontSendNotification);
+  sculptingPanel.releaseSlider.setValue(0.2, juce::dontSendNotification);
+  sculptingPanel.adsrVisualizer.setParams(0.1f / 5.0f, 0.1f / 5.0f, 1.0f,
+                                          0.2f / 5.0f, 0.0f, 0.0f, 0.0f, 1.0f);
+
   if (mappingPanel.layer1) {
     for (auto *col : mappingPanel.layer1->columns) {
       for (auto *region : col->regions)

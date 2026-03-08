@@ -22,6 +22,9 @@ public:
 
   virtual juce::String getLibraryName() const = 0;
   virtual juce::String getLibraryAuthor() const = 0;
+  virtual juce::String getLibraryDescription() const = 0;
+  virtual juce::Image getLibraryArtwork() const = 0;
+  virtual bool isLibraryLoaded() const = 0;
 
   virtual void loadSoteroLibrary(const juce::File &file) = 0;
 

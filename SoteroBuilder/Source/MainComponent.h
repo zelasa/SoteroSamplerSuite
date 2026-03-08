@@ -17,10 +17,13 @@ namespace sotero {
 class MainComponent : public juce::AudioAppComponent,
                       public juce::FileDragAndDropTarget,
                       public juce::MidiInputCallback,
-                      public ISoteroAudioEngine {
+                      public ISoteroAudioEngine,
+                      public juce::Timer {
 public:
   MainComponent();
   ~MainComponent() override;
+
+  void timerCallback() override;
 
   void paint(juce::Graphics &) override;
   void resized() override;

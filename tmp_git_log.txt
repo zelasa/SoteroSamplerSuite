@@ -1,0 +1,10 @@
+77d276b Phase 5: Library Browser, Tone/Tune controls, and Sotero Shield security foundation
+5b7c779 Builder UI Enhancements: Octave Selector, Sculpting Tools, and Compilation Toggles
+5a94431 Phase 3: Completed Engine Foundation (Non-Destructive Engine, Loop Engine, Dual-Mic & Secure Stream placeholder)
+5afdfdf Phase 3: Initial implementation of Non-Destructive Sample Engine (Offsets & Gain)
+59d430d Versioning: Consolidate docs and expand metadata (N1-N7 + UI Alignment)
+7d29bde Fix active sample state, optimize rebuildSynth (async), and establish Phase 3 DSP foundations (ADSR/Filters)
+5a4e9ff fix: remove stray return value in loadSoteroLibrary
+b0cf62b fix: resolve compilation errors in SamplerPlayer post-integration
+59c3861 feat: Integrate SamplerPlayer into SoteroBuilder v0.4.0 and fix CMake build
+0abf757 feat: implement linked resizing of adjacent samples

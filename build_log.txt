@@ -1,0 +1,1621 @@
+ninja: Entering directory `d:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\out\build\x64-Debug'
+[0/2] Re-checking globbed directories...
+[1/4] Building CXX object SoteroBuilder\CMakeFiles\SoteroBuilder.dir\Source\Main.cpp.obj
+FAILED: SoteroBuilder/CMakeFiles/SoteroBuilder.dir/Source/Main.cpp.obj 
+C:\PROGRA~1\MIB055~1\18\COMMUN~1\VC\Tools\MSVC\1450~1.357\bin\Hostx64\x64\cl.exe  /nologo /TP -DDEBUG=1 -DJUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1 -DJUCE_MODULE_AVAILABLE_juce_audio_basics=1 -DJUCE_MODULE_AVAILABLE_juce_audio_devices=1 -DJUCE_MODULE_AVAILABLE_juce_audio_formats=1 -DJUCE_MODULE_AVAILABLE_juce_audio_processors=1 -DJUCE_MODULE_AVAILABLE_juce_audio_processors_headless=1 -DJUCE_MODULE_AVAILABLE_juce_audio_utils=1 -DJUCE_MODULE_AVAILABLE_juce_core=1 -DJUCE_MODULE_AVAILABLE_juce_cryptography=1 -DJUCE_MODULE_AVAILABLE_juce_data_structures=1 -DJUCE_MODULE_AVAILABLE_juce_dsp=1 -DJUCE_MODULE_AVAILABLE_juce_events=1 -DJUCE_MODULE_AVAILABLE_juce_graphics=1 -DJUCE_MODULE_AVAILABLE_juce_gui_basics=1 -DJUCE_MODULE_AVAILABLE_juce_gui_extra=1 -DJUCE_STANDALONE_APPLICATION=1 -DJUCE_TARGET_HAS_BINARY_DATA=1 -D_DEBUG=1 -ID:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\out\build\x64-Debug\SoteroBuilder\SoteroBuilder_artefacts\JuceLibraryCode -ID:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\SoteroBuilder\Source -ID:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\SoteroBuilder\..\SamplerPlayer\Source -ID:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\Common\. -ID:\Luis\OneDrive\Juce\modules -ID:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless\format_types\VST3_SDK -ID:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless\format_types\LV2_SDK -ID:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2 -ID:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd -ID:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless\format_types\LV2_SDK\sord -ID:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src -ID:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless\format_types\LV2_SDK\sratom -ID:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv -ID:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src -ID:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\out\build\x64-Debug\SoteroBuilder\juce_binarydata_SoteroBuilderAssets\JuceLibraryCode /DWIN32 /D_WINDOWS /GR /EHsc /Zi /Ob0 /Od /RTC1 -std:c++17 -MDd /FS /bigobj /showIncludes /FoSoteroBuilder\CMakeFiles\SoteroBuilder.dir\Source\Main.cpp.obj /FdSoteroBuilder\CMakeFiles\SoteroBuilder.dir\ /FS -c D:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\SoteroBuilder\Source\Main.cpp
+Observaá∆o: incluindo arquivo: D:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\SoteroBuilder\Source\MainComponent.h
+Observaá∆o: incluindo arquivo:  D:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\SoteroBuilder\Source\../../Common/SoteroEngineInterface.h
+Observaá∆o: incluindo arquivo:   D:\Luis\OneDrive\Juce\modules\juce_audio_processors/juce_audio_processors.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/juce_audio_processors_headless.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_basics/juce_audio_basics.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_core/juce_core.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\system/juce_TargetPlatform.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\system/juce_StandardHeader.h
+Observaá∆o: incluindo arquivo:        C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\algorithm
+Observaá∆o: incluindo arquivo:         C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\yvals_core.h
+Observaá∆o: incluindo arquivo:          C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\vcruntime.h
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\sal.h
+Observaá∆o: incluindo arquivo:            C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\concurrencysal.h
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\vadefs.h
+Observaá∆o: incluindo arquivo:          C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xkeycheck.h
+Observaá∆o: incluindo arquivo:         C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\__msvc_heap_algorithms.hpp
+Observaá∆o: incluindo arquivo:          C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xutility
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\yvals.h
+Observaá∆o: incluindo arquivo:            C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\crtdbg.h
+Observaá∆o: incluindo arquivo:             C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt.h
+Observaá∆o: incluindo arquivo:             C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\vcruntime_new_debug.h
+Observaá∆o: incluindo arquivo:              C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\vcruntime_new.h
+Observaá∆o: incluindo arquivo:            C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\crtdefs.h
+Observaá∆o: incluindo arquivo:            C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\use_ansi.h
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\__msvc_iter_core.hpp
+Observaá∆o: incluindo arquivo:            C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\utility
+Observaá∆o: incluindo arquivo:             C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\initializer_list
+Observaá∆o: incluindo arquivo:              C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\cstddef
+Observaá∆o: incluindo arquivo:               C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\stddef.h
+Observaá∆o: incluindo arquivo:               C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xtr1common
+Observaá∆o: incluindo arquivo:             C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\type_traits
+Observaá∆o: incluindo arquivo:              C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\cstdint
+Observaá∆o: incluindo arquivo:               C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\stdint.h
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\climits
+Observaá∆o: incluindo arquivo:            C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\limits.h
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\cstdlib
+Observaá∆o: incluindo arquivo:            C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\math.h
+Observaá∆o: incluindo arquivo:             C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_math.h
+Observaá∆o: incluindo arquivo:            C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\stdlib.h
+Observaá∆o: incluindo arquivo:             C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_malloc.h
+Observaá∆o: incluindo arquivo:             C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_search.h
+Observaá∆o: incluindo arquivo:             C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_wstdlib.h
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\cstring
+Observaá∆o: incluindo arquivo:            C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\string.h
+Observaá∆o: incluindo arquivo:             C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_memory.h
+Observaá∆o: incluindo arquivo:              C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_memcpy_s.h
+Observaá∆o: incluindo arquivo:               C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\errno.h
+Observaá∆o: incluindo arquivo:               C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\vcruntime_string.h
+Observaá∆o: incluindo arquivo:             C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_wstring.h
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\cwchar
+Observaá∆o: incluindo arquivo:            C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\cstdio
+Observaá∆o: incluindo arquivo:             C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\stdio.h
+Observaá∆o: incluindo arquivo:              C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_wstdio.h
+Observaá∆o: incluindo arquivo:               C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_stdio_config.h
+Observaá∆o: incluindo arquivo:            C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\wchar.h
+Observaá∆o: incluindo arquivo:             C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_wconio.h
+Observaá∆o: incluindo arquivo:             C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_wctype.h
+Observaá∆o: incluindo arquivo:             C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_wdirect.h
+Observaá∆o: incluindo arquivo:             C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_wio.h
+Observaá∆o: incluindo arquivo:              C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_share.h
+Observaá∆o: incluindo arquivo:             C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_wprocess.h
+Observaá∆o: incluindo arquivo:             C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_wtime.h
+Observaá∆o: incluindo arquivo:             C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\sys/stat.h
+Observaá∆o: incluindo arquivo:              C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\sys/types.h
+Observaá∆o: incluindo arquivo:             C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\intrin.h
+Observaá∆o: incluindo arquivo:              C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\intrin0.inl.h
+Observaá∆o: incluindo arquivo:              C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\setjmp.h
+Observaá∆o: incluindo arquivo:              C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\immintrin.h
+Observaá∆o: incluindo arquivo:               C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\wmmintrin.h
+Observaá∆o: incluindo arquivo:                C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\nmmintrin.h
+Observaá∆o: incluindo arquivo:                 C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\smmintrin.h
+Observaá∆o: incluindo arquivo:                  C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\tmmintrin.h
+Observaá∆o: incluindo arquivo:                   C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\pmmintrin.h
+Observaá∆o: incluindo arquivo:                    C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\emmintrin.h
+Observaá∆o: incluindo arquivo:                     C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xmmintrin.h
+Observaá∆o: incluindo arquivo:                      C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\mmintrin.h
+Observaá∆o: incluindo arquivo:                      C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\malloc.h
+Observaá∆o: incluindo arquivo:               C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\zmmintrin.h
+Observaá∆o: incluindo arquivo:              C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\ammintrin.h
+Observaá∆o: incluindo arquivo:         C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\__msvc_minmax.hpp
+Observaá∆o: incluindo arquivo:         C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xmemory
+Observaá∆o: incluindo arquivo:          C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\limits
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\cfloat
+Observaá∆o: incluindo arquivo:            C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\float.h
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\intrin0.h
+Observaá∆o: incluindo arquivo:          C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\new
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\exception
+Observaá∆o: incluindo arquivo:            C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\vcruntime_exception.h
+Observaá∆o: incluindo arquivo:             C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\eh.h
+Observaá∆o: incluindo arquivo:              C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_terminate.h
+Observaá∆o: incluindo arquivo:          C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xatomic.h
+Observaá∆o: incluindo arquivo:        C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\array
+Observaá∆o: incluindo arquivo:        C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\atomic
+Observaá∆o: incluindo arquivo:         C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xthreads.h
+Observaá∆o: incluindo arquivo:          C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\__msvc_threads_core.hpp
+Observaá∆o: incluindo arquivo:          C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xtimec.h
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\ctime
+Observaá∆o: incluindo arquivo:            C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\time.h
+Observaá∆o: incluindo arquivo:        C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\cmath
+Observaá∆o: incluindo arquivo:        C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\condition_variable
+Observaá∆o: incluindo arquivo:         C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\__msvc_chrono.hpp
+Observaá∆o: incluindo arquivo:          C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\ratio
+Observaá∆o: incluindo arquivo:         C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\memory
+Observaá∆o: incluindo arquivo:          C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\iosfwd
+Observaá∆o: incluindo arquivo:          C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\typeinfo
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\vcruntime_typeinfo.h
+Observaá∆o: incluindo arquivo:         C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\mutex
+Observaá∆o: incluindo arquivo:          C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\system_error
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\__msvc_system_error_abi.hpp
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\cerrno
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\stdexcept
+Observaá∆o: incluindo arquivo:            C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xstring
+Observaá∆o: incluindo arquivo:             C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\__msvc_sanitizer_annotate_container.hpp
+Observaá∆o: incluindo arquivo:             C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\__msvc_string_view.hpp
+Observaá∆o: incluindo arquivo:             C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xpolymorphic_allocator.h
+Observaá∆o: incluindo arquivo:              C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\tuple
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xcall_once.h
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xerrc.h
+Observaá∆o: incluindo arquivo:          C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\thread
+Observaá∆o: incluindo arquivo:           C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\process.h
+Observaá∆o: incluindo arquivo:            C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_startup.h
+Observaá∆o: incluindo arquivo:             C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\math.h
+Observaá∆o: incluindo arquivo:             C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\vcruntime_startup.h
+Observaá∆o: incluindo arquivo:        C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\functional
+Observaá∆o: incluindo arquivo:         C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\unordered_map
+Observaá∆o: incluindo arquivo:          C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xhash
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\list
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\vector
+Observaá∆o: incluindo arquivo:            C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\__msvc_bit_utils.hpp
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xbit_ops.h
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xnode_handle.h
+Observaá∆o: incluindo arquivo:        C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\future
+Observaá∆o: incluindo arquivo:         C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\ppltasks.h
+Observaá∆o: incluindo arquivo:          C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\pplwin.h
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\pplinterface.h
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\ppltaskscheduler.h
+Observaá∆o: incluindo arquivo:            C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\crtdefs.h
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\pplcancellation_token.h
+Observaá∆o: incluindo arquivo:        C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\iomanip
+Observaá∆o: incluindo arquivo:         C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\istream
+Observaá∆o: incluindo arquivo:          C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\__msvc_ostream.hpp
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\ios
+Observaá∆o: incluindo arquivo:            C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xlocnum
+Observaá∆o: incluindo arquivo:             C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\iterator
+Observaá∆o: incluindo arquivo:             C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\streambuf
+Observaá∆o: incluindo arquivo:              C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xiosbase
+Observaá∆o: incluindo arquivo:               C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\share.h
+Observaá∆o: incluindo arquivo:               C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xlocale
+Observaá∆o: incluindo arquivo:                C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xfacet
+Observaá∆o: incluindo arquivo:                C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xlocinfo
+Observaá∆o: incluindo arquivo:                 C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\__msvc_xlocinfo_types.hpp
+Observaá∆o: incluindo arquivo:                 C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\cctype
+Observaá∆o: incluindo arquivo:                  C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\ctype.h
+Observaá∆o: incluindo arquivo:                 C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\clocale
+Observaá∆o: incluindo arquivo:                  C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\locale.h
+Observaá∆o: incluindo arquivo:         C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xlocmon
+Observaá∆o: incluindo arquivo:         C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xloctime
+Observaá∆o: incluindo arquivo:        C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\iostream
+Observaá∆o: incluindo arquivo:         C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\ostream
+Observaá∆o: incluindo arquivo:        C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\map
+Observaá∆o: incluindo arquivo:         C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xtree
+Observaá∆o: incluindo arquivo:        C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\numeric
+Observaá∆o: incluindo arquivo:        C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\optional
+Observaá∆o: incluindo arquivo:         C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xsmf_control.h
+Observaá∆o: incluindo arquivo:        C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\queue
+Observaá∆o: incluindo arquivo:         C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\deque
+Observaá∆o: incluindo arquivo:        C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\set
+Observaá∆o: incluindo arquivo:        C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\sstream
+Observaá∆o: incluindo arquivo:         C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\string
+Observaá∆o: incluindo arquivo:        C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\string_view
+Observaá∆o: incluindo arquivo:        C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\typeindex
+Observaá∆o: incluindo arquivo:        C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\unordered_set
+Observaá∆o: incluindo arquivo:        C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\variant
+Observaá∆o: incluindo arquivo:        D:\Luis\OneDrive\Juce\modules\juce_core\system\juce_CompilerSupport.h
+Observaá∆o: incluindo arquivo:        D:\Luis\OneDrive\Juce\modules\juce_core\system\juce_CompilerWarnings.h
+Observaá∆o: incluindo arquivo:        D:\Luis\OneDrive\Juce\modules\juce_core\system\juce_PlatformDefs.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\misc/juce_EnumHelpers.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\misc/juce_OrderedContainerHelpers.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\memory/juce_Memory.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\maths/juce_MathsFunctions.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\memory/juce_ByteOrder.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\memory/juce_Atomic.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\text/juce_CharacterFunctions.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\text/juce_CharPointer_UTF8.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\text/juce_CharPointer_UTF16.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\text/juce_CharPointer_UTF32.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\text/juce_CharPointer_ASCII.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\text/juce_String.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\text/juce_StringRef.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\logging/juce_Logger.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\memory/juce_LeakedObjectDetector.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\memory/juce_ContainerDeletePolicy.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\memory/juce_HeapBlock.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\memory/juce_MemoryBlock.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\memory/juce_CopyableHeapBlock.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\memory/juce_ReferenceCountedObject.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\memory/juce_ScopedPointer.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\memory/juce_OptionalScopedPointer.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\containers/juce_Optional.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\containers/juce_Enumerate.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\containers/juce_ScopedValueSetter.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\memory/juce_Singleton.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\memory/juce_WeakReference.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\threads/juce_ScopedLock.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\threads/juce_CriticalSection.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\maths/juce_Range.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\maths/juce_NormalisableRange.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\maths/juce_StatisticsAccumulator.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\containers/juce_ElementComparator.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\containers/juce_ArrayAllocationBase.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\containers/juce_ArrayBase.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\containers/juce_Array.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\containers/juce_LinkedListPointer.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\misc/juce_ScopeGuard.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\containers/juce_ListenerList.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\containers/juce_OwnedArray.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\containers/juce_ReferenceCountedArray.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\containers/juce_SortedSet.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\containers/juce_SparseSet.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\containers/juce_AbstractFifo.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\containers/juce_SingleThreadedAbstractFifo.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\text/juce_NewLine.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\text/juce_StringPool.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\text/juce_Identifier.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\text/juce_StringArray.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\system/juce_SystemStats.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\memory/juce_HeavyweightLeakedObjectDetector.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\text/juce_StringPairArray.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\text/juce_TextDiff.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\text/juce_LocalisedStrings.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\text/juce_Base64.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\misc/juce_Functional.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\containers/juce_Span.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\misc/juce_Result.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\misc/juce_Uuid.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\misc/juce_ConsoleApplication.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\containers/juce_Variant.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\containers/juce_NamedValueSet.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\json/juce_JSON.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\containers/juce_DynamicObject.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\containers/juce_HashMap.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\containers/juce_FixedSizeFunction.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\time/juce_RelativeTime.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\time/juce_Time.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\streams/juce_InputStream.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\streams/juce_OutputStream.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\streams/juce_BufferedInputStream.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\streams/juce_MemoryInputStream.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\streams/juce_MemoryOutputStream.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\streams/juce_SubregionStream.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\streams/juce_InputSource.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\files/juce_File.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\files/juce_DirectoryIterator.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\files/juce_RangedDirectoryIterator.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\detail/juce_NativeFileHandle.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\files/juce_FileInputStream.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\files/juce_FileOutputStream.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\files/juce_FileSearchPath.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\files/juce_MemoryMappedFile.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\files/juce_TemporaryFile.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\files/juce_FileFilter.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\files/juce_WildcardFileFilter.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\streams/juce_FileInputSource.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\logging/juce_FileLogger.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\json/juce_JSONUtils.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\serialisation/juce_Serialisation.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\json/juce_JSONSerialisation.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\maths/juce_BigInteger.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\maths/juce_Expression.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\maths/juce_Random.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\misc/juce_RuntimePermissions.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\misc/juce_WindowsRegistry.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\threads/juce_ChildProcess.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\threads/juce_DynamicLibrary.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\threads/juce_InterProcessLock.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\threads/juce_Process.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\threads/juce_SpinLock.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\threads/juce_WaitableEvent.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\threads/juce_Thread.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\threads/juce_HighResolutionTimer.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\threads/juce_ThreadLocalValue.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\threads/juce_ThreadPool.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\threads/juce_TimeSliceThread.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\threads/juce_ReadWriteLock.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\threads/juce_ScopedReadLock.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\threads/juce_ScopedWriteLock.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\network/juce_IPAddress.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\network/juce_MACAddress.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\network/juce_NamedPipe.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\network/juce_Socket.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\network/juce_URL.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\network/juce_WebInputStream.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\streams/juce_URLInputSource.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\time/juce_PerformanceCounter.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\unit_tests/juce_UnitTest.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\xml/juce_XmlDocument.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\xml/juce_XmlElement.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\zip/juce_GZIPCompressorOutputStream.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\zip/juce_GZIPDecompressorInputStream.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\zip/juce_ZipFile.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\containers/juce_PropertySet.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\memory/juce_SharedResourcePointer.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\memory/juce_AllocationHooks.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\memory/juce_Reservoir.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\files/juce_AndroidDocument.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\streams/juce_AndroidDocumentInputSource.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\misc/juce_OptionsHelpers.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\detail/juce_CallbackListenerList.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\detail/juce_LruCache.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\detail/juce_IncrementRef.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\buffers/juce_AudioDataConverters.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\buffers/juce_FloatVectorOperations.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\buffers/juce_AudioSampleBuffer.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\buffers/juce_AudioChannelSet.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\buffers/juce_AudioProcessLoadMeasurer.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\utilities/juce_Decibels.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\utilities/juce_IIRFilter.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\utilities/juce_GenericInterpolator.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\utilities/juce_Interpolators.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\utilities/juce_SmoothedValue.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\utilities/juce_Reverb.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\utilities/juce_ADSR.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi/juce_MidiMessage.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi/juce_MidiBuffer.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi/juce_MidiMessageSequence.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi/juce_MidiFile.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi/juce_MidiKeyboardState.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi/juce_MidiRPN.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi/juce_MidiDataConcatenator.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\mpe/juce_MPEValue.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\mpe/juce_MPENote.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\mpe/juce_MPEZoneLayout.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\mpe/juce_MPEInstrument.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\mpe/juce_MPEMessages.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\mpe/juce_MPESynthesiserBase.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\mpe/juce_MPESynthesiserVoice.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\mpe/juce_MPESynthesiser.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\mpe/juce_MPEUtils.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\sources/juce_AudioSource.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\sources/juce_PositionableAudioSource.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\sources/juce_BufferingAudioSource.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\sources/juce_ChannelRemappingAudioSource.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\sources/juce_IIRFilterAudioSource.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\sources/juce_MemoryAudioSource.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\sources/juce_MixerAudioSource.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\sources/juce_ResamplingAudioSource.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\sources/juce_ReverbAudioSource.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\sources/juce_ToneGeneratorAudioSource.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\synthesisers/juce_Synthesiser.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\audio_play_head/juce_AudioPlayHead.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\utilities/juce_AudioWorkgroup.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi/ump/juce_UMPBytesOnGroup.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi/ump/juce_UMPDeviceInfo.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi/ump/juce_UMP.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi\ump\juce_UMPProtocols.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi\ump\juce_UMPUtils.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi\ump\juce_UMPacket.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi\ump\juce_UMPSysEx7.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi\ump\juce_UMPView.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi\ump\juce_UMPIterator.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi\ump\juce_UMPackets.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi\ump\juce_UMPFactory.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi\ump\juce_UMPConversion.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi\ump\juce_UMPMidi1ToBytestreamTranslator.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi\ump\juce_UMPMidi1ToMidi2DefaultTranslator.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi\ump\juce_UMPConverters.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi\ump\juce_UMPDispatcher.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi\ump\juce_UMPStringUtils.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_events/juce_events.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\messages/juce_MessageManager.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\messages/juce_Message.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\messages/juce_MessageListener.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\messages/juce_CallbackMessage.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\messages/juce_DeletedAtShutdown.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\messages/juce_NotificationType.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\messages/juce_ApplicationBase.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\messages/juce_Initialisation.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\messages/juce_MountedVolumeListChangeDetector.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\broadcasters/juce_ActionBroadcaster.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\broadcasters/juce_ActionListener.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\broadcasters/juce_AsyncUpdater.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\broadcasters/juce_LockingAsyncUpdater.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\broadcasters/juce_ChangeListener.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\broadcasters/juce_ChangeBroadcaster.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\timers/juce_Timer.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\timers/juce_TimedCallback.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\timers/juce_MultiTimer.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\interprocess/juce_ChildProcessManager.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\interprocess/juce_InterprocessConnection.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\interprocess/juce_InterprocessConnectionServer.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\interprocess/juce_ConnectedChildProcess.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\interprocess/juce_NetworkServiceDiscovery.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\native/juce_ScopedLowPowerModeDisabler.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/format/juce_PluginFormatDefs.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/processors/juce_AudioProcessorListener.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/utilities/juce_AAXClientExtensions.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/utilities/juce_VST2ClientExtensions.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/utilities/juce_VST3Interface.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/utilities/juce_VST3ClientExtensions.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/format_types/juce_ARACommon.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/utilities/juce_ExtensionsVisitor.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/processors/juce_AudioProcessorParameter.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/processors/juce_HostedAudioProcessorParameter.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/processors/juce_AudioProcessorParameterGroup.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/processors/juce_AudioProcessor.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/processors/juce_PluginDescription.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/processors/juce_AudioPluginInstance.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/processors/juce_AudioProcessorGraph.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/format/juce_AudioPluginFormat.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/utilities/juce_AudioProcessorParameterWithID.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/utilities/juce_RangedAudioParameter.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/utilities/juce_AudioParameterFloat.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/utilities/juce_AudioParameterInt.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/utilities/juce_AudioParameterBool.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/utilities/juce_AudioParameterChoice.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/utilities/ARA/juce_ARADebug.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/utilities/ARA/juce_ARA_utils.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/format_types/juce_AudioUnitPluginFormatHeadless.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/format_types/juce_LADSPAPluginFormatHeadless.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/format_types/juce_LV2PluginFormatHeadless.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/format_types/juce_VST3PluginFormatHeadless.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/format_types/juce_VSTPluginFormatHeadless.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/format_types/juce_ARAHosting.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/format/juce_AudioPluginFormatManager.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_gui_extra/juce_gui_extra.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_basics/juce_gui_basics.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_graphics/juce_graphics.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\geometry/juce_AffineTransform.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\geometry/juce_Point.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\geometry/juce_Line.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\geometry/juce_Rectangle.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\geometry/juce_Parallelogram.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\placement/juce_Justification.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\geometry/juce_Path.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\geometry/juce_RectangleList.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\colour/juce_PixelFormats.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\colour/juce_Colour.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\colour/juce_ColourGradient.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\colour/juce_Colours.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\geometry/juce_BorderSize.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\geometry/juce_EdgeTable.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\geometry/juce_PathIterator.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\geometry/juce_PathStrokeType.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\placement/juce_RectanglePlacement.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\images/juce_ImageCache.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\images/juce_ImageConvolutionKernel.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\images/juce_ImageFileFormat.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\fonts/juce_GlyphArrangementOptions.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\contexts/juce_GraphicsContext.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\images/juce_Image.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\colour/juce_FillType.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\fonts/juce_FontFeatures.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\fonts/juce_Typeface.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\fonts/juce_FontOptions.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\fonts/juce_Font.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\detail/juce_Ranges.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\detail/juce_SimpleShapedText.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\detail/juce_JustifiedText.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\detail/juce_ShapedText.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\fonts/juce_AttributedString.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\fonts/juce_GlyphArrangement.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\fonts/juce_TextLayout.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\contexts/juce_LowLevelGraphicsContext.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\images/juce_ScaledImage.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\detail/juce_FontRendering.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\native/juce_RenderingHelpers.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\contexts/juce_LowLevelGraphicsSoftwareRenderer.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\effects/juce_ImageEffectFilter.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\effects/juce_DropShadowEffect.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\effects/juce_GlowEffect.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\detail/juce_Unicode.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_data_structures/juce_data_structures.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_data_structures\undomanager/juce_UndoableAction.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_data_structures\undomanager/juce_UndoManager.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_data_structures\values/juce_Value.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_data_structures\values/juce_ValueTree.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_data_structures\values/juce_ValueTreeSynchroniser.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_data_structures\values/juce_CachedValue.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_data_structures\values/juce_ValueTreePropertyWithDefault.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_data_structures\app_properties/juce_PropertiesFile.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_data_structures\app_properties/juce_ApplicationProperties.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\mouse/juce_MouseCursor.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\mouse/juce_MouseListener.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\keyboard/juce_ModifierKeys.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\mouse/juce_MouseInputSource.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\mouse/juce_MouseEvent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\keyboard/juce_KeyPress.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\keyboard/juce_KeyListener.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\components/juce_ComponentTraverser.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\components/juce_FocusTraverser.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\components/juce_ModalComponentManager.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\components/juce_ComponentListener.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\components/juce_CachedComponentImage.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\components/juce_Component.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_ComponentAnimator.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\desktop/juce_Desktop.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\desktop/juce_Displays.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_ComponentBoundsConstrainer.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_BorderedComponentBoundsConstrainer.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\mouse/juce_ComponentDragger.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\mouse/juce_DragAndDropTarget.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\mouse/juce_DragAndDropContainer.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\mouse/juce_FileDragAndDropTarget.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\mouse/juce_SelectedItemSet.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\mouse/juce_MouseInactivityDetector.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\mouse/juce_TextDragAndDropTarget.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\mouse/juce_TooltipClient.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\keyboard/juce_CaretComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\keyboard/juce_KeyboardFocusTraverser.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\keyboard/juce_SystemClipboard.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\keyboard/juce_TextEditorKeyMapper.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\keyboard/juce_TextInputTarget.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\commands/juce_ApplicationCommandID.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\commands/juce_ApplicationCommandInfo.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\commands/juce_ApplicationCommandTarget.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\commands/juce_ApplicationCommandManager.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\commands/juce_KeyPressMappingSet.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\buttons/juce_Button.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\buttons/juce_ArrowButton.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\buttons/juce_DrawableButton.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\buttons/juce_HyperlinkButton.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\buttons/juce_ImageButton.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\buttons/juce_ShapeButton.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\buttons/juce_TextButton.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\buttons/juce_ToggleButton.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_AnimatedPosition.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_AnimatedPositionBehaviours.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_ComponentBuilder.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_ComponentMovementWatcher.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_ConcertinaPanel.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_GroupComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_ResizableBorderComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_ResizableCornerComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_ResizableEdgeComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_ScrollBar.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_StretchableLayoutManager.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_StretchableLayoutResizerBar.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_StretchableObjectResizer.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_TabbedButtonBar.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_TabbedComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\accessibility/interfaces/juce_AccessibilityCellInterface.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\accessibility/interfaces/juce_AccessibilityTableInterface.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\accessibility/interfaces/juce_AccessibilityTextInterface.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\accessibility/interfaces/juce_AccessibilityValueInterface.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\accessibility/enums/juce_AccessibilityActions.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\accessibility/enums/juce_AccessibilityEvent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\accessibility/enums/juce_AccessibilityRole.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\accessibility/juce_AccessibilityState.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\accessibility/juce_AccessibilityHandler.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\drawables/juce_Drawable.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_Viewport.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\menus/juce_PopupMenu.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\menus/juce_MenuBarModel.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\menus/juce_MenuBarComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\positioning/juce_RelativeCoordinate.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\positioning/juce_MarkerList.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\positioning/juce_RelativePoint.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\positioning/juce_RelativeRectangle.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\positioning/juce_RelativeCoordinatePositioner.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\positioning/juce_RelativeParallelogram.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\positioning/juce_RelativePointPath.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\drawables/juce_DrawableShape.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\drawables/juce_DrawableComposite.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\drawables/juce_DrawableImage.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\drawables/juce_DrawablePath.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\drawables/juce_DrawableRectangle.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\drawables/juce_DrawableText.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\widgets/juce_TextEditor.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\widgets/juce_Label.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\widgets/juce_ComboBox.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\widgets/juce_ImageComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\widgets/juce_ListBox.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\widgets/juce_ProgressBar.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\widgets/juce_Slider.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\widgets/juce_TableHeaderComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\widgets/juce_TableListBox.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\widgets/juce_Toolbar.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\widgets/juce_ToolbarItemComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\widgets/juce_ToolbarItemFactory.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\widgets/juce_ToolbarItemPalette.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\menus/juce_BurgerMenuComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\buttons/juce_ToolbarButton.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\misc/juce_DropShadower.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\misc/juce_FocusOutline.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\widgets/juce_TreeView.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\windows/juce_TopLevelWindow.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\windows/juce_MessageBoxOptions.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\windows/juce_ScopedMessageBox.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\windows/juce_AlertWindow.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\windows/juce_CallOutBox.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\windows/juce_ComponentPeer.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\windows/juce_ResizableWindow.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\windows/juce_DocumentWindow.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\windows/juce_DialogWindow.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\windows/juce_NativeMessageBox.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\windows/juce_ThreadWithProgressWindow.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\windows/juce_TooltipWindow.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\windows/juce_VBlankAttachment.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\windows/juce_WindowUtils.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\windows/juce_NativeScaleFactorNotifier.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_MultiDocumentPanel.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_SidePanel.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\filebrowser/juce_FileBrowserListener.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\filebrowser/juce_DirectoryContentsList.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\filebrowser/juce_DirectoryContentsDisplayComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\filebrowser/juce_FileBrowserComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\filebrowser/juce_FileChooser.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\filebrowser/juce_FileChooserDialogBox.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\filebrowser/juce_FileListComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\filebrowser/juce_FilenameComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\filebrowser/juce_FilePreviewComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\filebrowser/juce_FileSearchPathListComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\filebrowser/juce_FileTreeComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\filebrowser/juce_ImagePreviewComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\filebrowser/juce_ContentSharer.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\properties/juce_PropertyComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\properties/juce_BooleanPropertyComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\properties/juce_ButtonPropertyComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\properties/juce_ChoicePropertyComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\properties/juce_PropertyPanel.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\properties/juce_SliderPropertyComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\properties/juce_TextPropertyComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\properties/juce_MultiChoicePropertyComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\application/juce_Application.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\misc/juce_BubbleComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\lookandfeel/juce_LookAndFeel.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\lookandfeel/juce_LookAndFeel_V2.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\lookandfeel/juce_LookAndFeel_V1.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\lookandfeel/juce_LookAndFeel_V3.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\lookandfeel/juce_LookAndFeel_V4.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\mouse/juce_LassoComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_FlexItem.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_FlexBox.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_GridItem.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_Grid.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\native/juce_ScopedDPIAwarenessDisabler.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\documents/juce_FileBasedDocument.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\code_editor/juce_CodeDocument.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\code_editor/juce_CodeEditorComponent.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\code_editor/juce_CodeTokeniser.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\code_editor/juce_CPlusPlusCodeTokeniser.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\code_editor/juce_CPlusPlusCodeTokeniserFunctions.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\code_editor/juce_XMLCodeTokeniser.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\code_editor/juce_LuaCodeTokeniser.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\embedding/juce_ActiveXControlComponent.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\embedding/juce_AndroidViewComponent.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\embedding/juce_NSViewComponent.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\embedding/juce_UIViewComponent.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\embedding/juce_XEmbedComponent.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\embedding/juce_HWNDComponent.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\misc/juce_AppleRemote.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\misc/juce_BubbleMessageComponent.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\misc/juce_ColourSelector.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\misc/juce_KeyMappingEditorComponent.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\misc/juce_PreferencesPanel.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\misc/juce_PushNotifications.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\misc/juce_RecentlyOpenedFilesList.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\misc/juce_SplashScreen.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\misc/juce_SystemTrayIconComponent.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\misc/juce_WebBrowserComponent.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\misc/juce_LiveConstantEditor.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\misc/juce_AnimatedAppComponent.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\detail/juce_WebControlRelayEvents.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\misc/juce_WebControlRelays.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\misc/juce_WebControlParameterIndexReceiver.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_processors\processors/juce_AudioProcessorEditorHostContext.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_processors\processors/juce_AudioProcessorEditor.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_processors\processors/juce_GenericAudioProcessorEditor.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_processors\format/juce_AudioPluginFormatManagerHelpers.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_processors\scanning/juce_KnownPluginList.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_processors\format_types/juce_AudioUnitPluginFormat.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_processors\format_types/juce_LADSPAPluginFormat.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_processors\format_types/juce_LV2PluginFormat.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_processors\format_types/juce_VST3PluginFormat.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_processors\format_types/juce_VSTPluginFormat.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_processors\scanning/juce_PluginDirectoryScanner.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_processors\scanning/juce_PluginListComponent.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_processors\utilities/juce_ParameterAttachments.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_processors\utilities/juce_AudioProcessorValueTreeState.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_processors\utilities/juce_PluginHostType.h
+Observaá∆o: incluindo arquivo:  D:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\SoteroBuilder\Source\../../Common/SoteroFormat.h
+Observaá∆o: incluindo arquivo:  D:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\SoteroBuilder\Source\../../Common/SoteroViews.h
+Observaá∆o: incluindo arquivo:   D:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\Common\SoteroLibraryManager.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\Common\SoteroArchive.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\Common\SoteroMetadata.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\Common\SoteroSecurity.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_cryptography/juce_cryptography.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_cryptography\encryption/juce_BlowFish.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_cryptography\encryption/juce_Primes.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_cryptography\encryption/juce_RSAKey.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_cryptography\hashing/juce_MD5.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_cryptography\hashing/juce_SHA256.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_cryptography\hashing/juce_Whirlpool.h
+Observaá∆o: incluindo arquivo:   D:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\Common\SoteroUI.h
+Observaá∆o: incluindo arquivo:   D:\Luis\OneDrive\Juce\modules\juce_audio_utils/juce_audio_utils.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_devices/juce_audio_devices.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_devices\midi_io/juce_ScheduledEventThread.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_devices\midi_io/ump/juce_UMPEndpointId.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_devices\midi_io/ump/juce_UMPStaticDeviceInfo.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_devices\midi_io/ump/juce_UMPBlock.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_devices\midi_io/ump/juce_UMPEndpoint.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_devices\midi_io/ump/juce_UMPDisconnectionListener.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_devices\midi_io/ump/juce_UMPInput.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_devices\midi_io/ump/juce_UMPOutput.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_devices\midi_io/ump/juce_UMPLegacyVirtualInput.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_devices\midi_io/ump/juce_UMPLegacyVirtualOutput.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_devices\midi_io/ump/juce_UMPVirtualEndpoint.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_devices\midi_io/ump/juce_UMPSession.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_devices\midi_io/ump/juce_UMPEndpoints.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_devices\midi_io/juce_MidiDevices.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_devices\midi_io/juce_MidiMessageCollector.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_devices\audio_io/juce_AudioIODevice.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_devices\audio_io/juce_AudioIODeviceType.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_devices\audio_io/juce_SystemAudioVolume.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_devices\sources/juce_AudioSourcePlayer.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_devices\sources/juce_AudioTransportSource.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_devices\audio_io/juce_AudioDeviceManager.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_formats/juce_audio_formats.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_formats\format/juce_AudioFormatReader.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_formats\format/juce_AudioFormatWriterOptions.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_formats\format/juce_AudioFormatWriter.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_formats\format/juce_MemoryMappedAudioFormatReader.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_formats\format/juce_AudioFormat.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_formats\format/juce_AudioFormatManager.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_formats\format/juce_AudioFormatReaderSource.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_formats\format/juce_AudioSubsectionReader.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_formats\format/juce_BufferingAudioFormatReader.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_formats\codecs/juce_AiffAudioFormat.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_formats\codecs/juce_CoreAudioFormat.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_formats\codecs/juce_FlacAudioFormat.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_formats\codecs/juce_LAMEEncoderAudioFormat.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_formats\codecs/juce_MP3AudioFormat.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_formats\codecs/juce_OggVorbisAudioFormat.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_formats\codecs/juce_WavAudioFormat.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_formats\codecs/juce_WindowsMediaAudioFormat.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_formats\sampler/juce_Sampler.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_utils\gui/juce_AudioDeviceSelectorComponent.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_utils\gui/juce_AudioThumbnailBase.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_utils\gui/juce_AudioThumbnail.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_utils\gui/juce_AudioThumbnailCache.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_utils\gui/juce_AudioVisualiserComponent.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_utils\gui/juce_KeyboardComponentBase.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_utils\gui/juce_MidiKeyboardComponent.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_utils\gui/juce_MPEKeyboardComponent.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_utils\gui/juce_AudioAppComponent.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_utils\gui/juce_BluetoothMidiDevicePairingDialogue.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_utils\players/juce_SoundPlayer.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_utils\players/juce_AudioProcessorPlayer.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_utils\audio_cd/juce_AudioCDBurner.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_utils\audio_cd/juce_AudioCDReader.h
+Observaá∆o: incluindo arquivo:  D:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\SoteroBuilder\Source\../../SamplerPlayer/Source/SoteroSamplerVoice.h
+Observaá∆o: incluindo arquivo:   D:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\SamplerPlayer\Source\../../Common/CurvedADSR.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\out\build\x64-Debug\SoteroBuilder\SoteroBuilder_artefacts\JuceLibraryCode\JuceHeader.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_dsp/juce_dsp.h
+Observaá∆o: incluindo arquivo:      C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\complex
+Observaá∆o: incluindo arquivo:       C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\ymath.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\native/juce_SIMDNativeOps_fallback.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\native/juce_SIMDNativeOps_sse.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\containers/juce_SIMDRegister.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\containers/juce_SIMDRegister_Impl.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\maths/juce_SpecialFunctions.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\maths/juce_Matrix.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\maths/juce_Phase.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\maths/juce_Polynomial.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\maths/juce_FastMathApproximations.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\maths/juce_LookupTable.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\maths/juce_LogRampedValue.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\containers/juce_AudioBlock.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\processors/juce_ProcessContext.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\processors/juce_ProcessorWrapper.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\processors/juce_ProcessorChain.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\processors/juce_ProcessorDuplicator.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\processors/juce_IIRFilter.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\processors/juce_IIRFilter_Impl.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\processors/juce_FIRFilter.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\processors/juce_StateVariableFilter.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\processors/juce_FirstOrderTPTFilter.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\processors/juce_Panner.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\processors/juce_DelayLine.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\processors/juce_Oversampling.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\processors/juce_BallisticsFilter.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\processors/juce_LinkwitzRileyFilter.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\processors/juce_DryWetMixer.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\processors/juce_StateVariableTPTFilter.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\frequency/juce_FFT.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\frequency/juce_Convolution.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\frequency/juce_Windowing.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\filter_design/juce_FilterDesign.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\widgets/juce_Reverb.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\widgets/juce_Bias.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\widgets/juce_Gain.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\widgets/juce_WaveShaper.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\widgets/juce_Oscillator.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\widgets/juce_LadderFilter.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\widgets/juce_Compressor.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\widgets/juce_NoiseGate.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\widgets/juce_Limiter.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\widgets/juce_Phaser.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\widgets/juce_Chorus.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\out\build\x64-Debug\SoteroBuilder\juce_binarydata_SoteroBuilderAssets\JuceLibraryCode\BinaryData.h
+D:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\SamplerPlayer\Source\../../Common/CurvedADSR.h(130): error C2039: ' getArrayOfWriteChannels': n∆o Ç um membro de 'juce::AudioBuffer<float>'
+D:\Luis\OneDrive\Juce\modules\juce_audio_basics\buffers/juce_AudioSampleBuffer.h(45): note: consulte a declaraá∆o de 'juce::AudioBuffer<float>'
+D:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\SamplerPlayer\Source\../../Common/CurvedADSR.h(134): error C3536: 'channelData': n∆o pode ser usado antes de ser inicializado
+D:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\SamplerPlayer\Source\../../Common/CurvedADSR.h(134): error C2109: subscrito requer tipo de matriz ou ponteiro
+Observaá∆o: incluindo arquivo:  D:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\SoteroBuilder\Source\ADSRVisualizer.h
+Observaá∆o: incluindo arquivo:  D:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\SoteroBuilder\Source\SampleRegion.h
+[2/4] Building CXX object SoteroBuilder\CMakeFiles\SoteroBuilder.dir\Source\MainComponent.cpp.obj
+FAILED: SoteroBuilder/CMakeFiles/SoteroBuilder.dir/Source/MainComponent.cpp.obj 
+C:\PROGRA~1\MIB055~1\18\COMMUN~1\VC\Tools\MSVC\1450~1.357\bin\Hostx64\x64\cl.exe  /nologo /TP -DDEBUG=1 -DJUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1 -DJUCE_MODULE_AVAILABLE_juce_audio_basics=1 -DJUCE_MODULE_AVAILABLE_juce_audio_devices=1 -DJUCE_MODULE_AVAILABLE_juce_audio_formats=1 -DJUCE_MODULE_AVAILABLE_juce_audio_processors=1 -DJUCE_MODULE_AVAILABLE_juce_audio_processors_headless=1 -DJUCE_MODULE_AVAILABLE_juce_audio_utils=1 -DJUCE_MODULE_AVAILABLE_juce_core=1 -DJUCE_MODULE_AVAILABLE_juce_cryptography=1 -DJUCE_MODULE_AVAILABLE_juce_data_structures=1 -DJUCE_MODULE_AVAILABLE_juce_dsp=1 -DJUCE_MODULE_AVAILABLE_juce_events=1 -DJUCE_MODULE_AVAILABLE_juce_graphics=1 -DJUCE_MODULE_AVAILABLE_juce_gui_basics=1 -DJUCE_MODULE_AVAILABLE_juce_gui_extra=1 -DJUCE_STANDALONE_APPLICATION=1 -DJUCE_TARGET_HAS_BINARY_DATA=1 -D_DEBUG=1 -ID:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\out\build\x64-Debug\SoteroBuilder\SoteroBuilder_artefacts\JuceLibraryCode -ID:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\SoteroBuilder\Source -ID:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\SoteroBuilder\..\SamplerPlayer\Source -ID:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\Common\. -ID:\Luis\OneDrive\Juce\modules -ID:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless\format_types\VST3_SDK -ID:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless\format_types\LV2_SDK -ID:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless\format_types\LV2_SDK\lv2 -ID:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless\format_types\LV2_SDK\serd -ID:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless\format_types\LV2_SDK\sord -ID:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless\format_types\LV2_SDK\sord\src -ID:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless\format_types\LV2_SDK\sratom -ID:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv -ID:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless\format_types\LV2_SDK\lilv\src -ID:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\out\build\x64-Debug\SoteroBuilder\juce_binarydata_SoteroBuilderAssets\JuceLibraryCode /DWIN32 /D_WINDOWS /GR /EHsc /Zi /Ob0 /Od /RTC1 -std:c++17 -MDd /FS /bigobj /showIncludes /FoSoteroBuilder\CMakeFiles\SoteroBuilder.dir\Source\MainComponent.cpp.obj /FdSoteroBuilder\CMakeFiles\SoteroBuilder.dir\ /FS -c D:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\SoteroBuilder\Source\MainComponent.cpp
+Observaá∆o: incluindo arquivo: D:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\SoteroBuilder\Source\MainComponent.h
+Observaá∆o: incluindo arquivo:  D:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\SoteroBuilder\Source\../../Common/SoteroEngineInterface.h
+Observaá∆o: incluindo arquivo:   D:\Luis\OneDrive\Juce\modules\juce_audio_processors/juce_audio_processors.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/juce_audio_processors_headless.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_basics/juce_audio_basics.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_core/juce_core.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\system/juce_TargetPlatform.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\system/juce_StandardHeader.h
+Observaá∆o: incluindo arquivo:        C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\algorithm
+Observaá∆o: incluindo arquivo:         C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\yvals_core.h
+Observaá∆o: incluindo arquivo:          C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\vcruntime.h
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\sal.h
+Observaá∆o: incluindo arquivo:            C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\concurrencysal.h
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\vadefs.h
+Observaá∆o: incluindo arquivo:          C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xkeycheck.h
+Observaá∆o: incluindo arquivo:         C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\__msvc_heap_algorithms.hpp
+Observaá∆o: incluindo arquivo:          C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xutility
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\yvals.h
+Observaá∆o: incluindo arquivo:            C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\crtdbg.h
+Observaá∆o: incluindo arquivo:             C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt.h
+Observaá∆o: incluindo arquivo:             C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\vcruntime_new_debug.h
+Observaá∆o: incluindo arquivo:              C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\vcruntime_new.h
+Observaá∆o: incluindo arquivo:            C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\crtdefs.h
+Observaá∆o: incluindo arquivo:            C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\use_ansi.h
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\__msvc_iter_core.hpp
+Observaá∆o: incluindo arquivo:            C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\utility
+Observaá∆o: incluindo arquivo:             C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\initializer_list
+Observaá∆o: incluindo arquivo:              C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\cstddef
+Observaá∆o: incluindo arquivo:               C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\stddef.h
+Observaá∆o: incluindo arquivo:               C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xtr1common
+Observaá∆o: incluindo arquivo:             C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\type_traits
+Observaá∆o: incluindo arquivo:              C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\cstdint
+Observaá∆o: incluindo arquivo:               C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\stdint.h
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\climits
+Observaá∆o: incluindo arquivo:            C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\limits.h
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\cstdlib
+Observaá∆o: incluindo arquivo:            C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\math.h
+Observaá∆o: incluindo arquivo:             C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_math.h
+Observaá∆o: incluindo arquivo:            C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\stdlib.h
+Observaá∆o: incluindo arquivo:             C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_malloc.h
+Observaá∆o: incluindo arquivo:             C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_search.h
+Observaá∆o: incluindo arquivo:             C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_wstdlib.h
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\cstring
+Observaá∆o: incluindo arquivo:            C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\string.h
+Observaá∆o: incluindo arquivo:             C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_memory.h
+Observaá∆o: incluindo arquivo:              C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_memcpy_s.h
+Observaá∆o: incluindo arquivo:               C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\errno.h
+Observaá∆o: incluindo arquivo:               C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\vcruntime_string.h
+Observaá∆o: incluindo arquivo:             C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_wstring.h
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\cwchar
+Observaá∆o: incluindo arquivo:            C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\cstdio
+Observaá∆o: incluindo arquivo:             C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\stdio.h
+Observaá∆o: incluindo arquivo:              C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_wstdio.h
+Observaá∆o: incluindo arquivo:               C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_stdio_config.h
+Observaá∆o: incluindo arquivo:            C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\wchar.h
+Observaá∆o: incluindo arquivo:             C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_wconio.h
+Observaá∆o: incluindo arquivo:             C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_wctype.h
+Observaá∆o: incluindo arquivo:             C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_wdirect.h
+Observaá∆o: incluindo arquivo:             C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_wio.h
+Observaá∆o: incluindo arquivo:              C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_share.h
+Observaá∆o: incluindo arquivo:             C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_wprocess.h
+Observaá∆o: incluindo arquivo:             C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_wtime.h
+Observaá∆o: incluindo arquivo:             C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\sys/stat.h
+Observaá∆o: incluindo arquivo:              C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\sys/types.h
+Observaá∆o: incluindo arquivo:             C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\intrin.h
+Observaá∆o: incluindo arquivo:              C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\intrin0.inl.h
+Observaá∆o: incluindo arquivo:              C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\setjmp.h
+Observaá∆o: incluindo arquivo:              C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\immintrin.h
+Observaá∆o: incluindo arquivo:               C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\wmmintrin.h
+Observaá∆o: incluindo arquivo:                C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\nmmintrin.h
+Observaá∆o: incluindo arquivo:                 C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\smmintrin.h
+Observaá∆o: incluindo arquivo:                  C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\tmmintrin.h
+Observaá∆o: incluindo arquivo:                   C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\pmmintrin.h
+Observaá∆o: incluindo arquivo:                    C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\emmintrin.h
+Observaá∆o: incluindo arquivo:                     C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xmmintrin.h
+Observaá∆o: incluindo arquivo:                      C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\mmintrin.h
+Observaá∆o: incluindo arquivo:                      C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\malloc.h
+Observaá∆o: incluindo arquivo:               C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\zmmintrin.h
+Observaá∆o: incluindo arquivo:              C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\ammintrin.h
+Observaá∆o: incluindo arquivo:         C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\__msvc_minmax.hpp
+Observaá∆o: incluindo arquivo:         C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xmemory
+Observaá∆o: incluindo arquivo:          C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\limits
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\cfloat
+Observaá∆o: incluindo arquivo:            C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\float.h
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\intrin0.h
+Observaá∆o: incluindo arquivo:          C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\new
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\exception
+Observaá∆o: incluindo arquivo:            C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\vcruntime_exception.h
+Observaá∆o: incluindo arquivo:             C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\eh.h
+Observaá∆o: incluindo arquivo:              C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_terminate.h
+Observaá∆o: incluindo arquivo:          C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xatomic.h
+Observaá∆o: incluindo arquivo:        C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\array
+Observaá∆o: incluindo arquivo:        C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\atomic
+Observaá∆o: incluindo arquivo:         C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xthreads.h
+Observaá∆o: incluindo arquivo:          C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\__msvc_threads_core.hpp
+Observaá∆o: incluindo arquivo:          C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xtimec.h
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\ctime
+Observaá∆o: incluindo arquivo:            C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\time.h
+Observaá∆o: incluindo arquivo:        C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\cmath
+Observaá∆o: incluindo arquivo:        C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\condition_variable
+Observaá∆o: incluindo arquivo:         C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\__msvc_chrono.hpp
+Observaá∆o: incluindo arquivo:          C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\ratio
+Observaá∆o: incluindo arquivo:         C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\memory
+Observaá∆o: incluindo arquivo:          C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\iosfwd
+Observaá∆o: incluindo arquivo:          C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\typeinfo
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\vcruntime_typeinfo.h
+Observaá∆o: incluindo arquivo:         C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\mutex
+Observaá∆o: incluindo arquivo:          C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\system_error
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\__msvc_system_error_abi.hpp
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\cerrno
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\stdexcept
+Observaá∆o: incluindo arquivo:            C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xstring
+Observaá∆o: incluindo arquivo:             C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\__msvc_sanitizer_annotate_container.hpp
+Observaá∆o: incluindo arquivo:             C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\__msvc_string_view.hpp
+Observaá∆o: incluindo arquivo:             C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xpolymorphic_allocator.h
+Observaá∆o: incluindo arquivo:              C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\tuple
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xcall_once.h
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xerrc.h
+Observaá∆o: incluindo arquivo:          C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\thread
+Observaá∆o: incluindo arquivo:           C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\process.h
+Observaá∆o: incluindo arquivo:            C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\corecrt_startup.h
+Observaá∆o: incluindo arquivo:             C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\math.h
+Observaá∆o: incluindo arquivo:             C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\vcruntime_startup.h
+Observaá∆o: incluindo arquivo:        C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\functional
+Observaá∆o: incluindo arquivo:         C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\unordered_map
+Observaá∆o: incluindo arquivo:          C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xhash
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\list
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\vector
+Observaá∆o: incluindo arquivo:            C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\__msvc_bit_utils.hpp
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xbit_ops.h
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xnode_handle.h
+Observaá∆o: incluindo arquivo:        C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\future
+Observaá∆o: incluindo arquivo:         C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\ppltasks.h
+Observaá∆o: incluindo arquivo:          C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\pplwin.h
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\pplinterface.h
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\ppltaskscheduler.h
+Observaá∆o: incluindo arquivo:            C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\crtdefs.h
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\pplcancellation_token.h
+Observaá∆o: incluindo arquivo:        C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\iomanip
+Observaá∆o: incluindo arquivo:         C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\istream
+Observaá∆o: incluindo arquivo:          C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\__msvc_ostream.hpp
+Observaá∆o: incluindo arquivo:           C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\ios
+Observaá∆o: incluindo arquivo:            C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xlocnum
+Observaá∆o: incluindo arquivo:             C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\iterator
+Observaá∆o: incluindo arquivo:             C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\streambuf
+Observaá∆o: incluindo arquivo:              C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xiosbase
+Observaá∆o: incluindo arquivo:               C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\share.h
+Observaá∆o: incluindo arquivo:               C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xlocale
+Observaá∆o: incluindo arquivo:                C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xfacet
+Observaá∆o: incluindo arquivo:                C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xlocinfo
+Observaá∆o: incluindo arquivo:                 C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\__msvc_xlocinfo_types.hpp
+Observaá∆o: incluindo arquivo:                 C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\cctype
+Observaá∆o: incluindo arquivo:                  C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\ctype.h
+Observaá∆o: incluindo arquivo:                 C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\clocale
+Observaá∆o: incluindo arquivo:                  C:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrt\locale.h
+Observaá∆o: incluindo arquivo:         C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xlocmon
+Observaá∆o: incluindo arquivo:         C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xloctime
+Observaá∆o: incluindo arquivo:        C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\iostream
+Observaá∆o: incluindo arquivo:         C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\ostream
+Observaá∆o: incluindo arquivo:        C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\map
+Observaá∆o: incluindo arquivo:         C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xtree
+Observaá∆o: incluindo arquivo:        C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\numeric
+Observaá∆o: incluindo arquivo:        C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\optional
+Observaá∆o: incluindo arquivo:         C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\xsmf_control.h
+Observaá∆o: incluindo arquivo:        C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\queue
+Observaá∆o: incluindo arquivo:         C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\deque
+Observaá∆o: incluindo arquivo:        C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\set
+Observaá∆o: incluindo arquivo:        C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\sstream
+Observaá∆o: incluindo arquivo:         C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\string
+Observaá∆o: incluindo arquivo:        C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\string_view
+Observaá∆o: incluindo arquivo:        C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\typeindex
+Observaá∆o: incluindo arquivo:        C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\unordered_set
+Observaá∆o: incluindo arquivo:        C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\variant
+Observaá∆o: incluindo arquivo:        D:\Luis\OneDrive\Juce\modules\juce_core\system\juce_CompilerSupport.h
+Observaá∆o: incluindo arquivo:        D:\Luis\OneDrive\Juce\modules\juce_core\system\juce_CompilerWarnings.h
+Observaá∆o: incluindo arquivo:        D:\Luis\OneDrive\Juce\modules\juce_core\system\juce_PlatformDefs.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\misc/juce_EnumHelpers.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\misc/juce_OrderedContainerHelpers.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\memory/juce_Memory.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\maths/juce_MathsFunctions.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\memory/juce_ByteOrder.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\memory/juce_Atomic.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\text/juce_CharacterFunctions.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\text/juce_CharPointer_UTF8.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\text/juce_CharPointer_UTF16.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\text/juce_CharPointer_UTF32.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\text/juce_CharPointer_ASCII.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\text/juce_String.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\text/juce_StringRef.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\logging/juce_Logger.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\memory/juce_LeakedObjectDetector.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\memory/juce_ContainerDeletePolicy.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\memory/juce_HeapBlock.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\memory/juce_MemoryBlock.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\memory/juce_CopyableHeapBlock.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\memory/juce_ReferenceCountedObject.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\memory/juce_ScopedPointer.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\memory/juce_OptionalScopedPointer.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\containers/juce_Optional.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\containers/juce_Enumerate.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\containers/juce_ScopedValueSetter.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\memory/juce_Singleton.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\memory/juce_WeakReference.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\threads/juce_ScopedLock.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\threads/juce_CriticalSection.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\maths/juce_Range.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\maths/juce_NormalisableRange.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\maths/juce_StatisticsAccumulator.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\containers/juce_ElementComparator.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\containers/juce_ArrayAllocationBase.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\containers/juce_ArrayBase.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\containers/juce_Array.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\containers/juce_LinkedListPointer.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\misc/juce_ScopeGuard.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\containers/juce_ListenerList.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\containers/juce_OwnedArray.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\containers/juce_ReferenceCountedArray.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\containers/juce_SortedSet.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\containers/juce_SparseSet.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\containers/juce_AbstractFifo.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\containers/juce_SingleThreadedAbstractFifo.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\text/juce_NewLine.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\text/juce_StringPool.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\text/juce_Identifier.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\text/juce_StringArray.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\system/juce_SystemStats.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\memory/juce_HeavyweightLeakedObjectDetector.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\text/juce_StringPairArray.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\text/juce_TextDiff.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\text/juce_LocalisedStrings.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\text/juce_Base64.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\misc/juce_Functional.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\containers/juce_Span.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\misc/juce_Result.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\misc/juce_Uuid.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\misc/juce_ConsoleApplication.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\containers/juce_Variant.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\containers/juce_NamedValueSet.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\json/juce_JSON.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\containers/juce_DynamicObject.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\containers/juce_HashMap.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\containers/juce_FixedSizeFunction.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\time/juce_RelativeTime.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\time/juce_Time.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\streams/juce_InputStream.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\streams/juce_OutputStream.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\streams/juce_BufferedInputStream.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\streams/juce_MemoryInputStream.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\streams/juce_MemoryOutputStream.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\streams/juce_SubregionStream.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\streams/juce_InputSource.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\files/juce_File.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\files/juce_DirectoryIterator.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\files/juce_RangedDirectoryIterator.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\detail/juce_NativeFileHandle.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\files/juce_FileInputStream.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\files/juce_FileOutputStream.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\files/juce_FileSearchPath.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\files/juce_MemoryMappedFile.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\files/juce_TemporaryFile.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\files/juce_FileFilter.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\files/juce_WildcardFileFilter.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\streams/juce_FileInputSource.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\logging/juce_FileLogger.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\json/juce_JSONUtils.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\serialisation/juce_Serialisation.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\json/juce_JSONSerialisation.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\maths/juce_BigInteger.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\maths/juce_Expression.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\maths/juce_Random.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\misc/juce_RuntimePermissions.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\misc/juce_WindowsRegistry.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\threads/juce_ChildProcess.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\threads/juce_DynamicLibrary.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\threads/juce_InterProcessLock.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\threads/juce_Process.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\threads/juce_SpinLock.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\threads/juce_WaitableEvent.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\threads/juce_Thread.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\threads/juce_HighResolutionTimer.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\threads/juce_ThreadLocalValue.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\threads/juce_ThreadPool.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\threads/juce_TimeSliceThread.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\threads/juce_ReadWriteLock.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\threads/juce_ScopedReadLock.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\threads/juce_ScopedWriteLock.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\network/juce_IPAddress.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\network/juce_MACAddress.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\network/juce_NamedPipe.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\network/juce_Socket.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\network/juce_URL.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\network/juce_WebInputStream.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\streams/juce_URLInputSource.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\time/juce_PerformanceCounter.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\unit_tests/juce_UnitTest.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\xml/juce_XmlDocument.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\xml/juce_XmlElement.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\zip/juce_GZIPCompressorOutputStream.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\zip/juce_GZIPDecompressorInputStream.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\zip/juce_ZipFile.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\containers/juce_PropertySet.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\memory/juce_SharedResourcePointer.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\memory/juce_AllocationHooks.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\memory/juce_Reservoir.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\files/juce_AndroidDocument.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\streams/juce_AndroidDocumentInputSource.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\misc/juce_OptionsHelpers.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\detail/juce_CallbackListenerList.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\detail/juce_LruCache.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_core\detail/juce_IncrementRef.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\buffers/juce_AudioDataConverters.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\buffers/juce_FloatVectorOperations.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\buffers/juce_AudioSampleBuffer.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\buffers/juce_AudioChannelSet.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\buffers/juce_AudioProcessLoadMeasurer.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\utilities/juce_Decibels.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\utilities/juce_IIRFilter.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\utilities/juce_GenericInterpolator.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\utilities/juce_Interpolators.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\utilities/juce_SmoothedValue.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\utilities/juce_Reverb.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\utilities/juce_ADSR.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi/juce_MidiMessage.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi/juce_MidiBuffer.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi/juce_MidiMessageSequence.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi/juce_MidiFile.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi/juce_MidiKeyboardState.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi/juce_MidiRPN.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi/juce_MidiDataConcatenator.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\mpe/juce_MPEValue.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\mpe/juce_MPENote.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\mpe/juce_MPEZoneLayout.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\mpe/juce_MPEInstrument.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\mpe/juce_MPEMessages.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\mpe/juce_MPESynthesiserBase.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\mpe/juce_MPESynthesiserVoice.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\mpe/juce_MPESynthesiser.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\mpe/juce_MPEUtils.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\sources/juce_AudioSource.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\sources/juce_PositionableAudioSource.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\sources/juce_BufferingAudioSource.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\sources/juce_ChannelRemappingAudioSource.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\sources/juce_IIRFilterAudioSource.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\sources/juce_MemoryAudioSource.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\sources/juce_MixerAudioSource.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\sources/juce_ResamplingAudioSource.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\sources/juce_ReverbAudioSource.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\sources/juce_ToneGeneratorAudioSource.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\synthesisers/juce_Synthesiser.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\audio_play_head/juce_AudioPlayHead.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\utilities/juce_AudioWorkgroup.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi/ump/juce_UMPBytesOnGroup.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi/ump/juce_UMPDeviceInfo.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi/ump/juce_UMP.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi\ump\juce_UMPProtocols.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi\ump\juce_UMPUtils.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi\ump\juce_UMPacket.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi\ump\juce_UMPSysEx7.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi\ump\juce_UMPView.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi\ump\juce_UMPIterator.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi\ump\juce_UMPackets.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi\ump\juce_UMPFactory.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi\ump\juce_UMPConversion.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi\ump\juce_UMPMidi1ToBytestreamTranslator.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi\ump\juce_UMPMidi1ToMidi2DefaultTranslator.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi\ump\juce_UMPConverters.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi\ump\juce_UMPDispatcher.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_audio_basics\midi\ump\juce_UMPStringUtils.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_events/juce_events.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\messages/juce_MessageManager.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\messages/juce_Message.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\messages/juce_MessageListener.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\messages/juce_CallbackMessage.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\messages/juce_DeletedAtShutdown.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\messages/juce_NotificationType.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\messages/juce_ApplicationBase.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\messages/juce_Initialisation.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\messages/juce_MountedVolumeListChangeDetector.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\broadcasters/juce_ActionBroadcaster.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\broadcasters/juce_ActionListener.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\broadcasters/juce_AsyncUpdater.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\broadcasters/juce_LockingAsyncUpdater.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\broadcasters/juce_ChangeListener.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\broadcasters/juce_ChangeBroadcaster.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\timers/juce_Timer.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\timers/juce_TimedCallback.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\timers/juce_MultiTimer.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\interprocess/juce_ChildProcessManager.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\interprocess/juce_InterprocessConnection.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\interprocess/juce_InterprocessConnectionServer.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\interprocess/juce_ConnectedChildProcess.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\interprocess/juce_NetworkServiceDiscovery.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_events\native/juce_ScopedLowPowerModeDisabler.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/format/juce_PluginFormatDefs.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/processors/juce_AudioProcessorListener.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/utilities/juce_AAXClientExtensions.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/utilities/juce_VST2ClientExtensions.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/utilities/juce_VST3Interface.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/utilities/juce_VST3ClientExtensions.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/format_types/juce_ARACommon.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/utilities/juce_ExtensionsVisitor.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/processors/juce_AudioProcessorParameter.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/processors/juce_HostedAudioProcessorParameter.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/processors/juce_AudioProcessorParameterGroup.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/processors/juce_AudioProcessor.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/processors/juce_PluginDescription.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/processors/juce_AudioPluginInstance.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/processors/juce_AudioProcessorGraph.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/format/juce_AudioPluginFormat.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/utilities/juce_AudioProcessorParameterWithID.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/utilities/juce_RangedAudioParameter.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/utilities/juce_AudioParameterFloat.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/utilities/juce_AudioParameterInt.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/utilities/juce_AudioParameterBool.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/utilities/juce_AudioParameterChoice.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/utilities/ARA/juce_ARADebug.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/utilities/ARA/juce_ARA_utils.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/format_types/juce_AudioUnitPluginFormatHeadless.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/format_types/juce_LADSPAPluginFormatHeadless.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/format_types/juce_LV2PluginFormatHeadless.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/format_types/juce_VST3PluginFormatHeadless.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/format_types/juce_VSTPluginFormatHeadless.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/format_types/juce_ARAHosting.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_processors_headless/format/juce_AudioPluginFormatManager.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_gui_extra/juce_gui_extra.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_basics/juce_gui_basics.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_graphics/juce_graphics.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\geometry/juce_AffineTransform.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\geometry/juce_Point.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\geometry/juce_Line.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\geometry/juce_Rectangle.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\geometry/juce_Parallelogram.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\placement/juce_Justification.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\geometry/juce_Path.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\geometry/juce_RectangleList.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\colour/juce_PixelFormats.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\colour/juce_Colour.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\colour/juce_ColourGradient.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\colour/juce_Colours.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\geometry/juce_BorderSize.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\geometry/juce_EdgeTable.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\geometry/juce_PathIterator.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\geometry/juce_PathStrokeType.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\placement/juce_RectanglePlacement.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\images/juce_ImageCache.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\images/juce_ImageConvolutionKernel.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\images/juce_ImageFileFormat.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\fonts/juce_GlyphArrangementOptions.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\contexts/juce_GraphicsContext.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\images/juce_Image.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\colour/juce_FillType.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\fonts/juce_FontFeatures.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\fonts/juce_Typeface.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\fonts/juce_FontOptions.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\fonts/juce_Font.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\detail/juce_Ranges.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\detail/juce_SimpleShapedText.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\detail/juce_JustifiedText.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\detail/juce_ShapedText.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\fonts/juce_AttributedString.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\fonts/juce_GlyphArrangement.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\fonts/juce_TextLayout.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\contexts/juce_LowLevelGraphicsContext.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\images/juce_ScaledImage.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\detail/juce_FontRendering.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\native/juce_RenderingHelpers.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\contexts/juce_LowLevelGraphicsSoftwareRenderer.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\effects/juce_ImageEffectFilter.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\effects/juce_DropShadowEffect.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\effects/juce_GlowEffect.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_graphics\detail/juce_Unicode.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_data_structures/juce_data_structures.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_data_structures\undomanager/juce_UndoableAction.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_data_structures\undomanager/juce_UndoManager.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_data_structures\values/juce_Value.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_data_structures\values/juce_ValueTree.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_data_structures\values/juce_ValueTreeSynchroniser.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_data_structures\values/juce_CachedValue.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_data_structures\values/juce_ValueTreePropertyWithDefault.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_data_structures\app_properties/juce_PropertiesFile.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_data_structures\app_properties/juce_ApplicationProperties.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\mouse/juce_MouseCursor.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\mouse/juce_MouseListener.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\keyboard/juce_ModifierKeys.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\mouse/juce_MouseInputSource.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\mouse/juce_MouseEvent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\keyboard/juce_KeyPress.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\keyboard/juce_KeyListener.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\components/juce_ComponentTraverser.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\components/juce_FocusTraverser.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\components/juce_ModalComponentManager.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\components/juce_ComponentListener.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\components/juce_CachedComponentImage.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\components/juce_Component.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_ComponentAnimator.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\desktop/juce_Desktop.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\desktop/juce_Displays.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_ComponentBoundsConstrainer.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_BorderedComponentBoundsConstrainer.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\mouse/juce_ComponentDragger.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\mouse/juce_DragAndDropTarget.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\mouse/juce_DragAndDropContainer.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\mouse/juce_FileDragAndDropTarget.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\mouse/juce_SelectedItemSet.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\mouse/juce_MouseInactivityDetector.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\mouse/juce_TextDragAndDropTarget.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\mouse/juce_TooltipClient.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\keyboard/juce_CaretComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\keyboard/juce_KeyboardFocusTraverser.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\keyboard/juce_SystemClipboard.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\keyboard/juce_TextEditorKeyMapper.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\keyboard/juce_TextInputTarget.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\commands/juce_ApplicationCommandID.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\commands/juce_ApplicationCommandInfo.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\commands/juce_ApplicationCommandTarget.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\commands/juce_ApplicationCommandManager.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\commands/juce_KeyPressMappingSet.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\buttons/juce_Button.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\buttons/juce_ArrowButton.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\buttons/juce_DrawableButton.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\buttons/juce_HyperlinkButton.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\buttons/juce_ImageButton.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\buttons/juce_ShapeButton.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\buttons/juce_TextButton.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\buttons/juce_ToggleButton.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_AnimatedPosition.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_AnimatedPositionBehaviours.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_ComponentBuilder.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_ComponentMovementWatcher.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_ConcertinaPanel.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_GroupComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_ResizableBorderComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_ResizableCornerComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_ResizableEdgeComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_ScrollBar.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_StretchableLayoutManager.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_StretchableLayoutResizerBar.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_StretchableObjectResizer.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_TabbedButtonBar.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_TabbedComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\accessibility/interfaces/juce_AccessibilityCellInterface.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\accessibility/interfaces/juce_AccessibilityTableInterface.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\accessibility/interfaces/juce_AccessibilityTextInterface.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\accessibility/interfaces/juce_AccessibilityValueInterface.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\accessibility/enums/juce_AccessibilityActions.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\accessibility/enums/juce_AccessibilityEvent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\accessibility/enums/juce_AccessibilityRole.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\accessibility/juce_AccessibilityState.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\accessibility/juce_AccessibilityHandler.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\drawables/juce_Drawable.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_Viewport.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\menus/juce_PopupMenu.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\menus/juce_MenuBarModel.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\menus/juce_MenuBarComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\positioning/juce_RelativeCoordinate.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\positioning/juce_MarkerList.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\positioning/juce_RelativePoint.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\positioning/juce_RelativeRectangle.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\positioning/juce_RelativeCoordinatePositioner.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\positioning/juce_RelativeParallelogram.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\positioning/juce_RelativePointPath.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\drawables/juce_DrawableShape.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\drawables/juce_DrawableComposite.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\drawables/juce_DrawableImage.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\drawables/juce_DrawablePath.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\drawables/juce_DrawableRectangle.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\drawables/juce_DrawableText.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\widgets/juce_TextEditor.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\widgets/juce_Label.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\widgets/juce_ComboBox.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\widgets/juce_ImageComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\widgets/juce_ListBox.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\widgets/juce_ProgressBar.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\widgets/juce_Slider.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\widgets/juce_TableHeaderComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\widgets/juce_TableListBox.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\widgets/juce_Toolbar.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\widgets/juce_ToolbarItemComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\widgets/juce_ToolbarItemFactory.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\widgets/juce_ToolbarItemPalette.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\menus/juce_BurgerMenuComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\buttons/juce_ToolbarButton.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\misc/juce_DropShadower.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\misc/juce_FocusOutline.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\widgets/juce_TreeView.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\windows/juce_TopLevelWindow.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\windows/juce_MessageBoxOptions.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\windows/juce_ScopedMessageBox.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\windows/juce_AlertWindow.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\windows/juce_CallOutBox.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\windows/juce_ComponentPeer.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\windows/juce_ResizableWindow.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\windows/juce_DocumentWindow.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\windows/juce_DialogWindow.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\windows/juce_NativeMessageBox.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\windows/juce_ThreadWithProgressWindow.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\windows/juce_TooltipWindow.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\windows/juce_VBlankAttachment.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\windows/juce_WindowUtils.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\windows/juce_NativeScaleFactorNotifier.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_MultiDocumentPanel.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_SidePanel.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\filebrowser/juce_FileBrowserListener.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\filebrowser/juce_DirectoryContentsList.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\filebrowser/juce_DirectoryContentsDisplayComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\filebrowser/juce_FileBrowserComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\filebrowser/juce_FileChooser.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\filebrowser/juce_FileChooserDialogBox.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\filebrowser/juce_FileListComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\filebrowser/juce_FilenameComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\filebrowser/juce_FilePreviewComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\filebrowser/juce_FileSearchPathListComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\filebrowser/juce_FileTreeComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\filebrowser/juce_ImagePreviewComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\filebrowser/juce_ContentSharer.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\properties/juce_PropertyComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\properties/juce_BooleanPropertyComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\properties/juce_ButtonPropertyComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\properties/juce_ChoicePropertyComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\properties/juce_PropertyPanel.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\properties/juce_SliderPropertyComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\properties/juce_TextPropertyComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\properties/juce_MultiChoicePropertyComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\application/juce_Application.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\misc/juce_BubbleComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\lookandfeel/juce_LookAndFeel.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\lookandfeel/juce_LookAndFeel_V2.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\lookandfeel/juce_LookAndFeel_V1.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\lookandfeel/juce_LookAndFeel_V3.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\lookandfeel/juce_LookAndFeel_V4.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\mouse/juce_LassoComponent.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_FlexItem.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_FlexBox.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_GridItem.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\layout/juce_Grid.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_gui_basics\native/juce_ScopedDPIAwarenessDisabler.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\documents/juce_FileBasedDocument.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\code_editor/juce_CodeDocument.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\code_editor/juce_CodeEditorComponent.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\code_editor/juce_CodeTokeniser.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\code_editor/juce_CPlusPlusCodeTokeniser.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\code_editor/juce_CPlusPlusCodeTokeniserFunctions.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\code_editor/juce_XMLCodeTokeniser.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\code_editor/juce_LuaCodeTokeniser.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\embedding/juce_ActiveXControlComponent.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\embedding/juce_AndroidViewComponent.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\embedding/juce_NSViewComponent.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\embedding/juce_UIViewComponent.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\embedding/juce_XEmbedComponent.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\embedding/juce_HWNDComponent.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\misc/juce_AppleRemote.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\misc/juce_BubbleMessageComponent.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\misc/juce_ColourSelector.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\misc/juce_KeyMappingEditorComponent.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\misc/juce_PreferencesPanel.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\misc/juce_PushNotifications.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\misc/juce_RecentlyOpenedFilesList.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\misc/juce_SplashScreen.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\misc/juce_SystemTrayIconComponent.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\misc/juce_WebBrowserComponent.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\misc/juce_LiveConstantEditor.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\misc/juce_AnimatedAppComponent.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\detail/juce_WebControlRelayEvents.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\misc/juce_WebControlRelays.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_gui_extra\misc/juce_WebControlParameterIndexReceiver.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_processors\processors/juce_AudioProcessorEditorHostContext.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_processors\processors/juce_AudioProcessorEditor.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_processors\processors/juce_GenericAudioProcessorEditor.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_processors\format/juce_AudioPluginFormatManagerHelpers.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_processors\scanning/juce_KnownPluginList.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_processors\format_types/juce_AudioUnitPluginFormat.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_processors\format_types/juce_LADSPAPluginFormat.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_processors\format_types/juce_LV2PluginFormat.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_processors\format_types/juce_VST3PluginFormat.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_processors\format_types/juce_VSTPluginFormat.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_processors\scanning/juce_PluginDirectoryScanner.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_processors\scanning/juce_PluginListComponent.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_processors\utilities/juce_ParameterAttachments.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_processors\utilities/juce_AudioProcessorValueTreeState.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_processors\utilities/juce_PluginHostType.h
+Observaá∆o: incluindo arquivo:  D:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\SoteroBuilder\Source\../../Common/SoteroFormat.h
+Observaá∆o: incluindo arquivo:  D:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\SoteroBuilder\Source\../../Common/SoteroViews.h
+Observaá∆o: incluindo arquivo:   D:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\Common\SoteroLibraryManager.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\Common\SoteroArchive.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\Common\SoteroMetadata.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\Common\SoteroSecurity.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_cryptography/juce_cryptography.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_cryptography\encryption/juce_BlowFish.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_cryptography\encryption/juce_Primes.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_cryptography\encryption/juce_RSAKey.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_cryptography\hashing/juce_MD5.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_cryptography\hashing/juce_SHA256.h
+Observaá∆o: incluindo arquivo:       D:\Luis\OneDrive\Juce\modules\juce_cryptography\hashing/juce_Whirlpool.h
+Observaá∆o: incluindo arquivo:   D:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\Common\SoteroUI.h
+Observaá∆o: incluindo arquivo:   D:\Luis\OneDrive\Juce\modules\juce_audio_utils/juce_audio_utils.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_devices/juce_audio_devices.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_devices\midi_io/juce_ScheduledEventThread.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_devices\midi_io/ump/juce_UMPEndpointId.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_devices\midi_io/ump/juce_UMPStaticDeviceInfo.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_devices\midi_io/ump/juce_UMPBlock.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_devices\midi_io/ump/juce_UMPEndpoint.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_devices\midi_io/ump/juce_UMPDisconnectionListener.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_devices\midi_io/ump/juce_UMPInput.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_devices\midi_io/ump/juce_UMPOutput.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_devices\midi_io/ump/juce_UMPLegacyVirtualInput.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_devices\midi_io/ump/juce_UMPLegacyVirtualOutput.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_devices\midi_io/ump/juce_UMPVirtualEndpoint.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_devices\midi_io/ump/juce_UMPSession.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_devices\midi_io/ump/juce_UMPEndpoints.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_devices\midi_io/juce_MidiDevices.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_devices\midi_io/juce_MidiMessageCollector.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_devices\audio_io/juce_AudioIODevice.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_devices\audio_io/juce_AudioIODeviceType.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_devices\audio_io/juce_SystemAudioVolume.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_devices\sources/juce_AudioSourcePlayer.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_devices\sources/juce_AudioTransportSource.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_devices\audio_io/juce_AudioDeviceManager.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_formats/juce_audio_formats.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_formats\format/juce_AudioFormatReader.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_formats\format/juce_AudioFormatWriterOptions.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_formats\format/juce_AudioFormatWriter.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_formats\format/juce_MemoryMappedAudioFormatReader.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_formats\format/juce_AudioFormat.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_formats\format/juce_AudioFormatManager.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_formats\format/juce_AudioFormatReaderSource.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_formats\format/juce_AudioSubsectionReader.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_formats\format/juce_BufferingAudioFormatReader.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_formats\codecs/juce_AiffAudioFormat.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_formats\codecs/juce_CoreAudioFormat.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_formats\codecs/juce_FlacAudioFormat.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_formats\codecs/juce_LAMEEncoderAudioFormat.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_formats\codecs/juce_MP3AudioFormat.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_formats\codecs/juce_OggVorbisAudioFormat.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_formats\codecs/juce_WavAudioFormat.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_formats\codecs/juce_WindowsMediaAudioFormat.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_audio_formats\sampler/juce_Sampler.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_utils\gui/juce_AudioDeviceSelectorComponent.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_utils\gui/juce_AudioThumbnailBase.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_utils\gui/juce_AudioThumbnail.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_utils\gui/juce_AudioThumbnailCache.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_utils\gui/juce_AudioVisualiserComponent.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_utils\gui/juce_KeyboardComponentBase.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_utils\gui/juce_MidiKeyboardComponent.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_utils\gui/juce_MPEKeyboardComponent.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_utils\gui/juce_AudioAppComponent.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_utils\gui/juce_BluetoothMidiDevicePairingDialogue.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_utils\players/juce_SoundPlayer.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_utils\players/juce_AudioProcessorPlayer.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_utils\audio_cd/juce_AudioCDBurner.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\modules\juce_audio_utils\audio_cd/juce_AudioCDReader.h
+Observaá∆o: incluindo arquivo:  D:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\SoteroBuilder\Source\../../SamplerPlayer/Source/SoteroSamplerVoice.h
+Observaá∆o: incluindo arquivo:   D:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\SamplerPlayer\Source\../../Common/CurvedADSR.h
+Observaá∆o: incluindo arquivo:    D:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\out\build\x64-Debug\SoteroBuilder\SoteroBuilder_artefacts\JuceLibraryCode\JuceHeader.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\modules\juce_dsp/juce_dsp.h
+Observaá∆o: incluindo arquivo:      C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\complex
+Observaá∆o: incluindo arquivo:       C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.50.35717\include\ymath.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\native/juce_SIMDNativeOps_fallback.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\native/juce_SIMDNativeOps_sse.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\containers/juce_SIMDRegister.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\containers/juce_SIMDRegister_Impl.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\maths/juce_SpecialFunctions.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\maths/juce_Matrix.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\maths/juce_Phase.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\maths/juce_Polynomial.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\maths/juce_FastMathApproximations.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\maths/juce_LookupTable.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\maths/juce_LogRampedValue.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\containers/juce_AudioBlock.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\processors/juce_ProcessContext.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\processors/juce_ProcessorWrapper.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\processors/juce_ProcessorChain.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\processors/juce_ProcessorDuplicator.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\processors/juce_IIRFilter.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\processors/juce_IIRFilter_Impl.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\processors/juce_FIRFilter.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\processors/juce_StateVariableFilter.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\processors/juce_FirstOrderTPTFilter.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\processors/juce_Panner.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\processors/juce_DelayLine.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\processors/juce_Oversampling.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\processors/juce_BallisticsFilter.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\processors/juce_LinkwitzRileyFilter.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\processors/juce_DryWetMixer.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\processors/juce_StateVariableTPTFilter.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\frequency/juce_FFT.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\frequency/juce_Convolution.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\frequency/juce_Windowing.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\filter_design/juce_FilterDesign.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\widgets/juce_Reverb.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\widgets/juce_Bias.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\widgets/juce_Gain.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\widgets/juce_WaveShaper.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\widgets/juce_Oscillator.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\widgets/juce_LadderFilter.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\widgets/juce_Compressor.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\widgets/juce_NoiseGate.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\widgets/juce_Limiter.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\widgets/juce_Phaser.h
+Observaá∆o: incluindo arquivo:      D:\Luis\OneDrive\Juce\modules\juce_dsp\widgets/juce_Chorus.h
+Observaá∆o: incluindo arquivo:     D:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\out\build\x64-Debug\SoteroBuilder\juce_binarydata_SoteroBuilderAssets\JuceLibraryCode\BinaryData.h
+D:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\SamplerPlayer\Source\../../Common/CurvedADSR.h(130): error C2039: ' getArrayOfWriteChannels': n∆o Ç um membro de 'juce::AudioBuffer<float>'
+D:\Luis\OneDrive\Juce\modules\juce_audio_basics\buffers/juce_AudioSampleBuffer.h(45): note: consulte a declaraá∆o de 'juce::AudioBuffer<float>'
+D:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\SamplerPlayer\Source\../../Common/CurvedADSR.h(134): error C3536: 'channelData': n∆o pode ser usado antes de ser inicializado
+D:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\SamplerPlayer\Source\../../Common/CurvedADSR.h(134): error C2109: subscrito requer tipo de matriz ou ponteiro
+Observaá∆o: incluindo arquivo:  D:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\SoteroBuilder\Source\ADSRVisualizer.h
+Observaá∆o: incluindo arquivo:  D:\Luis\OneDrive\Juce\Projetos\SoteroSamplerSuite\SoteroBuilder\Source\SampleRegion.h
+ninja: build stopped: subcommand failed.

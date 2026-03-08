@@ -1,6 +1,8 @@
 #pragma once
 
+#include "../../Common/CurvedADSR.h"
 #include <JuceHeader.h>
+#include <cmath>
 
 namespace sotero {
 /**
@@ -13,12 +15,14 @@ public:
                      const juce::BigInteger &midiNotes, int midiRootNote,
                      double attackTimeSecs, double releaseTimeSecs,
                      double maxSampleLengthSecs, int chokeGroup = 0,
-                     int vLow = 0, int vHigh = 127, int64_t start = 0,
-                     int64_t end = 0, int64_t fIn = 0, int64_t fOut = 0,
-                     float vol = 1.0f, float fineTune = 0.0f, int micLayer = 0,
-                     float a = 0.01f, float d = 0.1f, float s = 1.0f,
-                     float r = 0.1f, int fType = 0, float fCut = 20000.0f,
-                     float fRes = 1.0f)
+                     int vLow = 0, int vHigh = 127, juce::int64 start = 0,
+                     juce::int64 end = 0, juce::int64 fIn = 0,
+                     juce::int64 fOut = 0, float vol = 1.0f,
+                     float fineTune = 0.0f, int micLayer = 0, float a = 0.01f,
+                     float d = 0.1f, float s = 1.0f, float r = 0.1f,
+                     float ac = 0.0f, float dc = 0.0f, float rc = 0.0f,
+                     int fType = 0, float fCut = 20000.0f, float fRes = 1.0f,
+                     bool eAdsr = true, bool eFilter = true)
       : juce::SamplerSound(name, source, midiNotes, midiRootNote,
                            attackTimeSecs, releaseTimeSecs,
                            maxSampleLengthSecs),
@@ -27,10 +31,16 @@ public:
         volumeMultiplier(vol), fineTuneCents(fineTune), micLayer(micLayer),
         filterType(fType), filterCutoff(fCut), filterResonance(fRes) {
 
+    sampleRate = source.sampleRate;
     adsrParams.attack = a;
     adsrParams.decay = d;
     adsrParams.sustain = s;
     adsrParams.release = r;
+    adsrParams.attackCurve = ac;
+    adsrParams.decayCurve = dc;
+    adsrParams.releaseCurve = rc;
+    engineEnableADSR = eAdsr;
+    engineEnableFilter = eFilter;
   }
 
   bool appliesToVelocity(int velocity) const {
@@ -42,20 +52,33 @@ public:
   int velocityHigh = 127;
 
   // Non-destructive metadata
-  int64_t sampleStart = 0;
-  int64_t sampleEnd = 0;
-  int64_t fadeIn = 0;
-  int64_t fadeOut = 0;
+  juce::int64 sampleStart = 0;
+  juce::int64 sampleEnd = 0;
+  juce::int64 fadeIn = 0;
+  juce::int64 fadeOut = 0;
   float volumeMultiplier = 1.0f;
   float fineTuneCents = 0.0f;
   int micLayer = 0;
 
-  juce::ADSR::Parameters adsrParams;
+  sotero::CurvedADSR::Parameters adsrParams;
 
   // Filter parameters (Foundation)
   float filterCutoff = 20000.0f;
   float filterResonance = 0.1f;
   int filterType = 0; // 0: Bypass, 1: LowPass, 2: HighPass, 3: BandPass
+
+  // Master Bypasses
+  bool engineEnableADSR = true;
+  bool engineEnableFilter = true;
+
+  // Helpers to bypass JUCE 8 private access
+  double getSampleRate() const { return sampleRate; }
+  juce::AudioBuffer<float> *getAudioData() const {
+    return juce::SamplerSound::getAudioData();
+  }
+
+private:
+  double sampleRate = 44100.0;
 };
 
 /**
@@ -70,45 +93,61 @@ public:
   }
 
   void prepare(const juce::dsp::ProcessSpec &spec) {
-    tempBuffer.setSize(spec.numChannels, spec.maximumBlockSize);
-    adsr.setSampleRate(spec.sampleRate);
+    tempBuffer.setSize(spec.numChannels, (int)spec.maximumBlockSize);
+    if (spec.sampleRate > 0.0)
+      adsr.setSampleRate(spec.sampleRate);
     processorChain.prepare(spec);
+  }
+
+  void reset() {
+    processorChain.reset();
+    adsr.reset();
   }
 
   void startNote(int midiNoteNumber, float velocity,
                  juce::SynthesiserSound *sound,
                  int currentPitchWheelPosition) override {
+    currentSamplePosition = 0;
+    this->velocity = velocity;
+
     if (auto *s = dynamic_cast<const sotero::SoteroSamplerSound *>(sound)) {
       currentChokeGroupId = s->chokeGroupId;
       adsr.setParameters(s->adsrParams);
 
       auto &filter = processorChain.get<0>();
+      processorChain.setBypassed<0>(s->filterType == 0 ||
+                                    !s->engineEnableFilter);
 
-      switch (s->filterType) {
-      case 1:
-        filter.setType(juce::dsp::StateVariableTPTFilterType::lowpass);
-        break;
-      case 2:
-        filter.setType(juce::dsp::StateVariableTPTFilterType::highpass);
-        break;
-      case 3:
-        filter.setType(juce::dsp::StateVariableTPTFilterType::bandpass);
-        break;
-      default:
-        filter.setType(juce::dsp::StateVariableTPTFilterType::lowpass);
-        break; // Default or Bypassed (via cutoff)
+      if (s->filterType > 0 && s->engineEnableFilter) {
+        switch (s->filterType) {
+        case 1:
+          filter.setType(juce::dsp::StateVariableTPTFilterType::lowpass);
+          break;
+        case 2:
+          filter.setType(juce::dsp::StateVariableTPTFilterType::highpass);
+          break;
+        case 3:
+          filter.setType(juce::dsp::StateVariableTPTFilterType::bandpass);
+          break;
+        default:
+          filter.setType(juce::dsp::StateVariableTPTFilterType::lowpass);
+          break;
+        }
+
+        filter.setCutoffFrequency(s->filterCutoff);
+        // Use 1.0 / sqrt(2) as a safe minimum fallback to avoid resonance
+        // issues and sounding weird
+        filter.setResonance(juce::jmax(
+            0.1f, s->filterResonance > 0.0f ? s->filterResonance : 0.707f));
       }
-
-      filter.setCutoffFrequency(s->filterType > 0 ? s->filterCutoff : 20000.0f);
-      filter.setResonance(s->filterResonance);
 
     } else {
       currentChokeGroupId = 0;
     }
 
-    sourceSamplePosition = 0;
-    juce::SamplerVoice::startNote(midiNoteNumber, velocity, sound,
-                                  currentPitchWheelPosition);
+    auto sr = getSampleRate();
+    if (sr > 0.0)
+      adsr.setSampleRate(sr);
     adsr.noteOn();
   }
 
@@ -137,17 +176,15 @@ public:
                        true);
     tempBuffer.clear();
 
-    const double playbackSpeedRatio =
-        getLevelMultiplier() * (s->getSampleRate() / getSampleRate());
+    const double playbackSpeedRatio = s->getSampleRate() / getSampleRate();
 
     // Simple implementation of sample offset and playback
     // In a real implementation, we'd use an interpolator for pitch/fine tune.
     // For this foundation, we'll implement the basic offset logic.
 
-    auto *reader = s->getAudioFormatReader();
-    if (reader != nullptr) {
+    auto *audioData = s->getAudioData();
+    if (audioData != nullptr) {
       // 1. Calculate Fine Tune Speed Ratio
-      // speedShift = 2 ^ (cents / 1200)
       const double fineTuneRatio = std::pow(2.0, s->fineTuneCents / 1200.0);
       const double masterPitchRatio =
           std::pow(2.0, (double)masterPitchSemitones / 12.0);
@@ -155,21 +192,28 @@ public:
           playbackSpeedRatio * fineTuneRatio * masterPitchRatio;
 
       // 2. Read Samples with Offset
-      int64_t startInSource = s->sampleStart + (int64_t)sourceSamplePosition;
-      int64_t numToRead = (int64_t)numSamples;
+      juce::int64 startInSource =
+          s->sampleStart + (juce::int64)currentSamplePosition;
+      int numToRead = numSamples;
 
       // Safety: Don't exceed sampleEnd
-      if (s->sampleEnd > 0 && startInSource + numToRead > s->sampleEnd) {
-        numToRead = s->sampleEnd - startInSource;
+      juce::int64 endPos =
+          s->sampleEnd > 0 ? s->sampleEnd : audioData->getNumSamples();
+      if (startInSource + numToRead > endPos) {
+        numToRead = (int)(endPos - startInSource);
       }
 
       if (numToRead > 0) {
-        reader->read(&tempBuffer, 0, (int)numToRead, startInSource, true, true);
+        for (int ch = 0; ch < tempBuffer.getNumChannels(); ++ch) {
+          tempBuffer.copyFrom(ch, 0, *audioData,
+                              ch % audioData->getNumChannels(),
+                              (int)startInSource, numToRead);
+        }
 
         // 3. Apply Fades (Non-Destructive)
-        for (int i = 0; i < (int)numToRead; ++i) {
+        for (int i = 0; i < numToRead; ++i) {
           float gain = 1.0f;
-          int64_t currentRelative = (int64_t)sourceSamplePosition + i;
+          juce::int64 currentRelative = (juce::int64)currentSamplePosition + i;
 
           // Fade In
           if (s->fadeIn > 0 && currentRelative < s->fadeIn) {
@@ -177,10 +221,10 @@ public:
           }
 
           // Fade Out
-          int64_t totalLength = (s->sampleEnd > 0)
-                                    ? (s->sampleEnd - s->sampleStart)
-                                    : reader->lengthInSamples;
-          int64_t distFromEnd = totalLength - currentRelative;
+          juce::int64 totalLength = (s->sampleEnd > 0)
+                                        ? (s->sampleEnd - s->sampleStart)
+                                        : audioData->getNumSamples();
+          juce::int64 distFromEnd = totalLength - currentRelative;
           if (s->fadeOut > 0 && distFromEnd < s->fadeOut) {
             gain *= (float)distFromEnd / (float)s->fadeOut;
           }
@@ -190,7 +234,7 @@ public:
           }
         }
 
-        sourceSamplePosition +=
+        currentSamplePosition +=
             (double)numToRead *
             speedRatio; // Move head based on pitch/fine tune
       } else {
@@ -198,13 +242,15 @@ public:
       }
     }
 
-    // Apply Volume Multiplier from Region
-    tempBuffer.applyGain(s->volumeMultiplier);
+    // Apply Volume Multiplier from Region and Note Velocity
+    tempBuffer.applyGain(s->volumeMultiplier * this->velocity);
 
-    // 2. Apply ADSR
-    adsr.applyEnvelopeToBuffer(tempBuffer, 0, numSamples);
+    // 2. Apply ADSR (If enabled by library)
+    if (s->engineEnableADSR) {
+      adsr.applyEnvelopeToBuffer(tempBuffer, 0, numSamples);
+    }
 
-    // 3. Apply Filter
+    // 3. Apply Filter (Handled automatically by setBypassed<0>)
     juce::dsp::AudioBlock<float> block(tempBuffer);
     juce::dsp::ProcessContextReplacing<float> context(block);
     processorChain.process(context);
@@ -215,9 +261,11 @@ public:
                            ch % tempBuffer.getNumChannels(), 0, numSamples);
     }
 
-    if (!adsr.isActive() ||
-        (s->sampleEnd > 0 &&
-         s->sampleStart + sourceSamplePosition >= s->sampleEnd)) {
+    // Check if the voice finished its life due to sample end or ADSR completion
+    if (s->sampleEnd > 0 &&
+        s->sampleStart + currentSamplePosition >= s->sampleEnd) {
+      clearCurrentNote();
+    } else if (s->engineEnableADSR && !adsr.isActive()) {
       clearCurrentNote();
     }
   }
@@ -228,17 +276,20 @@ public:
   void choke(int chokeGroupId) {
     if (isVoiceActive() && currentChokeGroupId == chokeGroupId &&
         chokeGroupId != 0) {
-      adsr.reset(); // Instant stop for choke
-      clearCurrentNote();
+      adsr.quickRelease(); // Professional shutdown instead of instant reset
     }
   }
 
   void setMasterPitch(float semitones) { masterPitchSemitones = semitones; }
 
+  float getADSRProgress() const { return adsr.getVisualTimeElapsed(); }
+
 private:
   int currentChokeGroupId = 0;
   float masterPitchSemitones = 0.0f;
-  juce::ADSR adsr;
+  double currentSamplePosition = 0;
+  float velocity = 0;
+  sotero::CurvedADSR adsr;
   juce::AudioBuffer<float> tempBuffer;
 
   juce::dsp::ProcessorChain<juce::dsp::StateVariableTPTFilter<float>>

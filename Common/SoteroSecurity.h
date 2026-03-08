@@ -1,7 +1,7 @@
 #pragma once
 
 #include <juce_core/juce_core.h>
-
+#include <juce_cryptography/juce_cryptography.h>
 namespace sotero {
 
 /**
@@ -15,10 +15,12 @@ public:
    * @brief Generates a unique Machine ID for DNA binding.
    */
   static juce::String getMachineID() {
-    auto raw = juce::SystemStats::getUserName() + "@" +
+    auto raw = juce::SystemStats::getLogonName() + "@" +
                juce::SystemStats::getDeviceDescription() + ":" +
                juce::SystemStats::getOperatingSystemName();
-    return juce::MD5(raw.toRawUTF8()).toHexString();
+
+    juce::MD5 hash(raw.toUTF8());
+    return hash.toHexString();
   }
 
   /**

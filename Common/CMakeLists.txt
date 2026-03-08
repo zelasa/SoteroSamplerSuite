@@ -11,4 +11,5 @@ target_link_libraries(Common INTERFACE
     juce::juce_audio_basics 
     juce::juce_audio_processors 
     juce::juce_gui_basics
-    juce::juce_gui_extra)
+    juce::juce_gui_extra
+    juce::juce_cryptography)

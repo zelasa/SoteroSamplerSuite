@@ -310,6 +310,10 @@ SetupView::SetupView(sotero::ISoteroAudioEngine &e) : engine(e) {
   };
 }
 
+void SetupView::paint(juce::Graphics &g) {
+  g.fillAll(juce::Colour(0xFF1A1A1A));
+}
+
 void SetupView::resized() {
   auto area = getLocalBounds().reduced(20);
   globalGroup.setBounds(area);
@@ -332,14 +336,33 @@ void SetupView::resized() {
 LibraryDashboard::LibraryDashboard(sotero::ISoteroAudioEngine &e)
     : engine(e), volSlider("VOLUME"), panSlider("PAN") {
   addAndMakeVisible(titleLabel);
-  titleLabel.setFont(juce::Font(28.0f, juce::Font::bold));
-  titleLabel.setJustificationType(juce::Justification::centred);
-  titleLabel.setColour(juce::Label::textColourId, juce::Colours::yellow);
+  titleLabel.setFont(juce::Font(32.0f, juce::Font::bold));
+  titleLabel.setJustificationType(juce::Justification::centredLeft);
+  titleLabel.setColour(juce::Label::textColourId,
+                       juce::Colour(0xFFFFFF00)); // Yellow Neon
 
   addAndMakeVisible(authorLabel);
-  authorLabel.setFont(juce::Font(18.0f, juce::Font::plain));
-  authorLabel.setJustificationType(juce::Justification::centred);
-  authorLabel.setColour(juce::Label::textColourId, juce::Colours::lightgrey);
+  authorLabel.setFont(juce::Font(20.0f, juce::Font::plain));
+  authorLabel.setJustificationType(juce::Justification::centredLeft);
+  authorLabel.setColour(juce::Label::textColourId,
+                        juce::Colour(0xFF00FFFF)); // Cyan Neon
+
+  addAndMakeVisible(artworkComponent);
+  artworkComponent.setInterceptsMouseClicks(false, false);
+
+  addAndMakeVisible(descriptionDisplay);
+  descriptionDisplay.setMultiLine(true);
+  descriptionDisplay.setReadOnly(true);
+  descriptionDisplay.setReturnKeyStartsNewLine(true);
+  descriptionDisplay.setCaretVisible(false);
+  descriptionDisplay.setScrollbarsShown(true);
+  descriptionDisplay.setColour(juce::TextEditor::backgroundColourId,
+                               juce::Colours::transparentBlack);
+  descriptionDisplay.setColour(juce::TextEditor::outlineColourId,
+                               juce::Colours::transparentBlack);
+  descriptionDisplay.setColour(juce::TextEditor::textColourId,
+                               juce::Colours::white.withAlpha(0.8f));
+  descriptionDisplay.setFont(juce::Font(15.0f));
 
   addAndMakeVisible(volSlider);
   volSlider.getSlider().setRange(-60.0, 6.0);
@@ -360,36 +383,65 @@ LibraryDashboard::LibraryDashboard(sotero::ISoteroAudioEngine &e)
 }
 
 void LibraryDashboard::paint(juce::Graphics &g) {
+  auto bounds = getLocalBounds().toFloat();
+
+  // Background
   g.setColour(juce::Colour(0xFF1E1E1E));
-  g.fillRoundedRectangle(getLocalBounds().toFloat().reduced(2), 15.0f);
+  g.fillRoundedRectangle(bounds.reduced(2), 15.0f);
+
+  // Glow effect for artwork area
+  auto artArea = bounds.reduced(20).removeFromLeft(bounds.getHeight() - 40);
+  juce::ColourGradient glow(juce::Colour(0x3300FFFF), artArea.getCentreX(),
+                            artArea.getCentreY(), juce::Colour(0x00000000),
+                            0.0f, 0.0f, true);
+  g.setGradientFill(glow);
+  g.fillRoundedRectangle(artArea.expanded(15), 10.0f);
+
   g.setColour(juce::Colours::white.withAlpha(0.1f));
-  g.drawRoundedRectangle(getLocalBounds().toFloat().reduced(2), 15.0f, 1.5f);
+  g.drawRoundedRectangle(bounds.reduced(2), 15.0f, 1.5f);
 }
 
 void LibraryDashboard::resized() {
   auto area = getLocalBounds().reduced(20);
 
-  auto topArea = area.removeFromTop(120);
-  titleLabel.setBounds(topArea.removeFromTop(50));
-  authorLabel.setBounds(topArea);
+  // Left side: Artwork
+  auto leftArea = area.removeFromLeft(area.getHeight()); // Square for art
+  artworkComponent.setBounds(leftArea.reduced(5));
 
-  area.removeFromTop(20); // Spacer
+  area.removeFromLeft(30); // Spacer
 
-  auto controlArea = area.removeFromBottom(180);
+  // Right side: Info & Controls
+  titleLabel.setBounds(area.removeFromTop(45));
+  authorLabel.setBounds(area.removeFromTop(30));
+
+  area.removeFromTop(15); // Spacer
+
+  // Description area
+  descriptionDisplay.setBounds(area.removeFromTop(150));
+
+  auto controlArea = area.removeFromBottom(150);
   int kw = controlArea.getWidth() / 2;
-  volSlider.setBounds(controlArea.removeFromLeft(kw).reduced(20));
-  panSlider.setBounds(controlArea.reduced(20));
 
-  auto vuArea = area.reduced(100, 20);
-  vuL.setBounds(vuArea.removeFromLeft(40));
-  vuArea.removeFromLeft(20);
-  vuR.setBounds(vuArea.removeFromLeft(40));
+  auto vArea = controlArea.removeFromLeft(kw).reduced(10);
+  volSlider.setBounds(vArea);
+
+  auto pArea = controlArea.reduced(10);
+  panSlider.setBounds(pArea.removeFromTop(100));
+
+  // Small VU meters integrated below
+  auto vuArea = pArea.reduced(20, 0);
+  vuL.setBounds(vuArea.removeFromLeft(15));
+  vuArea.removeFromLeft(5);
+  vuR.setBounds(vuArea.removeFromLeft(15));
 }
 
 void LibraryDashboard::timerCallback() {
   titleLabel.setText(engine.getLibraryName(), juce::dontSendNotification);
   authorLabel.setText("by " + engine.getLibraryAuthor(),
                       juce::dontSendNotification);
+  descriptionDisplay.setText(engine.getLibraryDescription(),
+                             juce::dontSendNotification);
+  artworkComponent.setImage(engine.getLibraryArtwork());
 
   vuL.setLevel(engine.getLevelL());
   vuR.setLevel(engine.getLevelR());
@@ -407,6 +459,7 @@ SoteroPlayerUI::SoteroPlayerUI(sotero::ISoteroAudioEngine &e)
     performanceView->setVisible(true);
     setupView->setVisible(false);
     libraryBrowser->setVisible(false);
+    libraryDashboard->setVisible(false);
   };
 
   addAndMakeVisible(setupBtn);
@@ -416,6 +469,7 @@ SoteroPlayerUI::SoteroPlayerUI(sotero::ISoteroAudioEngine &e)
     performanceView->setVisible(false);
     setupView->setVisible(true);
     libraryBrowser->setVisible(false);
+    libraryDashboard->setVisible(false);
   };
 
   addAndMakeVisible(libBtn);
@@ -424,8 +478,15 @@ SoteroPlayerUI::SoteroPlayerUI(sotero::ISoteroAudioEngine &e)
   libBtn.onClick = [this] {
     performanceView->setVisible(false);
     setupView->setVisible(false);
-    libraryBrowser->setVisible(true);
-    libraryBrowser->refresh();
+
+    if (engine.isLibraryLoaded()) {
+      libraryDashboard->setVisible(true);
+      libraryBrowser->setVisible(false);
+    } else {
+      libraryDashboard->setVisible(false);
+      libraryBrowser->setVisible(true);
+      libraryBrowser->refresh();
+    }
   };
 
   addAndMakeVisible(midiMonitorLabel);
@@ -454,6 +515,10 @@ SoteroPlayerUI::SoteroPlayerUI(sotero::ISoteroAudioEngine &e)
   libraryBrowser = std::make_unique<LibraryBrowser>(engine);
   addAndMakeVisible(*libraryBrowser);
   libraryBrowser->setVisible(false);
+
+  libraryDashboard = std::make_unique<LibraryDashboard>(engine);
+  addAndMakeVisible(*libraryDashboard);
+  libraryDashboard->setVisible(false);
 
   addAndMakeVisible(keyboard);
 
@@ -489,6 +554,7 @@ void SoteroPlayerUI::resized() {
   performanceView->setBounds(area);
   setupView->setBounds(area);
   libraryBrowser->setBounds(area);
+  libraryDashboard->setBounds(area);
 }
 
 void SoteroPlayerUI::timerCallback() {
@@ -510,7 +576,8 @@ void SoteroPlayerUI::timerCallback() {
 
 // --- LibraryBrowser Implementation ---
 
-LibraryBrowser::Item::Item(const LibraryEntry &e) : entry(e) {}
+LibraryBrowser::Item::Item(const SoteroLibraryManager::LibraryEntry &e)
+    : entry(e) {}
 
 void LibraryBrowser::Item::paint(juce::Graphics &g) {
   auto bounds = getLocalBounds().toFloat().reduced(2);

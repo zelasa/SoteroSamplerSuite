@@ -75,9 +75,9 @@ public:
 private:
   sotero::ISoteroAudioEngine &engine;
   juce::Label titleLabel, authorLabel;
-  juce::Image artwork;
+  juce::ImageComponent artworkComponent;
+  juce::TextEditor descriptionDisplay;
   sotero::HardwareKnob volSlider, panSlider;
-  juce::TextButton loadBtn;
   sotero::VUMeter vuL, vuR;
   std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> volAtt,
       panAtt;
@@ -113,9 +113,9 @@ public:
   void resized() override;
 
   struct Item : public juce::Component {
-    LibraryEntry entry;
+    SoteroLibraryManager::LibraryEntry entry;
     std::function<void(juce::File)> onLoadRequested;
-    Item(const LibraryEntry &e);
+    Item(const SoteroLibraryManager::LibraryEntry &e);
     void paint(juce::Graphics &g) override;
     void mouseDown(const juce::MouseEvent &) override;
     bool isSelected = false;
@@ -152,6 +152,7 @@ private:
   std::unique_ptr<PerformanceView> performanceView;
   std::unique_ptr<SetupView> setupView;
   std::unique_ptr<LibraryBrowser> libraryBrowser;
+  std::unique_ptr<LibraryDashboard> libraryDashboard;
 
   juce::Label midiMonitorLabel, midiVelocityLabel;
   juce::ImageComponent logo;

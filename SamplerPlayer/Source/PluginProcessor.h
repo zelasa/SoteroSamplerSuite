@@ -2,6 +2,7 @@
 
 #include "../../Common/SoteroArchive.h"
 #include "../../Common/SoteroEngineInterface.h"
+#include "../../Common/SoteroLoopEngine.h"
 #include "SoteroSamplerVoice.h"
 #include <JuceHeader.h>
 
@@ -48,10 +49,19 @@ public:
 
   float getLevelL() const override { return lastMasterLevelL.load(); }
   float getLevelR() const override { return lastMasterLevelR.load(); }
-  juce::String getLibraryName() const override { return currentLibraryName; }
+
+  juce::String getLibraryName() const override { return currentMetadata.name; }
   juce::String getLibraryAuthor() const override {
-    return currentLibraryAuthor;
+    return currentMetadata.author;
   }
+  juce::String getLibraryDescription() const override {
+    return currentMetadata.description;
+  }
+  juce::Image getLibraryArtwork() const override { return currentArtwork; }
+  bool isLibraryLoaded() const override {
+    return currentLibraryFile.existsAsFile();
+  }
+
   int getLastMidiNote() const override { return lastMidiNote.load(); }
   int getLastMidiVelocity() const override { return lastMidiVelocity.load(); }
   juce::MidiKeyboardState &getKeyboardState() override { return keyboardState; }
@@ -66,10 +76,13 @@ public:
 
 private:
   juce::File currentLibraryFile;
+  juce::dsp::ProcessSpec lastProcessSpec;
+  bool hasPrepared = false;
   juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
 
-  juce::String currentLibraryName;
-  juce::String currentLibraryAuthor;
+  sotero::LibraryMetadata currentMetadata;
+  juce::Image currentArtwork;
+
   std::atomic<int> lastMidiNote{-1};
   std::atomic<int> lastMidiVelocity{-1};
   std::atomic<int> currentView{0}; // 0: Performance, 1: Setup
@@ -83,6 +96,7 @@ private:
   juce::dsp::Reverb::Parameters reverbParams;
 
   juce::MidiKeyboardState keyboardState;
+  sotero::SoteroLoopEngine loopEngine;
 
   std::atomic<float> lastMasterLevelL{0.0f};
   std::atomic<float> lastMasterLevelR{0.0f};
