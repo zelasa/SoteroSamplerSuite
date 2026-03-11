@@ -155,6 +155,7 @@ private:
   std::unique_ptr<LibraryDashboard> libraryDashboard;
 
   juce::Label midiMonitorLabel, midiVelocityLabel;
+  juce::Label versionLabel{"Version", "v0.4.0"};
   juce::ImageComponent logo;
   SoteroKeyboard keyboard;
 };

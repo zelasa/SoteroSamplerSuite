@@ -501,6 +501,11 @@ SoteroPlayerUI::SoteroPlayerUI(sotero::ISoteroAudioEngine &e)
   midiVelocityLabel.setColour(juce::Label::textColourId, juce::Colours::yellow);
   midiVelocityLabel.setFont(juce::Font(16.0f, juce::Font::bold));
 
+  addAndMakeVisible(versionLabel);
+  versionLabel.setFont(juce::Font(14.0f));
+  versionLabel.setColour(juce::Label::textColourId, juce::Colours::grey);
+  versionLabel.setJustificationType(juce::Justification::centredRight);
+
   addAndMakeVisible(logo);
   // (We'll expect BinaryData to be available in the apps, but here we just
   // placeholder or expect common code to provide it. For now, just setup.)
@@ -539,8 +544,10 @@ void SoteroPlayerUI::resized() {
   // Monitor (Right)
   auto monitorArea = topBar.removeFromRight(200);
   midiMonitorLabel.setBounds(
+      monitorArea.removeFromTop(monitorArea.getHeight() / 3));
+  midiVelocityLabel.setBounds(
       monitorArea.removeFromTop(monitorArea.getHeight() / 2));
-  midiVelocityLabel.setBounds(monitorArea);
+  versionLabel.setBounds(monitorArea);
 
   // Navigation (Center)
   auto tabs = topBar.reduced(50, 5);

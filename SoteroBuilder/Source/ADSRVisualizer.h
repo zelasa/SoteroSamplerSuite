@@ -23,12 +23,14 @@ public:
   std::function<void(float)> onSustainChange;
   std::function<void(float)> onReleaseChange;
   std::function<void(float)> onPeakLevelChange;
+  std::function<void(float)> onSustainTimeChange;
   std::function<void(float)> onAttackCurveChange;
   std::function<void(float)> onDecayCurveChange;
   std::function<void(float)> onReleaseCurveChange;
 
   void setParams(float a, float d, float s, float r, float aC = 0.0f,
-                 float dC = 0.0f, float rC = 0.0f, float peak = 1.0f) {
+                 float dC = 0.0f, float rC = 0.0f, float peak = 1.0f,
+                 float sTime = 0.5f) {
     if (draggingIndex != -1)
       return; // Don't interrupt drag
 
@@ -40,6 +42,7 @@ public:
     decayCurve = dC;
     releaseCurve = rC;
     peakLevel = peak;
+    sustainTime = sTime;
     repaint();
   }
 
@@ -66,29 +69,28 @@ public:
     juce::Path path;
     path.startNewSubPath(nodes[0]);
 
-    // Attack (Curved)
-    drawCurvedSegment(path, nodes[0], nodes[1], attackCurve);
-    // Decay (Curved)
-    drawCurvedSegment(path, nodes[1], nodes[2], decayCurve);
-    // Sustain (Linear)
-    path.lineTo(nodes[3]);
-    // Release (Curved)
-    drawCurvedSegment(path, nodes[3], nodes[4], releaseCurve);
-
-    // --- Draw Fill & Stroke ---
-    float opacity = isEnabled() ? 1.0f : 0.2f;
-    g.setColour(juce::Colours::yellow.withAlpha(0.1f * opacity));
-    juce::Path fillP = path;
-    fillP.lineTo(nodes[4].getX(), r.getBottom());
-    fillP.lineTo(nodes[0].getX(), r.getBottom());
-    fillP.closeSubPath();
-    g.fillPath(fillP);
-
-    g.setColour(juce::Colours::yellow.withAlpha(opacity));
-    g.strokePath(path, juce::PathStrokeType(2.0f));
-
-    // --- Draw Handles ---
     if (isEnabled()) {
+      // Attack (Curved)
+      drawCurvedSegment(path, nodes[0], nodes[1], attackCurve);
+      // Decay (Curved)
+      drawCurvedSegment(path, nodes[1], nodes[2], decayCurve);
+      // Sustain (Linear)
+      path.lineTo(nodes[3]);
+      // Release (Curved)
+      drawCurvedSegment(path, nodes[3], nodes[4], releaseCurve);
+
+      // --- Draw Fill & Stroke ---
+      g.setColour(juce::Colours::yellow.withAlpha(0.1f));
+      juce::Path fillP = path;
+      fillP.lineTo(nodes[4].getX(), r.getBottom());
+      fillP.lineTo(nodes[0].getX(), r.getBottom());
+      fillP.closeSubPath();
+      g.fillPath(fillP);
+
+      g.setColour(juce::Colours::yellow);
+      g.strokePath(path, juce::PathStrokeType(2.0f));
+
+      // --- Draw Handles ---
       auto allHandles = getAllPotentialHandles(r);
       for (int i = 0; i < (int)allHandles.size(); ++i) {
         auto hp = allHandles[i];
@@ -108,49 +110,104 @@ public:
           g.drawEllipse(hp.getX() - 3.0f, hp.getY() - 3.0f, 6.0f, 6.0f, 1.0f);
         }
       }
-    } else {
-      g.setColour(juce::Colours::white.withAlpha(0.4f));
-      g.setFont(12.0f);
-      g.drawFittedText("SELECT A SAMPLE TO EDIT ADSR", getLocalBounds(),
-                       juce::Justification::centred, 1);
-    }
 
-    // --- Draw Time Labels ---
-    g.setColour(juce::Colours::white.withAlpha(0.3f));
-    g.setFont(10.0f);
-    for (int i = 0; i <= 5; ++i) {
-      float x = r.getX() + (float)i * (r.getWidth() / 5.0f);
-      g.drawFittedText(
-          juce::String(i * 1000) + "ms",
-          juce::Rectangle<int>((int)x - 20, (int)r.getBottom() + 2, 40, 15),
-          juce::Justification::centredTop, 1);
-    }
+      // --- Draw Time Labels ---
+      g.setColour(juce::Colours::white.withAlpha(0.3f));
+      g.setFont(10.0f);
+      float currentMaxT = getCurrentMaxT();
+      float labelInterval = 0.5f;
+      if (currentMaxT <= 0.5f)
+        labelInterval = 0.1f;
+      else if (currentMaxT <= 1.2f)
+        labelInterval = 0.2f;
+      else if (currentMaxT <= 2.5f)
+        labelInterval = 0.5f;
+      else if (currentMaxT <= 6.0f)
+        labelInterval = 1.0f;
+      else if (currentMaxT <= 12.0f)
+        labelInterval = 2.0f;
+      else
+        labelInterval = 5.0f;
 
-    // --- Draw Playhead ---
-    if (playheadTime >= 0.0f) {
-      float px = r.getX() + (playheadTime / maxT) * r.getWidth();
-      if (px <= r.getRight()) {
+      for (float t = 0; t <= currentMaxT; t += labelInterval) {
+        float x = r.getX() + (t / currentMaxT) * r.getWidth();
+        g.drawFittedText(
+            juce::String((int)(t * 1000)) + "ms",
+            juce::Rectangle<int>((int)x - 20, (int)r.getBottom() + 2, 40, 15),
+            juce::Justification::centredTop, 1);
+      }
+
+      // --- Draw Playhead ---
+      float pTimeToShow = (playheadTime < 0.0f) ? 0.0f : playheadTime;
+
+      float px = r.getX() + (pTimeToShow / currentMaxT) * r.getWidth();
+      if (px <= r.getRight() + 0.5f) {
         g.setColour(juce::Colours::white.withAlpha(0.6f));
         g.drawVerticalLine((int)px, r.getY(), r.getBottom());
 
-        // Find Y on path
+        // Optimized precise Y calculation (matches getNodes logic)
+        float currentPeakY = r.getY() + (1.0f - peakLevel) * r.getHeight();
+        float sustainY = r.getY() + (1.0f - sustain) * r.getHeight();
         float py = r.getBottom();
-        // Simple search for Y at X
-        for (float t = 0; t <= 1.0f; t += 0.01f) {
-          auto p = path.getPointAlongPath(t * path.getLength());
-          if (std::abs(p.getX() - px) < 2.0f) {
-            py = p.getY();
-            break;
+
+        if (pTimeToShow <= attack) {
+          if (attack > 0.0001f) {
+            py = getPointOnCurve(
+                     {r.getX(), r.getBottom()},
+                     {r.getX() + (attack / currentMaxT) * r.getWidth(),
+                      currentPeakY},
+                     attackCurve, pTimeToShow / attack)
+                     .getY();
+          } else {
+            py = currentPeakY;
+          }
+        } else if (pTimeToShow <= attack + decay) {
+          if (decay > 0.0001f) {
+            py =
+                getPointOnCurve(
+                    {r.getX() + (attack / currentMaxT) * r.getWidth(),
+                     currentPeakY},
+                    {r.getX() + ((attack + decay) / currentMaxT) * r.getWidth(),
+                     sustainY},
+                    decayCurve, (pTimeToShow - attack) / decay)
+                    .getY();
+          } else {
+            py = sustainY;
+          }
+        } else if (pTimeToShow <= attack + decay + sustainTime) {
+          py = sustainY;
+        } else if (pTimeToShow <= attack + decay + sustainTime + release) {
+          if (release > 0.0001f) {
+            py =
+                getPointOnCurve(
+                    {r.getX() + ((attack + decay + sustainTime) / currentMaxT) *
+                                    r.getWidth(),
+                     sustainY},
+                    {r.getX() + ((attack + decay + sustainTime + release) /
+                                 currentMaxT) *
+                                    r.getWidth(),
+                     r.getBottom()},
+                    releaseCurve,
+                    (pTimeToShow - attack - decay - sustainTime) / release)
+                    .getY();
+          } else {
+            py = r.getBottom();
           }
         }
+
         g.setColour(juce::Colours::white);
         g.fillEllipse(px - 3.0f, py - 3.0f, 6.0f, 6.0f);
       }
+    } else {
+      g.setColour(juce::Colours::white.withAlpha(0.2f));
+      g.setFont(juce::Font(14.0f, juce::Font::italic));
+      g.drawFittedText("SELECT A SAMPLE TO EDIT ADSR", getLocalBounds(),
+                       juce::Justification::centred, 1);
     }
   }
 
   void setPlayheadTime(float t) {
-    if (std::abs(playheadTime - t) > 0.001f) {
+    if (std::abs(playheadTime - t) > 0.0001f) {
       playheadTime = t;
       repaint();
     }
@@ -169,6 +226,7 @@ public:
       if (e.position.getDistanceSquaredFrom(handles[i]) < 100.0f) {
         draggingIndex = i;
         dragStartPos = e.position;
+        dragMaxT = getCurrentMaxT();
         dragStartValues = {attack,       decay,       sustain,
                            release,      attackCurve, decayCurve,
                            releaseCurve, peakLevel,   sustainTime};
@@ -183,31 +241,35 @@ public:
       return;
 
     auto r = getLocalBounds().reduced(30, 20).toFloat();
-    float dx = (e.position.getX() - dragStartPos.getX()) / r.getWidth() * maxT;
+    float currentMaxT = draggingIndex != -1 ? dragMaxT : getCurrentMaxT();
+    float dx =
+        (e.position.getX() - dragStartPos.getX()) / r.getWidth() * currentMaxT;
     float dy = (dragStartPos.getY() - e.position.getY()) / r.getHeight();
 
     // Mapping logic
     if (draggingIndex == 1) { // Attack Node
-      attack = juce::jlimit(0.001f, maxT, dragStartValues.a + dx);
+      attack = juce::jlimit(0.001f, dragMaxT, dragStartValues.a + dx);
       peakLevel = juce::jlimit(0.0f, 1.0f, dragStartValues.peak + dy);
       if (onAttackChange)
         onAttackChange(attack);
       if (onPeakLevelChange)
         onPeakLevelChange(peakLevel);
     } else if (draggingIndex == 2) { // Decay Node
-      decay = juce::jlimit(0.001f, maxT, dragStartValues.d + dx);
+      decay = juce::jlimit(0.001f, dragMaxT, dragStartValues.d + dx);
       sustain = juce::jlimit(0.0f, 1.0f, dragStartValues.s + dy);
       if (onDecayChange)
         onDecayChange(decay);
       if (onSustainChange)
         onSustainChange(sustain);
     } else if (draggingIndex == 3) { // Sustain End Node
-      sustainTime = juce::jlimit(0.1f, maxT, dragStartValues.sTime + dx);
+      sustainTime = juce::jlimit(0.1f, dragMaxT, dragStartValues.sTime + dx);
       sustain = juce::jlimit(0.0f, 1.0f, dragStartValues.s + dy);
       if (onSustainChange)
         onSustainChange(sustain);
+      if (onSustainTimeChange)
+        onSustainTimeChange(sustainTime);
     } else if (draggingIndex == 4) { // Release Node
-      release = juce::jlimit(0.001f, maxT, dragStartValues.r + dx);
+      release = juce::jlimit(0.001f, dragMaxT, dragStartValues.r + dx);
       if (onReleaseChange)
         onReleaseChange(release);
     } else if (draggingIndex == 5) { // Attack Slope
@@ -252,20 +314,21 @@ private:
 
   std::vector<juce::Point<float>> getNodes(juce::Rectangle<float> r) {
     std::vector<juce::Point<float>> n;
+    float currentMaxT = getCurrentMaxT();
     float x = r.getX();
     // 0: Start
     n.push_back({x, r.getBottom()});
     // 1: Attack End
-    x += (attack / maxT) * r.getWidth();
+    x += (attack / currentMaxT) * r.getWidth();
     n.push_back({x, r.getY() + (1.0f - peakLevel) * r.getHeight()});
     // 2: Decay End
-    x += (decay / maxT) * r.getWidth();
+    x += (decay / currentMaxT) * r.getWidth();
     n.push_back({x, r.getY() + (1.0f - sustain) * r.getHeight()});
     // 3: Sustain End
-    x += (sustainTime / maxT) * r.getWidth();
+    x += (sustainTime / currentMaxT) * r.getWidth();
     n.push_back({x, r.getY() + (1.0f - sustain) * r.getHeight()});
     // 4: Release End
-    x += (release / maxT) * r.getWidth();
+    x += (release / currentMaxT) * r.getWidth();
     n.push_back({x, r.getBottom()});
 
     return n;
@@ -303,15 +366,20 @@ private:
             p1.getY() + (p2.getY() - p1.getY()) * ct};
   }
 
+  float getCurrentMaxT() const {
+    float total = attack + decay + sustainTime + release;
+    return juce::jmax(0.5f, total * 1.1f);
+  }
+
   float attack = 0.1f, decay = 0.1f, sustain = 1.0f, release = 0.2f;
   float attackCurve = 0.0f, decayCurve = 0.0f, releaseCurve = 0.0f;
   float peakLevel = 1.0f;
   float sustainTime = 0.5f; // Visual duration
-  const float maxT = 5.0f;
 
   float playheadTime = -1.0f;
   int draggingIndex = -1;
   int hoverIndex = -1;
+  float dragMaxT = 5.0f;
   juce::Point<float> dragStartPos;
   struct State {
     float a, d, s, r, aC, dC, rC, peak, sTime;

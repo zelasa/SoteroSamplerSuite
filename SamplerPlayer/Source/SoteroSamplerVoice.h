@@ -2,6 +2,7 @@
 
 #include "../../Common/CurvedADSR.h"
 #include <JuceHeader.h>
+#include <atomic>
 #include <cmath>
 
 namespace sotero {
@@ -22,14 +23,16 @@ public:
                      float d = 0.1f, float s = 1.0f, float r = 0.1f,
                      float ac = 0.0f, float dc = 0.0f, float rc = 0.0f,
                      int fType = 0, float fCut = 20000.0f, float fRes = 1.0f,
-                     bool eAdsr = true, bool eFilter = true)
+                     bool eAdsr = true, bool eFilter = true,
+                     float vSustain = 0.5f)
       : juce::SamplerSound(name, source, midiNotes, midiRootNote,
                            attackTimeSecs, releaseTimeSecs,
                            maxSampleLengthSecs),
         chokeGroupId(chokeGroup), velocityLow(vLow), velocityHigh(vHigh),
         sampleStart(start), sampleEnd(end), fadeIn(fIn), fadeOut(fOut),
         volumeMultiplier(vol), fineTuneCents(fineTune), micLayer(micLayer),
-        filterType(fType), filterCutoff(fCut), filterResonance(fRes) {
+        midiRootNote(midiRootNote), filterType(fType), filterCutoff(fCut),
+        filterResonance(fRes) {
 
     sampleRate = source.sampleRate;
     adsrParams.attack = a;
@@ -39,6 +42,7 @@ public:
     adsrParams.attackCurve = ac;
     adsrParams.decayCurve = dc;
     adsrParams.releaseCurve = rc;
+    adsrParams.visualSustain = vSustain;
     engineEnableADSR = eAdsr;
     engineEnableFilter = eFilter;
   }
@@ -47,6 +51,7 @@ public:
     return velocity >= velocityLow && velocity <= velocityHigh;
   }
 
+  int midiRootNote = 0;
   int chokeGroupId = 0;
   int velocityLow = 0;
   int velocityHigh = 127;
@@ -73,6 +78,7 @@ public:
 
   // Helpers to bypass JUCE 8 private access
   double getSampleRate() const { return sampleRate; }
+  int getMidiRootNote() const { return midiRootNote; }
   juce::AudioBuffer<float> *getAudioData() const {
     return juce::SamplerSound::getAudioData();
   }
@@ -148,6 +154,7 @@ public:
     auto sr = getSampleRate();
     if (sr > 0.0)
       adsr.setSampleRate(sr);
+    lastTriggerTime.store(juce::Time::getMillisecondCounter());
     adsr.noteOn();
   }
 
@@ -245,9 +252,11 @@ public:
     // Apply Volume Multiplier from Region and Note Velocity
     tempBuffer.applyGain(s->volumeMultiplier * this->velocity);
 
-    // 2. Apply ADSR (If enabled by library)
+    // 2. Apply ADSR (Always advance for visualizer tracking)
     if (s->engineEnableADSR) {
       adsr.applyEnvelopeToBuffer(tempBuffer, 0, numSamples);
+    } else {
+      adsr.advance(numSamples);
     }
 
     // 3. Apply Filter (Handled automatically by setBypassed<0>)
@@ -284,11 +293,14 @@ public:
 
   float getADSRProgress() const { return adsr.getVisualTimeElapsed(); }
 
+  uint32_t getTriggerTime() const { return lastTriggerTime.load(); }
+
 private:
   int currentChokeGroupId = 0;
   float masterPitchSemitones = 0.0f;
   double currentSamplePosition = 0;
   float velocity = 0;
+  std::atomic<uint32_t> lastTriggerTime{0};
   sotero::CurvedADSR adsr;
   juce::AudioBuffer<float> tempBuffer;
 

@@ -1,6 +1,8 @@
 #pragma once
 #include "../../Common/SoteroFormat.h"
 #include <JuceHeader.h>
+#include <functional>
+
 
 namespace sotero {
 
@@ -25,6 +27,7 @@ public:
   }
   bool getActive() const { return isActive; }
   bool isDragging() const { return currentDragMode != DragMode::None; }
+  bool getIsDetachedDrag() const { return isDetachedDrag; }
 
   void updateFromMapping(const KeyMapping &m) {
     currentMapping = m;
@@ -32,7 +35,9 @@ public:
   }
   const KeyMapping &getMapping() const { return currentMapping; }
 
-  std::function<void(bool &stickyTop, bool &stickyBottom)> onDragStart;
+  enum class DragMode { None, TopHandle, BottomHandle, Body, Eraser };
+  DragMode getCurrentDragMode() const { return currentDragMode; }
+
   std::function<void(const KeyMapping &)> onBoundsChanged;
   std::function<void(const KeyMapping &)> onDragFinished;
   std::function<void(const KeyMapping &)> onClear;
@@ -41,6 +46,7 @@ public:
   std::function<void(const KeyMapping &)> onAuditionEnd;
   std::function<void()> onSelect;
   std::function<void(int)> onRequestMove; // delta notes (horizontal drag)
+  std::function<void(bool, bool)> onDragStart;
 
 private:
   KeyMapping currentMapping;
@@ -49,11 +55,11 @@ private:
 
   bool isHovering = false;
   bool isActive = false;
-  enum class DragMode { None, TopHandle, BottomHandle, Body, Eraser };
   DragMode currentDragMode = DragMode::None;
   int dragStartY = 0;
   int initialVelHigh = 127;
   int initialVelLow = 0;
+  bool isDetachedDrag = false;
 
   juce::Rectangle<int> getTopHandleBounds() const;
   juce::Rectangle<int> getBottomHandleBounds() const;

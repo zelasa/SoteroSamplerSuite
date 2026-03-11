@@ -230,6 +230,8 @@ private:
     // Spec: "TO PLAYER" Master toggle
     juce::ToggleButton toPlayerToggle{"TO PLAYER"};
 
+    juce::Label versionLabel{"Version", "v0.4.0"};
+
     HeaderPanel() {
       addAndMakeVisible(titleLabel);
       addAndMakeVisible(devModeBtn);
@@ -239,10 +241,15 @@ private:
       addAndMakeVisible(newBtn);
       addAndMakeVisible(closeBtn);
       addAndMakeVisible(toPlayerToggle);
+      addAndMakeVisible(versionLabel);
 
       titleLabel.setFont(juce::Font(22.0f, juce::Font::bold));
       titleLabel.setJustificationType(juce::Justification::centred);
       titleLabel.setColour(juce::Label::textColourId, juce::Colours::yellow);
+
+      versionLabel.setFont(juce::Font(14.0f));
+      versionLabel.setJustificationType(juce::Justification::centredLeft);
+      versionLabel.setColour(juce::Label::textColourId, juce::Colours::grey);
 
       toPlayerToggle.setColour(juce::ToggleButton::textColourId,
                                juce::Colours::grey);
@@ -266,6 +273,9 @@ private:
 
       // Center-ish: Title
       titleLabel.setBounds(r.removeFromTop(30));
+
+      // Version
+      versionLabel.setBounds(r.removeFromLeft(100).reduced(2));
 
       // Toggle
       toPlayerToggle.setBounds(r.removeFromRight(100).reduced(2));
@@ -315,6 +325,12 @@ private:
 
       addAndMakeVisible(filterTitle);
       addAndMakeVisible(filterTypeSelector);
+      filterTypeSelector.addItem("OFF", 1);
+      filterTypeSelector.addItem("LP", 2);
+      filterTypeSelector.addItem("HP", 3);
+      filterTypeSelector.addItem("BP", 4);
+      filterTypeSelector.setSelectedId(1, juce::dontSendNotification);
+
       addAndMakeVisible(cutoffSlider);
       addAndMakeVisible(resSlider);
       addAndMakeVisible(velSensSlider);
@@ -358,16 +374,101 @@ private:
 
   // --- Advanced FX & Loops (Placeholder) ---
   struct AdvancedPanel : public juce::Component {
+    juce::Label title{"Advanced", "MASTER FX & DYNAMICS"};
+
+    // Compressor
+    juce::GroupComponent compGroup{"", "COMPRESSOR"};
+    juce::Slider compThresh, compRatio, compAttack, compRelease;
+    juce::ComboBox compMode;
+
+    // Reverb
+    juce::GroupComponent revGroup{"", "REVERB"};
+    juce::ToggleButton revEnable{"ENABLE"};
+    juce::Slider revSize, revMix;
+
+    // Master Tone
+    juce::Label toneLabel{"Tone", "TONE"};
+    juce::Slider toneSlider;
+
+    AdvancedPanel() {
+      addAndMakeVisible(title);
+      title.setColour(juce::Label::textColourId, juce::Colours::orange);
+      title.setFont(juce::Font(16.0f, juce::Font::bold));
+
+      // Compressor Setup
+      addAndMakeVisible(compGroup);
+      addAndMakeVisible(compThresh);
+      addAndMakeVisible(compRatio);
+      addAndMakeVisible(compAttack);
+      addAndMakeVisible(compRelease);
+      addAndMakeVisible(compMode);
+      compMode.addItem("OFF", 1);
+      compMode.addItem("CLEAN", 2);
+      compMode.addItem("WARM", 3);
+      compMode.addItem("PUNCH", 4);
+      compMode.setSelectedId(1, juce::dontSendNotification);
+
+      // Reverb Setup
+      addAndMakeVisible(revGroup);
+      addAndMakeVisible(revEnable);
+      addAndMakeVisible(revSize);
+      addAndMakeVisible(revMix);
+
+      // Tone
+      addAndMakeVisible(toneLabel);
+      addAndMakeVisible(toneSlider);
+
+      auto setupSlider = [](juce::Slider &s, juce::String suffix) {
+        s.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+        s.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 15);
+        s.setTextValueSuffix(suffix);
+      };
+
+      setupSlider(compThresh, " dB");
+      setupSlider(compRatio, ":1");
+      setupSlider(compAttack, " ms");
+      setupSlider(compRelease, " ms");
+      setupSlider(revSize, " %");
+      setupSlider(revMix, " %");
+      setupSlider(toneSlider, "");
+      toneSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+    }
+
     void paint(juce::Graphics &g) override {
       auto r = getLocalBounds().reduced(2);
       g.setColour(juce::Colour(0xff0a0a0a));
       g.fillRoundedRectangle(r.toFloat(), 4.0f);
       g.setColour(juce::Colours::white.withAlpha(0.1f));
       g.drawRoundedRectangle(r.toFloat(), 4.0f, 1.0f);
+    }
 
-      g.setColour(juce::Colours::white.withAlpha(0.3f));
-      g.drawFittedText("ADVANCED FX & LOOPS", getLocalBounds(),
-                       juce::Justification::centred, 1);
+    void resized() override {
+      auto r = getLocalBounds().reduced(10);
+      title.setBounds(r.removeFromTop(25));
+
+      auto fxArea = r;
+      auto compArea =
+          fxArea.removeFromLeft(fxArea.getWidth() * 0.55f).reduced(5);
+      compGroup.setBounds(compArea);
+      auto c = compArea.reduced(5, 20);
+      compMode.setBounds(c.removeFromTop(20));
+      float cw = c.getWidth() / 4.0f;
+      compThresh.setBounds(c.removeFromLeft(cw));
+      compRatio.setBounds(c.removeFromLeft(cw));
+      compAttack.setBounds(c.removeFromLeft(cw));
+      compRelease.setBounds(c);
+
+      auto revArea = fxArea.removeFromLeft(fxArea.getWidth() * 0.7f).reduced(5);
+      revGroup.setBounds(revArea);
+      auto rv = revArea.reduced(5, 20);
+      revEnable.setBounds(rv.removeFromTop(20));
+      float rw = rv.getWidth() / 2.0f;
+      revSize.setBounds(rv.removeFromLeft(rw));
+      revMix.setBounds(rv);
+
+      auto toneArea = fxArea.reduced(5);
+      toneLabel.setBounds(toneArea.removeFromTop(20));
+      toneSlider.setBounds(toneArea);
     }
   } advancedPanel;
 
@@ -383,6 +484,7 @@ private:
     void paint(juce::Graphics &g) override;
 
     juce::Rectangle<int> vuL, vuR;
+    juce::Slider volSlider;
   } metadataPanel;
 
   // --- Grid Mapper Section ---
@@ -541,8 +643,7 @@ private:
   void updateOctave(int newOctave);
 
   juce::File currentLibraryFile;
-  bool dragStickyTop = false;
-  bool dragStickyBottom = false;
+
 
   void updateGridUI();
   void updateMetadataFromUI();
@@ -585,16 +686,36 @@ private:
   juce::dsp::Reverb masterReverb;
   juce::dsp::Reverb::Parameters reverbParams;
 
+  // Attachments
+  using SliderAtt = juce::AudioProcessorValueTreeState::SliderAttachment;
+  using ButtonAtt = juce::AudioProcessorValueTreeState::ButtonAttachment;
+  using ComboAtt = juce::AudioProcessorValueTreeState::ComboBoxAttachment;
+
+  std::unique_ptr<ComboAtt> compModeAtt;
+  std::unique_ptr<SliderAtt> compThreshAtt, compRatioAtt, compAttackAtt,
+      compReleaseAtt;
+  std::unique_ptr<ButtonAtt> revEnableAtt;
+  std::unique_ptr<SliderAtt> revSizeAtt, revMixAtt, toneAtt, volAtt, pitchAtt;
+
   std::atomic<float> lastLevelL{0.0f}, lastLevelR{0.0f};
   std::atomic<int> lastMidiNote{-1}, lastMidiVelocity{-1};
+
+  enum class UIMode { Developer, UserPlayer };
+  UIMode currentUIMode = UIMode::Developer;
+  void setUIMode(UIMode mode);
 
   void alignLayers();
   bool isRangeFree(int note, int micLayer, int lo, int hi, int excludeIndex);
   void resolveCollisions(int note, int micLayer, int &targetLo, int &targetHi,
-                         int excludeIndex, bool allowCrossSync = true,
+                         int excludeIndex, bool allowCrossSync, 
                          bool isPrimaryTarget = true);
+  void applyDefinitiveCollision(int targetIndex, const KeyMapping &proposed, int modeVal, bool isSwapPhase);
+
   void updateColumnRegions(int note, int layer);
   int findCounterpart(int sourceIndex);
+
+  bool dragStickyTop = false;
+  bool dragStickyBottom = false;
 
   juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
 

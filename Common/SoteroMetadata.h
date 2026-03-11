@@ -61,6 +61,7 @@ public:
       m->setAttribute("adsrD", (double)mapping.adsrDecay);
       m->setAttribute("adsrS", (double)mapping.adsrSustain);
       m->setAttribute("adsrR", (double)mapping.adsrRelease);
+      m->setAttribute("adsrST", (double)mapping.adsrSustainTime);
       m->setAttribute("fType", mapping.filterType);
       m->setAttribute("fCut", (double)mapping.filterCutoff);
       m->setAttribute("fRes", (double)mapping.filterResonance);
@@ -132,6 +133,7 @@ public:
           mapping.adsrDecay = (float)m->getDoubleAttribute("adsrD", 0.1);
           mapping.adsrSustain = (float)m->getDoubleAttribute("adsrS", 1.0);
           mapping.adsrRelease = (float)m->getDoubleAttribute("adsrR", 0.1);
+          mapping.adsrSustainTime = (float)m->getDoubleAttribute("adsrST", 0.5);
           mapping.filterType = m->getIntAttribute("fType", 0);
           mapping.filterCutoff = (float)m->getDoubleAttribute("fCut", 20000.0);
           mapping.filterResonance = (float)m->getDoubleAttribute("fRes", 1.0);

@@ -57,13 +57,14 @@ struct KeyMapping {
   int micLayer = 0; // 0 = Layer 1 (Mic 1), 1 = Layer 2 (Mic 2)
 
   // Sculpting Parameters (Per-mapping)
-  float adsrAttack = 0.01f;
+  float adsrAttack = 0.0f;
   float adsrDecay = 0.1f;
   float adsrSustain = 1.0f;
   float adsrRelease = 0.1f;
   float adsrAttackCurve = 0.0f;
   float adsrDecayCurve = 0.0f;
   float adsrReleaseCurve = 0.0f;
+  float adsrSustainTime = 0.5f;
 
   int filterType = 0; // 0 = None, 1 = LP, 2 = HP, 3 = BP
   float filterCutoff = 20000.0f;

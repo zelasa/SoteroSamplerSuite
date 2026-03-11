@@ -1,6 +1,8 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include <algorithm>
+#include <atomic>
 #include <cmath>
 #include <cstdint>
 
@@ -22,9 +24,11 @@ public:
     float attackCurve = 0.0f;  // -1.0 (Log/Fast) to 1.0 (Exp/Slow)
     float decayCurve = 0.0f;   // -1.0 to 1.0
     float releaseCurve = 0.0f; // -1.0 to 1.0
+    float peakLevel = 1.0f;
+    float visualSustain = 0.5f; // seconds
   };
 
-  CurvedADSR() {}
+  CurvedADSR() : state(State::Idle), sampleCounter(0) {}
 
   void setSampleRate(double newSampleRate) { sampleRate = newSampleRate; }
 
@@ -34,43 +38,46 @@ public:
   }
 
   void noteOn() {
-    state = State::Attack;
+    state.store(State::Attack);
     currentLevel = 0.0f;
     targetLevel = 1.0f;
-    sampleCounter = 0;
+    sampleCounter.store(0);
     updateRates();
   }
 
   void noteOff() {
-    state = State::Release;
+    state.store(State::Release);
     releaseStartLevel = currentLevel;
     targetLevel = 0.0f;
-    sampleCounter = 0;
+    sampleCounter.store(0);
     updateRates();
   }
 
   void quickRelease() {
-    state = State::Shutdown;
+    state.store(State::Shutdown);
     releaseStartLevel = currentLevel;
     targetLevel = 0.0f;
-    sampleCounter = 0;
+    sampleCounter.store(0);
     shutdownSamples = (juce::int64)(0.01f * sampleRate); // 10ms shutdown
   }
 
   void reset() {
-    state = State::Idle;
+    state.store(State::Idle);
     currentLevel = 0.0f;
-    sampleCounter = 0;
+    sampleCounter.store(0);
   }
 
   bool isActive() const { return state != State::Idle; }
 
   float getNextSample() {
-    if (state == State::Idle)
+    auto currentState = state.load();
+    if (currentState == State::Idle)
       return 0.0f;
 
-    if (state == State::Sustain)
+    if (currentState == State::Sustain) {
+      sampleCounter.fetch_add(1);
       return params.sustain;
+    }
 
     float progress = 0.0f;
     float startL = 0.0f;
@@ -78,7 +85,7 @@ public:
     float curve = 0.0f;
     juce::int64 totalS = 0;
 
-    switch (state) {
+    switch (currentState) {
     case State::Attack:
       totalS = attackSamples;
       startL = 0.0f;
@@ -111,12 +118,13 @@ public:
       currentLevel = endL;
       advanceState();
     } else {
-      progress = (float)sampleCounter / (float)totalS;
+      auto currentSamples = sampleCounter.load();
+      progress = (float)currentSamples / (float)totalS;
       float curvedProgress = applyCurve(progress, curve);
       currentLevel = startL + (endL - startL) * curvedProgress;
 
-      sampleCounter++;
-      if (sampleCounter >= totalS) {
+      sampleCounter.fetch_add(1);
+      if (sampleCounter.load() >= totalS) {
         currentLevel = endL;
         advanceState();
       }
@@ -135,56 +143,60 @@ public:
     }
   }
 
+  void advance(int numSamples) {
+    for (int i = 0; i < numSamples; ++i) {
+      getNextSample();
+    }
+  }
+
   /**
    * Returns the elapsed time in seconds relative to the visual representation.
    * Visual representation assumes: Attack + Decay + (0.5s Sustain) + Release.
    */
   float getVisualTimeElapsed() const {
-    if (state == State::Idle)
+    auto currentState = state.load();
+    auto currentSamples = sampleCounter.load();
+
+    if (currentState == State::Idle)
       return -1.0f;
 
-    float t = 0.0f;
-    const float visualSustain = 0.5f;
-
-    switch (state) {
+    switch (currentState) {
     case State::Attack:
-      t = (float)sampleCounter / (float)sampleRate;
-      break;
+      return (float)currentSamples / (float)sampleRate;
     case State::Decay:
-      t = params.attack + ((float)sampleCounter / (float)sampleRate);
-      break;
-    case State::Sustain:
-      t = params.attack + params.decay + (visualSustain * 0.5f);
-      break;
-    case State::Release:
-      t = params.attack + params.decay + visualSustain +
-          ((float)sampleCounter / (float)sampleRate);
-      break;
-    case State::Shutdown:
-      t = params.attack + params.decay + visualSustain +
-          ((float)sampleCounter / (float)sampleRate);
-      break;
-    default:
-      break;
+      return params.attack + ((float)currentSamples / (float)sampleRate);
+    case State::Sustain: {
+      // Crawl at real-time speed relative to the visual segment width
+      float sustainProgress =
+          std::min(1.0f, (float)((double)currentSamples /
+                                 (sampleRate * params.visualSustain)));
+      return params.attack + params.decay +
+             (params.visualSustain * sustainProgress);
     }
-    return t;
+    case State::Release:
+    case State::Shutdown:
+      return params.attack + params.decay + params.visualSustain +
+             ((float)currentSamples / (float)sampleRate);
+    default:
+      return -1.0f;
+    }
   }
 
 private:
   enum class State { Idle, Attack, Decay, Sustain, Release, Shutdown };
 
   void advanceState() {
-    sampleCounter = 0;
-    switch (state) {
+    sampleCounter.store(0);
+    switch (state.load()) {
     case State::Attack:
-      state = State::Decay;
+      state.store(State::Decay);
       break;
     case State::Decay:
-      state = State::Sustain;
+      state.store(State::Sustain);
       break;
     case State::Release:
     case State::Shutdown:
-      state = State::Idle;
+      state.store(State::Idle);
       break;
     default:
       break;
@@ -214,14 +226,14 @@ private:
     return (std::exp(k * x) - 1.0f) / (std::exp(k) - 1.0f);
   }
 
-  State state = State::Idle;
+  std::atomic<State> state;
   Parameters params;
   double sampleRate = 44100.0;
   float currentLevel = 0.0f;
   float targetLevel = 0.0f;
   float releaseStartLevel = 0.0f;
 
-  juce::int64 sampleCounter = 0;
+  std::atomic<juce::int64> sampleCounter;
   juce::int64 attackSamples = 0;
   juce::int64 decaySamples = 0;
   juce::int64 releaseSamples = 0;

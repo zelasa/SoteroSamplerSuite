@@ -31,15 +31,6 @@ MainComponent::MainComponent()
   startTimerHz(30); // Poll for playhead at 30Hz
 
   // --- Sculpting Panel Wiring ---
-  auto &sp = sculptingPanel;
-  sp.attackSlider.setRange(0.0, 5.0, 0.001);
-  sp.decaySlider.setRange(0.0, 5.0, 0.001);
-  sp.sustainSlider.setRange(0.0, 1.0, 0.01);
-  sp.releaseSlider.setRange(0.0, 5.0, 0.001);
-  sp.cutoffSlider.setRange(20.0, 20000.0, 1.0);
-  sp.cutoffSlider.setSkewFactorFromMidPoint(1000.0);
-  sp.resSlider.setRange(0.1, 1.0, 0.01);
-
   auto updateADSRVisual = [this] {
     if (activeMappingIndex < 0 ||
         activeMappingIndex >= libraryData.mappings.size())
@@ -47,14 +38,16 @@ MainComponent::MainComponent()
 
     auto &m = libraryData.mappings.getReference(activeMappingIndex);
     sculptingPanel.adsrVisualizer.setParams(
-        (float)sculptingPanel.attackSlider.getValue(),
-        (float)sculptingPanel.decaySlider.getValue(),
+        (float)sculptingPanel.attackSlider.getValue() / 5.0f,
+        (float)sculptingPanel.decaySlider.getValue() / 5.0f,
         (float)sculptingPanel.sustainSlider.getValue(),
-        (float)sculptingPanel.releaseSlider.getValue(), m.adsrAttackCurve,
-        m.adsrDecayCurve, m.adsrReleaseCurve,
-        1.0f, // Peak
-        m.adsrSustainTime);
+        (float)sculptingPanel.releaseSlider.getValue() / 5.0f,
+        m.adsrAttackCurve, m.adsrDecayCurve, m.adsrReleaseCurve,
+        1.0f // Peak
+    );
   };
+
+  auto &sp = sculptingPanel;
 
   // Attack
   sp.attackSlider.setRange(0.001, 5.0, 0.001);
@@ -70,7 +63,7 @@ MainComponent::MainComponent()
         juce::sendNotification);
   };
   sp.adsrVisualizer.onAttackChange = [this](float val) {
-    sculptingPanel.attackSlider.setValue(val, juce::sendNotification);
+    sculptingPanel.attackSlider.setValue(val * 5.0f, juce::sendNotification);
   };
 
   // Decay
@@ -87,7 +80,7 @@ MainComponent::MainComponent()
         juce::sendNotification);
   };
   sp.adsrVisualizer.onDecayChange = [this](float val) {
-    sculptingPanel.decaySlider.setValue(val, juce::sendNotification);
+    sculptingPanel.decaySlider.setValue(val * 5.0f, juce::sendNotification);
   };
 
   // Sustain
@@ -106,14 +99,6 @@ MainComponent::MainComponent()
   sp.adsrVisualizer.onSustainChange = [this](float val) {
     sculptingPanel.sustainSlider.setValue(val, juce::sendNotification);
   };
-  sp.adsrVisualizer.onSustainTimeChange = [this](float val) {
-    if (activeMappingIndex >= 0 &&
-        activeMappingIndex < libraryData.mappings.size()) {
-      libraryData.mappings.getReference(activeMappingIndex).adsrSustainTime =
-          val;
-      rebuildSynth();
-    }
-  };
 
   // Release
   sp.releaseSlider.setRange(0.001, 5.0, 0.001);
@@ -131,7 +116,7 @@ MainComponent::MainComponent()
   sp.adsrVisualizer.onReleaseChange = [this](float val) {
     if (activeMappingIndex >= 0 &&
         activeMappingIndex < libraryData.mappings.size()) {
-      sculptingPanel.releaseSlider.setValue(val, juce::sendNotification);
+      sculptingPanel.releaseSlider.setValue(val * 5.0f, juce::sendNotification);
     }
   };
   sp.adsrVisualizer.onAttackCurveChange = [this](float val) {
@@ -206,11 +191,6 @@ MainComponent::MainComponent()
   mappingPanel.octaveSelector.setSelectedId(mappingPanel.currentOctave + 3);
   mappingPanel.octaveSelector.onChange = [this] {
     updateOctave(mappingPanel.octaveSelector.getSelectedId() - 3);
-  };
-  mappingPanel.layerSyncLock.onClick = [this] {
-    if (mappingPanel.layerSyncLock.getToggleState()) {
-      alignLayers();
-    }
   };
 
   // --- Mapping / KeyColumn Callbacks ---
@@ -321,61 +301,13 @@ MainComponent::MainComponent()
       juce::File::getSpecialLocation(juce::File::userHomeDirectory);
   setSize(1100, 850);
 
-  // --- Master FX Wiring ---
-  auto &ap = *apvts;
-  compModeAtt =
-      std::make_unique<ComboAtt>(ap, "masterComp", advancedPanel.compMode);
-  compThreshAtt =
-      std::make_unique<SliderAtt>(ap, "compThresh", advancedPanel.compThresh);
-  compRatioAtt =
-      std::make_unique<SliderAtt>(ap, "compRatio", advancedPanel.compRatio);
-  compAttackAtt =
-      std::make_unique<SliderAtt>(ap, "compAttack", advancedPanel.compAttack);
-  compReleaseAtt =
-      std::make_unique<SliderAtt>(ap, "compRelease", advancedPanel.compRelease);
-
-  revEnableAtt =
-      std::make_unique<ButtonAtt>(ap, "revEnable", advancedPanel.revEnable);
-  revSizeAtt =
-      std::make_unique<SliderAtt>(ap, "revSize", advancedPanel.revSize);
-  revMixAtt = std::make_unique<SliderAtt>(ap, "revMix", advancedPanel.revMix);
-
-  toneAtt =
-      std::make_unique<SliderAtt>(ap, "masterTone", advancedPanel.toneSlider);
-  volAtt = std::make_unique<SliderAtt>(
-      ap, "masterVol", metadataPanel.volSlider); // Assuming added or reuse
-  pitchAtt = std::make_unique<SliderAtt>(
-      ap, "masterPitch",
-      sculptingPanel.velSensSlider); // Reusing for now or adding
-
-  // --- Mode Button Logic ---
-  headerPanel.devModeBtn.onClick = [this] { setUIMode(UIMode::Developer); };
-  headerPanel.userModeBtn.onClick = [this] { setUIMode(UIMode::UserPlayer); };
+  mappingPanel.layerSyncLock.onStateChange = [this] {
+    if (mappingPanel.layerSyncLock.getToggleState()) {
+      alignLayers();
+    }
+  };
 
   updateGridUI();
-}
-
-void MainComponent::setUIMode(UIMode mode) {
-  currentUIMode = mode;
-
-  bool isDev = (mode == UIMode::Developer);
-
-  // Toggle visibility of Builder-centric panels
-  mappingPanel.setVisible(isDev);
-  sculptingPanel.setVisible(isDev);
-  if (waveform1)
-    waveform1->setVisible(isDev);
-  if (waveform2)
-    waveform2->setVisible(isDev);
-
-  // Advanced Panel and Metadata are visible in BOTH, but resized differently
-  // or we could show a distinct PerformanceView later. For now, we adjust
-  // layout.
-
-  headerPanel.devModeBtn.setToggleState(isDev, juce::dontSendNotification);
-  headerPanel.userModeBtn.setToggleState(!isDev, juce::dontSendNotification);
-
-  resized();
 }
 
 MainComponent::~MainComponent() {
@@ -584,7 +516,7 @@ void MainComponent::rebuildSynth() {
               m.adsrSustain, m.adsrRelease, m.adsrAttackCurve, m.adsrDecayCurve,
               m.adsrReleaseCurve, m.filterType, m.filterCutoff,
               m.filterResonance, libraryData.enableADSR && !isBypassed,
-              libraryData.enableFilter && !isBypassed, m.adsrSustainTime));
+              libraryData.enableFilter && !isBypassed));
         }
       }
     }
@@ -679,9 +611,9 @@ void MainComponent::updateGridUI() {
                                               juce::dontSendNotification);
 
         sculptingPanel.adsrVisualizer.setParams(
-            m.adsrAttack, m.adsrDecay, m.adsrSustain, m.adsrRelease,
-            m.adsrAttackCurve, m.adsrDecayCurve, m.adsrReleaseCurve, 1.0f,
-            m.adsrSustainTime);
+            m.adsrAttack / 5.0f, m.adsrDecay / 5.0f, m.adsrSustain,
+            m.adsrRelease / 5.0f, m.adsrAttackCurve, m.adsrDecayCurve,
+            m.adsrReleaseCurve, 1.0f);
 
         sculptingPanel.filterTypeSelector.setSelectedId(
             m.filterType + 1, juce::dontSendNotification);
@@ -746,7 +678,10 @@ void MainComponent::updateGridUI() {
         }
       };
 
-
+      region->onDragStart = [this](bool top, bool bottom) {
+        dragStickyTop = top;
+        dragStickyBottom = bottom;
+      };
 
       region->onClear = [this, mIndex](const KeyMapping &) {
         if (mIndex >= 0 && mIndex < libraryData.mappings.size()) {
@@ -792,6 +727,9 @@ void MainComponent::updateGridUI() {
           ref.velocityHigh = targetHi;
 
           // 4. Update the actual UI components from the new data
+          // IMPORTANT: Even if 'region' is dragging, we want to update its
+          // internal 'currentMapping' to reflect any push-back/capping
+          // that resolveCollisions performed.
           region->updateFromMapping(ref);
 
           updateColumnRegions(ref.midiNote, ref.micLayer);
@@ -856,50 +794,11 @@ void MainComponent::updateGridUI() {
 void MainComponent::timerCallback() {
   const juce::ScopedLock sl(synthLock);
   float latestTime = -1.0f;
-  uint32_t latestTrigger = 0;
 
-  if (activeMappingIndex >= 0 &&
-      activeMappingIndex < libraryData.mappings.size()) {
-    auto &m = libraryData.mappings.getReference(activeMappingIndex);
-
-    for (int i = 0; i < synth.getNumVoices(); ++i) {
-      if (auto *v = dynamic_cast<SoteroSamplerVoice *>(synth.getVoice(i))) {
-        // We only care about voices that are currently active (not Idle)
-        // AND for our requested behavior: we stop the playhead if the user
-        // released it (i.e., not in Attack/Decay/Sustain)
-        if (v->isVoiceActive()) {
-          auto *sound = dynamic_cast<const SoteroSamplerSound *>(
-              v->getCurrentlyPlayingSound().get());
-
-          if (sound && sound->getMidiRootNote() == m.midiNote &&
-              sound->micLayer == m.micLayer) {
-
-            // Find the most recently triggered voice (highest trigger time)
-            uint32_t triggerTime = v->getTriggerTime();
-            if (triggerTime >= latestTrigger) {
-              latestTrigger = triggerTime;
-
-              // To follow "return to start when stop clicking":
-              // We check if the note is still being HELD.
-              // JUCE uses 'isKeyDown' internally or we can check the ADSR
-              // progress. If it's in Release, we'll treat it as -1.0 to reset.
-              float progress = v->getADSRProgress();
-
-              // If progress is greater than the start of Release, reset it.
-              // Based on CurvedADSR::getVisualTimeElapsed, Release starts after
-              // A + D + visualSustain
-              float releaseStart = sound->adsrParams.attack +
-                                   sound->adsrParams.decay +
-                                   sound->adsrParams.visualSustain;
-
-              if (progress >= 0.0f && progress < releaseStart) {
-                latestTime = progress;
-              } else {
-                latestTime = -1.0f; // Reset to start
-              }
-            }
-          }
-        }
+  for (int i = 0; i < synth.getNumVoices(); ++i) {
+    if (auto *v = dynamic_cast<SoteroSamplerVoice *>(synth.getVoice(i))) {
+      if (v->isVoiceActive()) {
+        latestTime = v->getADSRProgress(); // I need to add this method to Voice
       }
     }
   }
@@ -921,15 +820,14 @@ void MainComponent::paint(juce::Graphics &g) {
 void MainComponent::deselectAllRegions() {
   activeMappingIndex = -1;
   sculptingPanel.setEnabled(false);
-  sculptingPanel.adsrVisualizer.setPlayheadTime(-1.0f);
 
   // Reset ADSR visualizer and sliders to default
   sculptingPanel.attackSlider.setValue(0.1, juce::dontSendNotification);
   sculptingPanel.decaySlider.setValue(0.1, juce::dontSendNotification);
   sculptingPanel.sustainSlider.setValue(1.0, juce::dontSendNotification);
   sculptingPanel.releaseSlider.setValue(0.2, juce::dontSendNotification);
-  sculptingPanel.adsrVisualizer.setParams(0.1f, 0.1f, 1.0f, 0.2f, 0.0f, 0.0f,
-                                          0.0f, 1.0f, 0.5f);
+  sculptingPanel.adsrVisualizer.setParams(0.1f / 5.0f, 0.1f / 5.0f, 1.0f,
+                                          0.2f / 5.0f, 0.0f, 0.0f, 0.0f, 1.0f);
 
   if (mappingPanel.layer1) {
     for (auto *col : mappingPanel.layer1->columns) {
@@ -957,9 +855,6 @@ void MainComponent::updateOctave(int newOctave) {
 void MainComponent::loadSoteroLibrary(const juce::File &file) {
   if (!file.existsAsFile())
     return;
-
-  deselectAllRegions();
-
   auto imported = sotero::SoteroArchive::readMetadata(file);
   if (imported.mappings.size() > 0) {
     currentLibraryFile = file;
@@ -1025,43 +920,26 @@ void MainComponent::resized() {
   auto r = getLocalBounds();
   headerPanel.setBounds(r.removeFromTop(70));
 
-  const float mappingWidthRatio = 0.65f;
-  auto topArea = r.removeFromTop(350); // Increased from 220
+  // Top Area (Waveforms + ADSR)
+  auto topArea = r.removeFromTop(220);
+  int waveformW = topArea.getWidth() / 4;
+
+  if (waveform1)
+    waveform1->setBounds(topArea.removeFromLeft(waveformW).reduced(2));
+  if (waveform2)
+    waveform2->setBounds(topArea.removeFromLeft(waveformW).reduced(2));
+  sculptingPanel.setBounds(topArea.reduced(2));
+
+  // Bottom Area (Mapping + Workspace)
   auto bottomArea = r;
+  mappingPanel.setBounds(
+      bottomArea.removeFromLeft(bottomArea.getWidth() * 0.65f).reduced(2));
 
-  // 1. Bottom Area Setup (Mapping + Workspace)
-  auto mappingBounds =
-      bottomArea.removeFromLeft(bottomArea.getWidth() * mappingWidthRatio);
-  mappingPanel.setBounds(mappingBounds.reduced(2));
-
-  auto workspaceBounds = bottomArea;
-  auto advancedArea =
-      workspaceBounds.removeFromTop(workspaceBounds.getHeight() * 0.45f);
-  advancedPanel.setBounds(advancedArea.reduced(2));
-  metadataPanel.setBounds(workspaceBounds.reduced(2));
-
-  // 2. Top Area Setup (Align with Bottom)
-  // ADSR aligns with Workspace Area (Advanced + Metadata)
-  sculptingPanel.setBounds(topArea.withLeft(workspaceBounds.getX())
-                               .withWidth(workspaceBounds.getWidth())
-                               .reduced(2));
-
-  // Waveforms align with Layers (Layer 1/2) in Mapping Panel
-  // We mirror the internal logic of MappingPanel (reduced(5) and gap of 24)
-  auto innerMapping = mappingBounds.reduced(2).reduced(5);
-  int gap = 24;
-  int layerW = (innerMapping.getWidth() - gap) / 2;
-
-  if (waveform1) {
-    auto w1Bounds = topArea.withLeft(innerMapping.getX()).withWidth(layerW);
-    waveform1->setBounds(w1Bounds.reduced(2));
-  }
-
-  if (waveform2) {
-    auto w2Bounds =
-        topArea.withLeft(innerMapping.getX() + layerW + gap).withWidth(layerW);
-    waveform2->setBounds(w2Bounds.reduced(2));
-  }
+  auto workspaceArea = bottomArea;
+  advancedPanel.setBounds(
+      workspaceArea.removeFromTop(workspaceArea.getHeight() * 0.45f)
+          .reduced(2));
+  metadataPanel.setBounds(workspaceArea.reduced(2));
 }
 
 MainComponent::MetadataPanel::MetadataPanel() {
@@ -1099,9 +977,6 @@ void MainComponent::MetadataPanel::resized() {
   fields.removeFromTop(5);
   authorLabel.setBounds(fields.removeFromTop(20));
   authorEditor.setBounds(fields.removeFromTop(30));
-
-  // Added Master Volume Slider to Metadata Panel for Player mode
-  volSlider.setBounds(r.removeFromBottom(50).reduced(20, 0));
 }
 
 void MainComponent::MetadataPanel::paint(juce::Graphics &g) {
@@ -1142,7 +1017,7 @@ void MainComponent::WaveformPanel::resized() {
 
 void MainComponent::SculptingPanel::resized() {
   auto r = getLocalBounds().reduced(5);
-  auto graphArea = r.removeFromTop(240); // Increased from 120
+  auto graphArea = r.removeFromTop(120); // ADSR visualizer area
   adsrVisualizer.setBounds(graphArea.reduced(5));
 
   auto slidersArea = r;
@@ -1234,8 +1109,16 @@ void MainComponent::alignLayers() {
       auto &m1 = libraryData.mappings.getReference(l1Indices[k]);
       auto &m2 = libraryData.mappings.getReference(l2Indices[k]);
 
-      m2.velocityLow = m1.velocityLow;
-      m2.velocityHigh = m1.velocityHigh;
+      int targetLo = m1.velocityLow;
+      int targetHi = m1.velocityHigh;
+
+      // Resolve collisions in Layer 2 for the target range before snapping
+      // Use allowCrossSync = false here because we are already in a batch sync
+      // operation
+      resolveCollisions(note, 1, targetLo, targetHi, l2Indices[k], false);
+
+      m2.velocityLow = targetLo;
+      m2.velocityHigh = targetHi;
     }
   }
   updateGridUI();
@@ -1288,95 +1171,6 @@ bool MainComponent::isRangeFree(int note, int micLayer, int lo, int hi,
   }
   return true;
 }
-
-void MainComponent::applyDefinitiveCollision(int targetIndex, const KeyMapping &proposed, int modeVal, bool isSwapPhase) {
-  if (targetIndex < 0 || targetIndex >= libraryData.mappings.size()) return;
-
-  auto dragMode = (sotero::SampleRegion::DragMode)modeVal;
-  auto &target = libraryData.mappings.getReference(targetIndex);
-  int note = target.midiNote;
-  int layer = target.micLayer;
-
-  // 1. Get all siblings in this column
-  juce::Array<int> colIndices;
-  for (int i = 0; i < libraryData.mappings.size(); ++i) {
-    auto &m = libraryData.mappings.getReference(i);
-    if (m.samplePath.isNotEmpty() && m.midiNote == note && m.micLayer == layer) {
-      colIndices.add(i);
-    }
-  }
-
-  // 2. Sort by current structural position
-  std::sort(colIndices.begin(), colIndices.end(), [&](int a, int b) {
-    return libraryData.mappings.getReference(a).velocityLow < libraryData.mappings.getReference(b).velocityLow;
-  });
-
-  int rank = colIndices.indexOf(targetIndex);
-  if (rank == -1) return;
-
-  target.velocityLow = proposed.velocityLow;
-  target.velocityHigh = proposed.velocityHigh;
-
-  if (isSwapPhase && dragMode == sotero::SampleRegion::DragMode::Body) {
-    // SWAP MODE (Alt+Drag) -> Reorder and Pack
-    std::sort(colIndices.begin(), colIndices.end(), [&](int a, int b) {
-      float cA = (float)(libraryData.mappings.getReference(a).velocityLow + libraryData.mappings.getReference(a).velocityHigh) / 2.0f;
-      float cB = (float)(libraryData.mappings.getReference(b).velocityLow + libraryData.mappings.getReference(b).velocityHigh) / 2.0f;
-      if (std::abs(cA - cB) < 0.001f) return a == targetIndex; // Target wins tie-breakers
-      return cA < cB;
-    });
-
-    int newRank = colIndices.indexOf(targetIndex);
-
-    // Pack downwards
-    for (int i = newRank - 1; i >= 0; --i) {
-      auto &curr = libraryData.mappings.getReference(colIndices[i]);
-      auto &above = libraryData.mappings.getReference(colIndices[i + 1]);
-      if (curr.velocityHigh >= above.velocityLow) {
-        int r = std::max(1, curr.velocityHigh - curr.velocityLow);
-        curr.velocityHigh = above.velocityLow - 1;
-        curr.velocityLow = curr.velocityHigh - r;
-      }
-      if (curr.velocityLow < 0) {
-        curr.velocityLow = 0;
-        curr.velocityHigh = std::max(1, curr.velocityHigh);
-      }
-    }
-
-    // Pack upwards
-    for (int i = newRank + 1; i < colIndices.size(); ++i) {
-      auto &curr = libraryData.mappings.getReference(colIndices[i]);
-      auto &below = libraryData.mappings.getReference(colIndices[i - 1]);
-      if (curr.velocityLow <= below.velocityHigh) {
-        int r = std::max(1, curr.velocityHigh - curr.velocityLow);
-        curr.velocityLow = below.velocityHigh + 1;
-        curr.velocityHigh = curr.velocityLow + r;
-      }
-      if (curr.velocityHigh > 127) {
-        curr.velocityHigh = 127;
-        curr.velocityLow = std::min(126, curr.velocityLow);
-      }
-    }
-
-    // Final boundary check
-    for (int i = 0; i < colIndices.size(); ++i) {
-        auto &m = libraryData.mappings.getReference(colIndices[i]);
-        if (m.velocityLow < 0) m.velocityLow = 0;
-        if (m.velocityHigh > 127) m.velocityHigh = 127;
-        if (m.velocityLow > m.velocityHigh) {
-            m.velocityLow = std::max(0, m.velocityHigh - 1);
-        }
-    }
-  } else {
-    // NORMAL DRAG MODE -> Resolve collisions recursively
-    int targetLo = proposed.velocityLow;
-    int targetHi = proposed.velocityHigh;
-    resolveCollisions(note, layer, targetLo, targetHi, targetIndex, true, true);
-    target.velocityLow = targetLo;
-    target.velocityHigh = targetHi;
-  }
-}
-
 
 void MainComponent::resolveCollisions(int note, int micLayer, int &targetLo,
                                       int &targetHi, int excludeIndex,
@@ -1441,10 +1235,10 @@ void MainComponent::resolveCollisions(int note, int micLayer, int &targetLo,
     auto &m = libraryData.mappings.getReference(c.index);
 
     // ADHESIVE (PULL): If we were glued at start
-    bool shouldPull = isPrimaryTarget && dragStickyTop && (above.indexOf(c) == 0);
+    bool shouldPull =
+        isPrimaryTarget && dragStickyTop && (above.indexOf(c) == 0);
 
     if (targetHi >= m.velocityLow || shouldPull) {
-
       int oldLo = m.velocityLow;
       int oldHi = m.velocityHigh;
 
@@ -1481,8 +1275,8 @@ void MainComponent::resolveCollisions(int note, int micLayer, int &targetLo,
     auto &m = libraryData.mappings.getReference(c.index);
 
     // ADHESIVE (PULL): If we were glued at start
-    // bool shouldPull = isPrimaryTarget && dragStickyBottom && (below.indexOf(c) == 0);
-    bool shouldPull = false; // Placeholder
+    bool shouldPull =
+        isPrimaryTarget && dragStickyBottom && (below.indexOf(c) == 0);
 
     if (targetLo <= m.velocityHigh || shouldPull) {
       int oldLo = m.velocityLow;
