@@ -168,8 +168,7 @@ void SampleRegion::mouseExit(const juce::MouseEvent &e) {
 
 void SampleRegion::mouseDown(const juce::MouseEvent &e) {
   juce::Component::SafePointer<SampleRegion> safeThis(this);
-  toFront(true); // Bring to front when clicked so it's not hidden by
-                 // overlapping regions
+  toFront(true);
 
   if (onSelect)
     onSelect();
@@ -180,12 +179,10 @@ void SampleRegion::mouseDown(const juce::MouseEvent &e) {
 
   if (e.mods.isRightButtonDown() && e.mods.isShiftDown()) {
     currentDragMode = DragMode::Eraser;
-    if (onAudition && (e.mods.isCtrlDown() || e.mods.isCommandDown())) {
+    if (onAudition && (e.mods.isCtrlDown() || e.mods.isCommandDown()))
       onAudition(currentMapping);
-    }
-
     dragStartY = e.getScreenY();
-    currentMapping.samplePath = ""; // Clear immediately for visual feedback
+    currentMapping.samplePath = "";
     repaint();
     return;
   }
@@ -196,14 +193,21 @@ void SampleRegion::mouseDown(const juce::MouseEvent &e) {
     currentDragMode = DragMode::BottomHandle;
   } else {
     currentDragMode = DragMode::Body;
-    if (onAudition && (e.mods.isCtrlDown() || e.mods.isCommandDown())) {
+    if (onAudition && (e.mods.isCtrlDown() || e.mods.isCommandDown()))
       onAudition(currentMapping);
-    }
   }
 
+  // Capture Alt key state and initial velocity center for swap detection
+  isAltDrag = e.mods.isAltDown();
+  swapDispatched = false;
+  // Capture initial screen X for continuous horizontal tracking
+  initialScreenX = e.getScreenX();
+  lastNoteOffset = 0;
+
   dragStartY = e.getScreenY();
-  initialVelLow = currentMapping.velocityLow;
+  initialVelLow  = currentMapping.velocityLow;
   initialVelHigh = currentMapping.velocityHigh;
+  initialCenterVel = (initialVelLow + initialVelHigh) / 2;
 
   bool stickyTop = false;
   bool stickyBottom = false;
@@ -212,11 +216,9 @@ void SampleRegion::mouseDown(const juce::MouseEvent &e) {
     for (auto *sibling : parent->getChildren()) {
       if (auto *other = dynamic_cast<SampleRegion *>(sibling)) {
         if (other != this && other->currentMapping.samplePath.isNotEmpty()) {
-          if (other->currentMapping.velocityLow ==
-              currentMapping.velocityHigh + 1)
+          if (other->currentMapping.velocityLow == currentMapping.velocityHigh + 1)
             stickyTop = true;
-          if (other->currentMapping.velocityHigh ==
-              currentMapping.velocityLow - 1)
+          if (other->currentMapping.velocityHigh == currentMapping.velocityLow - 1)
             stickyBottom = true;
         }
       }
@@ -232,6 +234,7 @@ void SampleRegion::mouseDrag(const juce::MouseEvent &e) {
   if (currentDragMode == DragMode::None)
     return;
 
+  // --- Eraser Mode ---
   if (currentDragMode == DragMode::Eraser) {
     if (auto *parent = getParentComponent()) {
       auto screenPos = e.getScreenPosition();
@@ -239,9 +242,9 @@ void SampleRegion::mouseDrag(const juce::MouseEvent &e) {
         if (auto *other = dynamic_cast<SampleRegion *>(sibling)) {
           if (other->getScreenBounds().contains(screenPos.toInt())) {
             if (other->currentMapping.samplePath.isNotEmpty()) {
-              other->currentMapping.samplePath = ""; // Visual clear
+              other->currentMapping.samplePath = "";
               if (other->onErase)
-                other->onErase(); // Silent data clear
+                other->onErase();
               other->repaint();
             }
           }
@@ -254,8 +257,9 @@ void SampleRegion::mouseDrag(const juce::MouseEvent &e) {
   if (e.mods.isRightButtonDown() && !e.mods.isShiftDown())
     return;
 
-  // We need to know the height of the parent column to calculate velocity
-  // accurately. Parent height represents 128 velocity steps (0 to 127).
+  // Re-read Alt key state dynamically every drag tick
+  isAltDrag = e.mods.isAltDown();
+
   if (auto *parent = getParentComponent()) {
     float parentHeight = (float)parent->getHeight();
     if (parentHeight <= 0)
@@ -263,27 +267,20 @@ void SampleRegion::mouseDrag(const juce::MouseEvent &e) {
 
     float pixelsPerVelocity = parentHeight / 128.0f;
     int dragDeltaY = e.getScreenY() - dragStartY;
-
-    // Use float precision for delta to avoid "stuck" dragging on small screens
     float velocityDeltaFloat = -((float)dragDeltaY / pixelsPerVelocity);
     int velocityDelta = juce::roundToInt(velocityDeltaFloat);
 
-    int limitLow = 0;
-    int limitHigh = 127;
-
-    if (currentDragMode == DragMode::TopHandle ||
-        currentDragMode == DragMode::BottomHandle) {
-      // Handles are now only limited by 0-127 and push-back logic.
-      // We removed the neighbor-based caps that were preventing "Pushing".
-    }
-
+    const int limitLow  = 0;
+    const int limitHigh = 127;
     bool boundsChanged = false;
 
+    // -------------------------------------------------------
+    // HANDLES (TopHandle / BottomHandle) – always operational 
+    // -------------------------------------------------------
     if (currentDragMode == DragMode::TopHandle) {
       int newHighL = currentMapping.velocityLow + 1;
       int newHighH = juce::jmax(newHighL, limitHigh);
-      int newHigh =
-          juce::jlimit(newHighL, newHighH, initialVelHigh + velocityDelta);
+      int newHigh  = juce::jlimit(newHighL, newHighH, initialVelHigh + velocityDelta);
       if (currentMapping.velocityHigh != newHigh) {
         currentMapping.velocityHigh = newHigh;
         boundsChanged = true;
@@ -291,78 +288,85 @@ void SampleRegion::mouseDrag(const juce::MouseEvent &e) {
     } else if (currentDragMode == DragMode::BottomHandle) {
       int newLowH = currentMapping.velocityHigh - 1;
       int newLowL = juce::jmin(limitLow, newLowH);
-      int newLow =
-          juce::jlimit(newLowL, newLowH, initialVelLow + velocityDelta);
+      int newLow  = juce::jlimit(newLowL, newLowH, initialVelLow + velocityDelta);
       if (currentMapping.velocityLow != newLow) {
         currentMapping.velocityLow = newLow;
         boundsChanged = true;
       }
-    } else if (currentDragMode == DragMode::Body) {
-      int range = initialVelHigh - initialVelLow;
-      if (range < 1)
-        range = 1;
+    }
+    // -------------------------------------------------------
+    // BODY DRAG
+    // -------------------------------------------------------
+    else if (currentDragMode == DragMode::Body) {
+      if (isAltDrag) {
+        // ── ALT MODE: fire a swap request when centre crosses into another slot
+        // We do NOT change velocityLow/High here (non-destructive).
+        int currentCentre = juce::jlimit(0, 127,
+            initialCenterVel + velocityDelta);
 
-      int newLow = juce::jlimit(0, 127 - range, initialVelLow + velocityDelta);
-      int newHigh = newLow + range;
+        // Compute deltaVelCenter relative to original centre
+        int deltaVelCenter = currentCentre - initialCenterVel;
 
-      if (currentMapping.velocityLow != newLow ||
-          currentMapping.velocityHigh != newHigh) {
-        currentMapping.velocityLow = newLow;
-        currentMapping.velocityHigh = newHigh;
-        boundsChanged = true;
+        // Only fire once per threshold crossing (guard against rapid re-fire)
+        if (!swapDispatched && std::abs(deltaVelCenter) > (initialVelHigh - initialVelLow) / 2 + 2) {
+          swapDispatched = true;
+          if (onVerticalSwapRequest)
+            onVerticalSwapRequest(deltaVelCenter, e.getScreenY());
+          // Component may be repositioned by performSwap but NOT destroyed.
+          // safeThis confirms we survived the call.
+        }
+        // No boundsChanged, no onBoundsChanged — purely informational drag
+      } else {
+        // ── NORMAL MODE: body is LOCKED vertically, no vertical movement.
+        // Only horizontal movement (onRequestMove) is active below.
+        // We intentionally do NOT update velocityLow/High.
+        boundsChanged = false;
       }
     }
 
-    // --- Horizontal Drag (Move across grid nodes) ---
-    if (onRequestMove) {
-      int xThreshold = getWidth();
-      int localX = e.x;
-      if (localX < -xThreshold / 2) {
-        onRequestMove(-1);
+    // -------------------------------------------------------
+    // HORIZONTAL DRAG (move across note columns)
+    // Uses absolute screen X to enable continuous multi-column sliding.
+    // Passes isAltDrag so MainComponent can skip collision.
+    // -------------------------------------------------------
+    if (currentDragMode == DragMode::Body && onRequestMove) {
+      int colWidth = juce::jmax(1, getWidth());
+      int pixelsMoved = e.getScreenX() - initialScreenX;
+      int newNoteOffset = pixelsMoved / colWidth; // rounds toward zero
+
+      int delta = newNoteOffset - lastNoteOffset;
+      if (delta != 0) {
+        lastNoteOffset = newNoteOffset;
+        onRequestMove(delta, isAltDrag);
         if (safeThis == nullptr)
-          return; // Check after callback
-        // Reset drag start to prevent multiple jumps
-        dragStartY = e.getScreenY();
-        initialVelLow = currentMapping.velocityLow;
-        initialVelHigh = currentMapping.velocityHigh;
-      } else if (localX > getWidth() + xThreshold / 2) {
-        onRequestMove(1);
-        if (safeThis == nullptr)
-          return; // Check after callback
-        dragStartY = e.getScreenY();
-        initialVelLow = currentMapping.velocityLow;
-        initialVelHigh = currentMapping.velocityHigh;
+          return;
+        // NOTE: initialScreenX is NOT reset here — absolute tracking
+        // means the offset accumulates naturally across the drag.
       }
     }
 
+    // -------------------------------------------------------
+    // Apply validated bounds and notify parent (handle drags)
+    // -------------------------------------------------------
     if (boundsChanged) {
-      // Apply global limits only - allowing "pass through" behavior during drag
       if (currentDragMode == DragMode::TopHandle) {
-        int newHighL =
-            currentMapping.velocityLow + 1; // Enforce minimum range of 1
+        int newHighL = currentMapping.velocityLow + 1;
         int newHighH = juce::jmax(newHighL, limitHigh);
         currentMapping.velocityHigh =
             juce::jlimit(newHighL, newHighH, currentMapping.velocityHigh);
       } else if (currentDragMode == DragMode::BottomHandle) {
-        int newLowH =
-            currentMapping.velocityHigh - 1; // Enforce minimum range of 1
+        int newLowH = currentMapping.velocityHigh - 1;
         int newLowL = juce::jmin(limitLow, newLowH);
         currentMapping.velocityLow =
             juce::jlimit(newLowL, newLowH, currentMapping.velocityLow);
-      } else if (currentDragMode == DragMode::Body) {
-        int range = juce::jmax(1, initialVelHigh - initialVelLow);
-        currentMapping.velocityLow =
-            juce::jlimit(0, 127 - range, currentMapping.velocityLow);
-        currentMapping.velocityHigh = currentMapping.velocityLow + range;
       }
 
       if (onBoundsChanged)
         onBoundsChanged(currentMapping);
       if (safeThis == nullptr)
-        return; // Check after callback
+        return;
 
-      if (safeThis != nullptr)
-        repaint();
+      repaint();
     }
   }
 }
@@ -456,6 +460,17 @@ void SampleRegion::mouseDoubleClick(const juce::MouseEvent &e) {
       repaint();
     }
   }
+}
+
+// Called by MainComponent::performSwap() after each swap completes.
+// Resets the swap guard and anchors the drag reference to the new
+// velocity position, enabling continuous multi-swap in one mouse gesture.
+void SampleRegion::resetSwapState(int newMouseScreenY) {
+  swapDispatched = false;
+  initialVelLow    = currentMapping.velocityLow;
+  initialVelHigh   = currentMapping.velocityHigh;
+  initialCenterVel = (initialVelLow + initialVelHigh) / 2;
+  dragStartY       = newMouseScreenY;
 }
 
 } // namespace sotero

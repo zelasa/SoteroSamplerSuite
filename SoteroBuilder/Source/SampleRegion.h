@@ -45,8 +45,11 @@ public:
   std::function<void(const KeyMapping &)> onAudition;
   std::function<void(const KeyMapping &)> onAuditionEnd;
   std::function<void()> onSelect;
-  std::function<void(int)> onRequestMove; // delta notes (horizontal drag)
+  std::function<void(int, bool)> onRequestMove; // delta notes, isAltDown (horizontal drag)
   std::function<void(bool, bool)> onDragStart;
+  std::function<void(int, int)> onVerticalSwapRequest; // (deltaVelCenter, mouseScreenY)
+  void resetSwapState(int newMouseScreenY); // called by MainComponent after each swap
+  bool getIsAltDrag() const noexcept { return isAltDrag; } // MainComponent checks for edge-binding bypass
 
 private:
   KeyMapping currentMapping;
@@ -60,6 +63,11 @@ private:
   int initialVelHigh = 127;
   int initialVelLow = 0;
   bool isDetachedDrag = false;
+  bool isAltDrag = false;
+  int initialCenterVel = 64; // centre of velocity range at drag start
+  bool swapDispatched = false; // guard: fire swap only once per threshold crossing
+  int initialScreenX = 0;   // screen X at mouseDown, for absolute horizontal tracking
+  int lastNoteOffset = 0;   // accumulated column offset since drag start
 
   juce::Rectangle<int> getTopHandleBounds() const;
   juce::Rectangle<int> getBottomHandleBounds() const;

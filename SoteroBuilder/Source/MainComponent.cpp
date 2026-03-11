@@ -762,82 +762,170 @@ void MainComponent::updateGridUI() {
       juce::Component::SafePointer<KeyColumn> safeCol(col);
       region->onBoundsChanged = [this, mIndex, safeCol,
                                  region](const KeyMapping &m) {
-        if (mIndex >= 0 && mIndex < libraryData.mappings.size()) {
-          auto &ref = libraryData.mappings.getReference(mIndex);
-          int targetLo = m.velocityLow;
-          int targetHi = m.velocityHigh;
+        if (mIndex < 0 || mIndex >= libraryData.mappings.size()) return;
 
-          bool syncActive = mappingPanel.layerSyncLock.getToggleState();
-          int otherIndex = syncActive ? findCounterpart(mIndex) : -1;
+        auto &ref    = libraryData.mappings.getReference(mIndex);
+        const bool altDown = (region != nullptr) && region->getIsAltDrag();
 
-          // 1. Resolve collisions in primary layer (with push-back)
-          resolveCollisions(ref.midiNote, ref.micLayer, targetLo, targetHi,
-                            mIndex, true, true);
+        // --- Compute deltas so we can propagate them to linked neighbours ---
+        const int oldLo  = ref.velocityLow;
+        const int oldHi  = ref.velocityHigh;
+        const int deltaLo = m.velocityLow  - oldLo;  // BottomHandle moved
+        const int deltaHi = m.velocityHigh - oldHi;  // TopHandle moved
 
-          // 2. Resolve collisions in other layer if sync is on
-          if (syncActive && otherIndex != -1) {
-            auto &other = libraryData.mappings.getReference(otherIndex);
-            other.velocityLow = targetLo;
-            other.velocityHigh = targetHi;
-            // Also pushes back if other hits bound
-            resolveCollisions(other.midiNote, other.micLayer, other.velocityLow,
-                              other.velocityHigh, otherIndex, true, false);
-            // Correct the primary mapping too if other pushed back
-            targetLo = other.velocityLow;
-            targetHi = other.velocityHigh;
+        bool syncActive = mappingPanel.layerSyncLock.getToggleState();
+        int  otherIndex = syncActive ? findCounterpart(mIndex) : -1;
+
+        // ---------------------------------------------------------------
+        // BI-DIRECTIONAL EDGE BINDING
+        // Without Alt: if an edge (top or bottom) is touching a neighbour's
+        // opposite edge, propagate the same delta to that neighbour.
+        // ---------------------------------------------------------------
+        if (!altDown) {
+          for (int i = 0; i < libraryData.mappings.size(); ++i) {
+            if (i == mIndex || i == otherIndex) continue;
+            auto &nb = libraryData.mappings.getReference(i);
+            if (nb.samplePath.isEmpty() || nb.midiNote != ref.midiNote || nb.micLayer != ref.micLayer)
+              continue;
+
+            auto applyToNeighbor = [&](int nbIdx, int dLo, int dHi) {
+                auto& n = libraryData.mappings.getReference(nbIdx);
+                bool nChanged = false;
+                if (dLo != 0 && n.velocityHigh == oldLo - 1) {
+                    n.velocityHigh = juce::jlimit(n.velocityLow + 1, 127, n.velocityHigh + dLo);
+                    nChanged = true;
+                }
+                if (dHi != 0 && n.velocityLow == oldHi + 1) {
+                    n.velocityLow = juce::jlimit(0, n.velocityHigh - 1, n.velocityLow + dHi);
+                    nChanged = true;
+                }
+                if (nChanged) {
+                    if (auto* nbRegion = findRegionForIndex(nbIdx))
+                        nbRegion->updateFromMapping(n);
+                }
+                return nChanged;
+            };
+
+            if (applyToNeighbor(i, deltaLo, deltaHi)) {
+                // If neighbor changed and sync is on, update its counterpart too
+                if (syncActive) {
+                    int nbOtherIdx = findCounterpart(i);
+                    if (nbOtherIdx != -1) {
+                        auto& nbOther = libraryData.mappings.getReference(nbOtherIdx);
+                        nbOther.velocityLow = nb.velocityLow;
+                        nbOther.velocityHigh = nb.velocityHigh;
+                        if (auto* nbOtherRegion = findRegionForIndex(nbOtherIdx))
+                            nbOtherRegion->updateFromMapping(nbOther);
+                    }
+                }
+            }
           }
+        }
 
-          // 3. Apply changes back to data
-          ref.velocityLow = targetLo;
-          ref.velocityHigh = targetHi;
+        // ---------------------------------------------------------------
+        // PRIMARY MAPPING UPDATE (with collision resolution)
+        // ---------------------------------------------------------------
+        int targetLo = m.velocityLow;
+        int targetHi = m.velocityHigh;
 
-          // 4. Update the actual UI components from the new data
-          region->updateFromMapping(ref);
+        resolveCollisions(ref.midiNote, ref.micLayer, targetLo, targetHi,
+                          mIndex, true, true);
 
-          updateColumnRegions(ref.midiNote, ref.micLayer);
-          if (syncActive && otherIndex != -1) {
-            auto &other = libraryData.mappings.getReference(otherIndex);
-            updateColumnRegions(other.midiNote, other.micLayer);
-          }
+        if (syncActive && otherIndex != -1) {
+          auto &other          = libraryData.mappings.getReference(otherIndex);
+          other.velocityLow    = targetLo;
+          other.velocityHigh   = targetHi;
+          resolveCollisions(other.midiNote, other.micLayer, other.velocityLow,
+                            other.velocityHigh, otherIndex, true, false);
+          // If other layer pushed back, honour that in the primary too
+          targetLo = other.velocityLow;
+          targetHi = other.velocityHigh;
+        }
+
+        ref.velocityLow  = targetLo;
+        ref.velocityHigh = targetHi;
+
+        region->updateFromMapping(ref);
+
+        updateColumnRegions(ref.midiNote, ref.micLayer);
+        if (syncActive && otherIndex != -1) {
+          auto &other = libraryData.mappings.getReference(otherIndex);
+          updateColumnRegions(other.midiNote, other.micLayer);
         }
       };
 
-      region->onRequestMove = [this, mIndex](int deltaNote) {
-        if (mIndex >= 0 && mIndex < libraryData.mappings.size()) {
-          auto &ref = libraryData.mappings.getReference(mIndex);
-          int oldNote = ref.midiNote;
-          int oldLo = ref.velocityLow;
-          int oldHi = ref.velocityHigh;
-          int targetNote = juce::jlimit(0, 127, oldNote + deltaNote);
+      region->onRequestMove = [this, mIndex, region](int deltaNote, bool altDown) {
+        if (mIndex < 0 || mIndex >= libraryData.mappings.size()) return;
+        if (deltaNote == 0) return;
 
-          if (targetNote == oldNote)
-            return;
+        auto& ref = libraryData.mappings.getReference(mIndex);
+        const int oldNote = ref.midiNote;
+        const int targetNote = juce::jlimit(0, 127, oldNote + deltaNote);
+        if (targetNote == oldNote) return;
 
-          bool syncActive = mappingPanel.layerSyncLock.getToggleState();
-          int otherIndex = syncActive ? findCounterpart(mIndex) : -1;
+        // Lambda to transfer a region between columns without destroying it
+        auto transferInPlace = [&](int mIdx, SampleRegion* reg, MappingPanel::LayerView* layerView, int oldN, int newN) -> bool {
+            int baseNote = (mappingPanel.currentOctave + 3) * 12;
+            int oldColIdx = oldN - baseNote;
+            int newColIdx = newN - baseNote;
+            if (oldColIdx < 0 || oldColIdx >= 12 || newColIdx < 0 || newColIdx >= 12) return false;
+            if (!layerView) return false;
 
-          // 1. Resolve collisions in primary layer at destination
-          resolveCollisions(targetNote, ref.micLayer, oldLo, oldHi, mIndex,
-                            true, true);
+            KeyColumn* oldCol = layerView->columns[oldColIdx];
+            KeyColumn* newCol = layerView->columns[newColIdx];
+            if (!oldCol || !newCol) return false;
 
-          // 2. If sync is on, resolve in other layer at destination
-          if (syncActive && otherIndex != -1) {
-            auto &other = libraryData.mappings.getReference(otherIndex);
-            other.midiNote = targetNote;
-            resolveCollisions(targetNote, other.micLayer, oldLo, oldHi,
-                              otherIndex, true, false);
-          }
+            // Find index in OwnedArray
+            int rank = -1;
+            for (int k = 0; k < oldCol->regions.size(); ++k) {
+                if (oldCol->regions[k] == reg) { rank = k; break; }
+            }
+            if (rank == -1) return false;
 
-          // 3. Apply changes
-          ref.midiNote = targetNote;
-          if (syncActive && otherIndex != -1) {
-            libraryData.mappings.getReference(otherIndex).midiNote = targetNote;
-          }
+            // Update mapping data note immediately
+            libraryData.mappings.getReference(mIdx).midiNote = newN;
 
-          juce::MessageManager::callAsync([this] {
-            updateGridUI();
-            rebuildSynth();
-          });
+            // Without Alt, check collision in target column
+            if (!altDown) {
+                bool occupied = false;
+                for (auto* other : newCol->regions) {
+                    if (other != reg) { occupied = true; break; }
+                }
+                if (occupied) {
+                    libraryData.mappings.getReference(mIdx).midiNote = oldN; // Revert
+                    return false;
+                }
+            }
+
+            // ATOMIC TRANSFER: Remove from old, add to new
+            SampleRegion* detached = oldCol->regions.removeAndReturn(rank);
+            if (detached) {
+                newCol->regions.add(detached);
+                newCol->addAndMakeVisible(detached);
+                oldCol->resized();
+                newCol->resized();
+                return true;
+            }
+            return false;
+        };
+
+        bool syncActive = mappingPanel.layerSyncLock.getToggleState();
+        int otherIndex = syncActive ? findCounterpart(mIndex) : -1;
+        MappingPanel::LayerView* primaryLayer = (ref.micLayer == 0) ? mappingPanel.layer1.get() : mappingPanel.layer2.get();
+
+        bool moved = transferInPlace(mIndex, region, primaryLayer, oldNote, targetNote);
+
+        if (moved && syncActive && otherIndex != -1) {
+            auto& other = libraryData.mappings.getReference(otherIndex);
+            int otherOld = other.midiNote;
+            MappingPanel::LayerView* otherLayer = (other.micLayer == 0) ? mappingPanel.layer1.get() : mappingPanel.layer2.get();
+            if (auto* otherReg = findRegionForIndex(otherIndex)) {
+                transferInPlace(otherIndex, otherReg, otherLayer, otherOld, targetNote);
+            }
+        }
+
+        if (moved) {
+            juce::MessageManager::callAsync([this] { rebuildSynth(); });
         }
       };
 
@@ -848,6 +936,36 @@ void MainComponent::updateGridUI() {
           updateGridUI();
           rebuildSynth();
         });
+      };
+
+      // ── Vertical Swap (Alt+Body drag) ──────────────────────────────────────
+      region->onVerticalSwapRequest = [this, mIndex, region](int deltaVelCenter, int mouseScreenY) {
+        if (mIndex < 0 || mIndex >= libraryData.mappings.size())
+          return;
+
+        auto &src = libraryData.mappings.getReference(mIndex);
+        int srcCentre     = (src.velocityLow + src.velocityHigh) / 2;
+        int targetCentre  = juce::jlimit(0, 127, srcCentre + deltaVelCenter);
+
+        // Find the nearest sample in this column whose centre is closest to targetCentre
+        int bestIndex = -1;
+        int bestDist  = INT_MAX;
+        for (int i = 0; i < libraryData.mappings.size(); ++i) {
+          if (i == mIndex) continue;
+          const auto &m = libraryData.mappings.getReference(i);
+          if (m.samplePath.isEmpty() || m.midiNote != src.midiNote || m.micLayer != src.micLayer)
+            continue;
+          int c    = (m.velocityLow + m.velocityHigh) / 2;
+          int dist = std::abs(c - targetCentre);
+          if (dist < bestDist) { bestDist = dist; bestIndex = i; }
+        }
+
+        if (bestIndex == -1) return;
+
+        // Direct call — no callAsync. Components are NOT recreated, so the
+        // drag continues uninterrupted, enabling multi-swap in one gesture.
+        juce::Component::SafePointer<SampleRegion> safeRegion(region);
+        performSwap(mIndex, bestIndex, safeRegion.getComponent(), mouseScreenY);
       };
     }
   }
@@ -1273,6 +1391,136 @@ int MainComponent::findCounterpart(int mIndex) {
   return -1;
 }
 
+// Calculates the pixel bounds that a region would occupy in its column
+// given a specific velocity range, mirroring KeyColumn::resized() logic.
+static juce::Rectangle<int> calcRegionBounds(const MainComponent::KeyColumn* col,
+                                              int velLow, int velHigh) noexcept {
+  float h      = (float)col->getHeight();
+  float yTop   = h * (1.0f - (velHigh / 127.0f));
+  float yBot   = h * (1.0f - (velLow  / 127.0f));
+  return juce::Rectangle<int>(0, (int)yTop, col->getWidth(),
+                               (int)juce::jmax(1.0f, yBot - yTop));
+}
+
+// In-place, atomic swap of velocity zones.
+// NO updateGridUI() — components are kept alive so the drag continues.
+// Uses juce::ComponentAnimator to give a smooth ghost-glide effect.
+void MainComponent::performSwap(int mIndexA, int mIndexB,
+                                SampleRegion* draggedRegion,
+                                int mouseScreenY) {
+  if (mIndexA < 0 || mIndexA >= libraryData.mappings.size()) return;
+  if (mIndexB < 0 || mIndexB >= libraryData.mappings.size()) return;
+  if (mIndexA == mIndexB) return;
+
+  auto &mA = libraryData.mappings.getReference(mIndexA);
+  auto &mB = libraryData.mappings.getReference(mIndexB);
+
+  // Safety: both must be in the same column
+  if (mA.midiNote != mB.midiNote || mA.micLayer != mB.micLayer) return;
+
+  // Find the target region's UI component BEFORE the data swap
+  SampleRegion* targetRegion = findRegionForIndex(mIndexB);
+
+  // Helper: animate a region from its current bounds to new bounds
+  // useProxyComponent=true creates a ghost screenshot that glides while
+  // the real component is immediately at its final position.
+  auto animateTo = [&](SampleRegion* r, int velLow, int velHigh) {
+    if (r == nullptr) return;
+    if (auto* col = dynamic_cast<MainComponent::KeyColumn*>(r->getParentComponent())) {
+      auto newBounds = calcRegionBounds(col, velLow, velHigh);
+      juce::Desktop::getInstance().getAnimator().animateComponent(
+          r, newBounds, 1.0f, 150 /*ms*/, false /*lerp real component*/, 0.0, 0.0);
+    }
+  };
+
+  // === ATOMIC DATA SWAP ===
+  int tmpLo = mA.velocityLow;  int tmpHi = mA.velocityHigh;
+  mA.velocityLow  = mB.velocityLow;  mA.velocityHigh = mB.velocityHigh;
+  mB.velocityLow  = tmpLo;           mB.velocityHigh = tmpHi;
+
+  // === ANIMATE TARGET (its velocity zone moved) ===
+  animateTo(targetRegion, mB.velocityLow, mB.velocityHigh);
+  if (targetRegion) targetRegion->updateFromMapping(mB);
+
+  // === UPDATE & RESET DRAGGED REGION ===
+  if (draggedRegion) {
+    draggedRegion->updateFromMapping(mA);
+    // Animate dragged region to its new (swapped) velocity position as well
+    animateTo(draggedRegion, mA.velocityLow, mA.velocityHigh);
+    // Reset drag anchors so the next swap threshold is evaluated from
+    // the new position — this is what enables continuous multi-swap.
+    draggedRegion->resetSwapState(mouseScreenY);
+  }
+
+  // === SYNC LAYERS ===
+  if (mappingPanel.layerSyncLock.getToggleState()) {
+    int mirrorA = findCounterpart(mIndexA);
+    int mirrorB = findCounterpart(mIndexB);
+    if (mirrorA != -1 && mirrorB != -1 && mirrorA != mirrorB) {
+      SampleRegion* mirrorTargetRegion = findRegionForIndex(mirrorB);
+      auto &mMA = libraryData.mappings.getReference(mirrorA);
+      auto &mMB = libraryData.mappings.getReference(mirrorB);
+      int mTmpLo = mMA.velocityLow; int mTmpHi = mMA.velocityHigh;
+      mMA.velocityLow  = mMB.velocityLow;  mMA.velocityHigh = mMB.velocityHigh;
+      mMB.velocityLow  = mTmpLo;           mMB.velocityHigh = mTmpHi;
+      animateTo(mirrorTargetRegion, mMB.velocityLow, mMB.velocityHigh);
+      if (mirrorTargetRegion) mirrorTargetRegion->updateFromMapping(mMB);
+      SampleRegion* mirrorDragged = findRegionForIndex(mirrorA);
+      if (mirrorDragged) mirrorDragged->updateFromMapping(mMA);
+    }
+  }
+
+  // Rebuild audio asynchronously (non-blocking: won't destroy UI components)
+  juce::MessageManager::callAsync([this] { rebuildSynth(); });
+}
+
+
+// Finds the SampleRegion UI component corresponding to a mapping index.
+// Matches by counting how many non-empty mappings with the same note+layer
+// appear before mappingIndex in libraryData.mappings — that rank is the
+// position of the region in KeyColumn::regions.
+void MainComponent::updateColumnRegions(int note, int layer) {
+  int baseNote = (mappingPanel.currentOctave + 3) * 12;
+  int colIndex = note - baseNote;
+  if (colIndex < 0 || colIndex >= 12) return;
+
+  auto* layerView = (layer == 0) ? mappingPanel.layer1.get()
+                                 : mappingPanel.layer2.get();
+  if (layerView && layerView->columns[colIndex]) {
+    layerView->columns[colIndex]->resized();
+  }
+}
+
+SampleRegion* MainComponent::findRegionForIndex(int mappingIndex) {
+  if (mappingIndex < 0 || mappingIndex >= libraryData.mappings.size())
+    return nullptr;
+  const auto &m = libraryData.mappings.getReference(mappingIndex);
+  if (m.samplePath.isEmpty()) return nullptr;
+
+  int baseNote = (mappingPanel.currentOctave + 3) * 12;
+  int colIndex  = m.midiNote - baseNote;
+  if (colIndex < 0 || colIndex >= 12) return nullptr;
+
+  auto* targetLayer = (m.micLayer == 0) ? mappingPanel.layer1.get()
+                                        : mappingPanel.layer2.get();
+  if (!targetLayer) return nullptr;
+
+  KeyColumn* col = targetLayer->columns[colIndex];
+  if (!col) return nullptr;
+
+  int rank = 0;
+  for (int i = 0; i < mappingIndex; ++i) {
+    const auto &mi = libraryData.mappings.getReference(i);
+    if (mi.samplePath.isNotEmpty() && mi.midiNote == m.midiNote
+        && mi.micLayer == m.micLayer)
+      ++rank;
+  }
+
+  if (rank < col->regions.size())
+    return col->regions[rank];
+  return nullptr;
+}
+
 bool MainComponent::isRangeFree(int note, int micLayer, int lo, int hi,
                                 int excludeIndex) {
   for (int i = 0; i < libraryData.mappings.size(); ++i) {
@@ -1519,45 +1767,6 @@ void MainComponent::resolveCollisions(int note, int micLayer, int &targetLo,
   --depth;
 }
 
-void MainComponent::updateColumnRegions(int note, int layer) {
-  MappingPanel::LayerView *targetLayer =
-      (layer == 0) ? mappingPanel.layer1.get() : mappingPanel.layer2.get();
-  if (!targetLayer)
-    return;
-
-  int baseNote = (mappingPanel.currentOctave + 3) * 12;
-  int colIndex = note - baseNote;
-  if (colIndex < 0 || colIndex >= 12)
-    return;
-
-  KeyColumn *col = targetLayer->columns[colIndex];
-  if (!col)
-    return;
-
-  // Find all mappings for this specific note/layer
-  juce::Array<int> matchingIndices;
-  for (int i = 0; i < libraryData.mappings.size(); ++i) {
-    auto &m = libraryData.mappings.getReference(i);
-    if (m.midiNote == note && m.micLayer == layer &&
-        m.samplePath.isNotEmpty()) {
-      matchingIndices.add(i);
-    }
-  }
-
-  // The order of regions in col->regions matches the order added in
-  // updateGridUI
-  if (matchingIndices.size() == col->regions.size()) {
-    for (int i = 0; i < matchingIndices.size(); ++i) {
-      auto &m = libraryData.mappings.getReference(matchingIndices[i]);
-      auto *region = col->regions[i];
-      if (!region->isDragging()) {
-        region->updateFromMapping(m);
-      }
-    }
-  }
-
-  col->resized(); // Trigger re-layout of the column's regions
-}
 
 void MainComponent::filesDropped(const juce::StringArray &files, int x, int y) {
   // Global drops are now handled by individual KeyColumns.

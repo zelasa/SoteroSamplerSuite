@@ -713,6 +713,8 @@ private:
 
   void updateColumnRegions(int note, int layer);
   int findCounterpart(int sourceIndex);
+  void performSwap(int mIndexA, int mIndexB, SampleRegion* draggedRegion, int mouseScreenY);
+  SampleRegion* findRegionForIndex(int mappingIndex); // UI lookup: mapping index -> SampleRegion*
 
   bool dragStickyTop = false;
   bool dragStickyBottom = false;
