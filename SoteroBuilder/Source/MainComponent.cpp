@@ -654,6 +654,18 @@ void MainComponent::updateGridUI() {
         auditionSampleOff(m.midiNote);
       };
 
+      region->onDragStart = [this, mIndex](bool stickyTop, bool stickyBottom) {
+        dragStickyTop = stickyTop;
+        dragStickyBottom = stickyBottom;
+        
+        bool syncActive = mappingPanel.layerSyncLock.getToggleState();
+        if (syncActive) {
+            dragCounterpartIndex = findCounterpart(mIndex);
+        } else {
+            dragCounterpartIndex = -1;
+        }
+      };
+
       if (mIndex == activeMappingIndex)
         region->setActive(true);
 
@@ -910,7 +922,7 @@ void MainComponent::updateGridUI() {
         };
 
         bool syncActive = mappingPanel.layerSyncLock.getToggleState();
-        int otherIndex = syncActive ? findCounterpart(mIndex) : -1;
+        int otherIndex = (syncActive && dragCounterpartIndex != -1) ? dragCounterpartIndex : -1;
         MappingPanel::LayerView* primaryLayer = (ref.micLayer == 0) ? mappingPanel.layer1.get() : mappingPanel.layer2.get();
 
         bool moved = transferInPlace(mIndex, region, primaryLayer, oldNote, targetNote);
@@ -932,6 +944,7 @@ void MainComponent::updateGridUI() {
       region->onDragFinished = [this](const KeyMapping &) {
         dragStickyTop = false;
         dragStickyBottom = false;
+        dragCounterpartIndex = -1;
         juce::MessageManager::callAsync([this] {
           updateGridUI();
           rebuildSynth();

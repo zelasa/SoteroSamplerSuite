@@ -715,6 +715,7 @@ private:
   int findCounterpart(int sourceIndex);
   void performSwap(int mIndexA, int mIndexB, SampleRegion* draggedRegion, int mouseScreenY);
   SampleRegion* findRegionForIndex(int mappingIndex); // UI lookup: mapping index -> SampleRegion*
+  int dragCounterpartIndex = -1; // Persistent grip for horizontal sync
 
   bool dragStickyTop = false;
   bool dragStickyBottom = false;
