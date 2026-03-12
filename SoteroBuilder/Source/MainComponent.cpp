@@ -897,18 +897,6 @@ void MainComponent::updateGridUI() {
             // Update mapping data note immediately
             libraryData.mappings.getReference(mIdx).midiNote = newN;
 
-            // Without Alt, check collision in target column
-            if (!altDown) {
-                bool occupied = false;
-                for (auto* other : newCol->regions) {
-                    if (other != reg) { occupied = true; break; }
-                }
-                if (occupied) {
-                    libraryData.mappings.getReference(mIdx).midiNote = oldN; // Revert
-                    return false;
-                }
-            }
-
             // ATOMIC TRANSFER: Remove from old, add to new
             SampleRegion* detached = oldCol->regions.removeAndReturn(rank);
             if (detached) {

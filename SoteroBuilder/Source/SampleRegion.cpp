@@ -329,7 +329,7 @@ void SampleRegion::mouseDrag(const juce::MouseEvent &e) {
     // Uses absolute screen X to enable continuous multi-column sliding.
     // Passes isAltDrag so MainComponent can skip collision.
     // -------------------------------------------------------
-    if (currentDragMode == DragMode::Body && onRequestMove) {
+    if (currentDragMode == DragMode::Body && onRequestMove && isAltDrag) {
       int colWidth = juce::jmax(1, getWidth());
       int pixelsMoved = e.getScreenX() - initialScreenX;
       int newNoteOffset = pixelsMoved / colWidth; // rounds toward zero
