@@ -1500,7 +1500,16 @@ void MainComponent::updateColumnRegions(int note, int layer) {
   auto* layerView = (layer == 0) ? mappingPanel.layer1.get()
                                  : mappingPanel.layer2.get();
   if (layerView && layerView->columns[colIndex]) {
-    layerView->columns[colIndex]->resized();
+    auto* col = layerView->columns[colIndex];
+    // Sync UI components with data before recalculating bounds
+    for (int i = 0; i < libraryData.mappings.size(); ++i) {
+      auto& m = libraryData.mappings.getReference(i);
+      if (m.samplePath.isNotEmpty() && m.midiNote == note && m.micLayer == layer) {
+        if (auto* reg = findRegionForIndex(i))
+          reg->updateFromMapping(m);
+      }
+    }
+    col->resized();
   }
 }
 
