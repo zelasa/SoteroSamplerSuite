@@ -72,8 +72,8 @@ public:
       setInterceptsMouseClicks(true, true);
     }
 
-    void addRegion(const KeyMapping &mapping) {
-      auto *region = new SampleRegion(mapping, noteNumber - 60, micLayer);
+    void addRegion(const KeyMapping &mapping, int mIndex) {
+      auto *region = new SampleRegion(mapping, noteNumber - 60, micLayer, mIndex);
       regions.add(region);
       addAndMakeVisible(region);
       resized();

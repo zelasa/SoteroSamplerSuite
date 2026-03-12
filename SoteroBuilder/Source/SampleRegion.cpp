@@ -2,8 +2,8 @@
 
 namespace sotero {
 
-SampleRegion::SampleRegion(const KeyMapping &mapping, int nIdx, int layer)
-    : currentMapping(mapping), parentNoteIndex(nIdx), micLayer(layer) {
+SampleRegion::SampleRegion(const KeyMapping &mapping, int nIdx, int layer, int mIdx)
+    : currentMapping(mapping), parentNoteIndex(nIdx), micLayer(layer), mappingIndex(mIdx) {
   setRepaintsOnMouseActivity(true);
 }
 

@@ -643,7 +643,7 @@ void MainComponent::updateGridUI() {
       if (col == nullptr)
         continue;
 
-      col->addRegion(mapping);
+      col->addRegion(mapping, mIndex);
       auto *region = col->regions.getLast();
 
       region->onAudition = [this](const KeyMapping &m) {
@@ -1504,11 +1504,12 @@ void MainComponent::updateColumnRegions(int note, int layer) {
 SampleRegion* MainComponent::findRegionForIndex(int mappingIndex) {
   if (mappingIndex < 0 || mappingIndex >= libraryData.mappings.size())
     return nullptr;
+
   const auto &m = libraryData.mappings.getReference(mappingIndex);
   if (m.samplePath.isEmpty()) return nullptr;
 
   int baseNote = (mappingPanel.currentOctave + 3) * 12;
-  int colIndex  = m.midiNote - baseNote;
+  int colIndex = m.midiNote - baseNote;
   if (colIndex < 0 || colIndex >= 12) return nullptr;
 
   auto* targetLayer = (m.micLayer == 0) ? mappingPanel.layer1.get()
@@ -1518,16 +1519,12 @@ SampleRegion* MainComponent::findRegionForIndex(int mappingIndex) {
   KeyColumn* col = targetLayer->columns[colIndex];
   if (!col) return nullptr;
 
-  int rank = 0;
-  for (int i = 0; i < mappingIndex; ++i) {
-    const auto &mi = libraryData.mappings.getReference(i);
-    if (mi.samplePath.isNotEmpty() && mi.midiNote == m.midiNote
-        && mi.micLayer == m.micLayer)
-      ++rank;
+  // Persistent ID lookup: iterate through regions in this column
+  // and find the one that owns this specific mapping index.
+  for (auto* reg : col->regions) {
+      if (reg->getMappingIndex() == mappingIndex)
+          return reg;
   }
-
-  if (rank < col->regions.size())
-    return col->regions[rank];
   return nullptr;
 }
 

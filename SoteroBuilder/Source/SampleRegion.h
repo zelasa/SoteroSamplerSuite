@@ -8,8 +8,10 @@ namespace sotero {
 
 class SampleRegion : public juce::Component {
 public:
-  SampleRegion(const KeyMapping &mapping, int noteIndex, int micLayer);
+  SampleRegion(const KeyMapping &mapping, int noteIndex, int micLayer, int mappingIndex);
   ~SampleRegion() override = default;
+
+  int getMappingIndex() const noexcept { return mappingIndex; }
 
   void paint(juce::Graphics &g) override;
   void resized() override;
@@ -51,7 +53,7 @@ public:
   void resetSwapState(int newMouseScreenY); // called by MainComponent after each swap
   bool getIsAltDrag() const noexcept { return isAltDrag; } // MainComponent checks for edge-binding bypass
 
-private:
+  int mappingIndex = -1;
   KeyMapping currentMapping;
   int parentNoteIndex;
   int micLayer = 0;
