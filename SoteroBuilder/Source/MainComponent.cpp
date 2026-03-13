@@ -944,29 +944,73 @@ void MainComponent::updateGridUI() {
         if (mIndex < 0 || mIndex >= libraryData.mappings.size())
           return;
 
-        auto &src = libraryData.mappings.getReference(mIndex);
-        int srcCentre     = (src.velocityLow + src.velocityHigh) / 2;
-        int targetCentre  = juce::jlimit(0, 127, srcCentre + deltaVelCenter);
+        // --- MULTI-SWAP LOOP ---
+        bool swapped = true;
+        while (swapped) {
+            swapped = false;
+            auto &src = libraryData.mappings.getReference(mIndex);
+            int srcCentre = (src.velocityLow + src.velocityHigh) / 2;
+            int targetCentre = srcCentre + deltaVelCenter;
 
-        // Find the nearest sample in this column whose centre is closest to targetCentre
-        int bestIndex = -1;
-        int bestDist  = INT_MAX;
-        for (int i = 0; i < libraryData.mappings.size(); ++i) {
-          if (i == mIndex) continue;
-          const auto &m = libraryData.mappings.getReference(i);
-          if (m.samplePath.isEmpty() || m.midiNote != src.midiNote || m.micLayer != src.micLayer)
-            continue;
-          int c    = (m.velocityLow + m.velocityHigh) / 2;
-          int dist = std::abs(c - targetCentre);
-          if (dist < bestDist) { bestDist = dist; bestIndex = i; }
+            // Find neighbors ... (rest of logic remains same)
+            int neighborIndex = -1;
+            if (deltaVelCenter > 0) { // Moving UP
+                int bestNextLow = 129;
+                for (int i = 0; i < libraryData.mappings.size(); ++i) {
+                    if (i == mIndex) continue;
+                    const auto &m = libraryData.mappings.getReference(i);
+                    if (m.samplePath.isEmpty() || m.midiNote != src.midiNote || m.micLayer != src.micLayer) continue;
+                    if (m.velocityLow > src.velocityHigh && m.velocityLow < bestNextLow) {
+                        bestNextLow = m.velocityLow;
+                        neighborIndex = i;
+                    }
+                }
+            } else if (deltaVelCenter < 0) { // Moving DOWN
+                int bestNextHigh = -1;
+                for (int i = 0; i < libraryData.mappings.size(); ++i) {
+                    if (i == mIndex) continue;
+                    const auto &m = libraryData.mappings.getReference(i);
+                    if (m.samplePath.isEmpty() || m.midiNote != src.midiNote || m.micLayer != src.micLayer) continue;
+                    if (m.velocityHigh < src.velocityLow && m.velocityHigh > bestNextHigh) {
+                        bestNextHigh = m.velocityHigh;
+                        neighborIndex = i;
+                    }
+                }
+            }
+
+            if (neighborIndex != -1) {
+                const auto &nb = libraryData.mappings.getReference(neighborIndex);
+                int nbCentre = (nb.velocityLow + nb.velocityHigh) / 2;
+                
+                // PIXEL-BASED HYSTERESIS
+                // We calculate how many velocity units represent ~6 pixels on screen.
+                int baseNote = (mappingPanel.currentOctave + 3) * 12;
+                int colIndex = src.midiNote - baseNote;
+                auto* layerView = (src.micLayer == 0) ? mappingPanel.layer1.get() : mappingPanel.layer2.get();
+                float colH = (layerView && layerView->columns[colIndex]) ? (float)layerView->columns[colIndex]->getHeight() : (float)getHeight();
+                
+                float velPerPixel = 127.0f / colH;
+                float hysteresisVel = 15.0f * velPerPixel; // Increased to 15 pixels for "heavy/magnetic" feel
+
+                int midPoint = (srcCentre + nbCentre) / 2;
+
+                bool shouldSwap = false;
+                if (deltaVelCenter > 0) { // Moving UP
+                    if ((float)targetCentre > (float)midPoint + hysteresisVel) shouldSwap = true;
+                } else { // Moving DOWN
+                    if ((float)targetCentre < (float)midPoint - hysteresisVel) shouldSwap = true;
+                }
+
+                if (shouldSwap) {
+                    juce::Component::SafePointer<SampleRegion> safeRegion(region);
+                    performSwap(mIndex, neighborIndex, safeRegion.getComponent(), mouseScreenY);
+                    swapped = true;
+                    
+                    srcCentre = (src.velocityLow + src.velocityHigh) / 2;
+                    deltaVelCenter = targetCentre - srcCentre; 
+                }
+            }
         }
-
-        if (bestIndex == -1) return;
-
-        // Direct call — no callAsync. Components are NOT recreated, so the
-        // drag continues uninterrupted, enabling multi-swap in one gesture.
-        juce::Component::SafePointer<SampleRegion> safeRegion(region);
-        performSwap(mIndex, bestIndex, safeRegion.getComponent(), mouseScreenY);
       };
     }
   }
@@ -1430,7 +1474,7 @@ void MainComponent::performSwap(int mIndexA, int mIndexB,
     if (auto* col = dynamic_cast<MainComponent::KeyColumn*>(r->getParentComponent())) {
       auto newBounds = calcRegionBounds(col, velLow, velHigh);
       juce::Desktop::getInstance().getAnimator().animateComponent(
-          r, newBounds, 1.0f, 150 /*ms*/, false /*lerp real component*/, 0.0, 0.0);
+          r, newBounds, 1.0f, 250 /*ms*/, false /*lerp real component*/, 0.0, 0.0);
     }
   };
 

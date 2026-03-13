@@ -200,14 +200,29 @@ void SampleRegion::mouseDown(const juce::MouseEvent &e) {
   // Capture Alt key state and initial velocity center for swap detection
   isAltDrag = e.mods.isAltDown();
   swapDispatched = false;
-  // Capture initial screen X for continuous horizontal tracking
-  initialScreenX = e.getScreenX();
-  lastNoteOffset = 0;
-
+  
+  // Capture initial screen X/Y for absolute tracking
   dragStartY = e.getScreenY();
   initialVelLow  = currentMapping.velocityLow;
   initialVelHigh = currentMapping.velocityHigh;
-  initialCenterVel = (initialVelLow + initialVelHigh) / 2;
+  initialCenterVel = (double)(initialVelLow + initialVelHigh) / 2.0;
+
+  // Capture handles and initial screen pos with float precision
+  initialScreenX = e.getScreenX();
+  initialScreenY = (double)e.getScreenY();
+
+  // Calculate Normalized Grip (0.0 = Bottom, 1.0 = Top)
+  if (auto* parent = getParentComponent()) {
+      float h = (float)parent->getHeight();
+      float pixelsPerVelocity = h / 127.0f;
+      float mouseVelLogical = 127.0f - (float)e.getEventRelativeTo(parent).y / pixelsPerVelocity;
+      float width = (float)(initialVelHigh - initialVelLow);
+      if (width < 1.0f) width = 1.0f;
+      normalizedGrip = (mouseVelLogical - (float)initialVelLow) / width;
+      normalizedGrip = juce::jlimit(0.0f, 1.0f, normalizedGrip);
+  } else {
+      normalizedGrip = 0.5f;
+  }
 
   bool stickyTop = false;
   bool stickyBottom = false;
@@ -265,8 +280,9 @@ void SampleRegion::mouseDrag(const juce::MouseEvent &e) {
     if (parentHeight <= 0)
       return;
 
-    float pixelsPerVelocity = parentHeight / 128.0f;
-    int dragDeltaY = e.getScreenY() - dragStartY;
+    float pixelsPerVelocity = parentHeight / 127.0f;
+    double dragDeltaY = (double)e.getScreenY() - initialScreenY;
+    
     float velocityDeltaFloat = -((float)dragDeltaY / pixelsPerVelocity);
     int velocityDelta = juce::roundToInt(velocityDeltaFloat);
 
@@ -301,19 +317,23 @@ void SampleRegion::mouseDrag(const juce::MouseEvent &e) {
       if (isAltDrag) {
         // ── ALT MODE: fire a swap request when centre crosses into another slot
         // We do NOT change velocityLow/High here (non-destructive).
-        int currentCentre = juce::jlimit(0, 127,
-            initialCenterVel + velocityDelta);
+        double rawCentre = initialCenterVel + (double)velocityDeltaFloat;
+        double clampedCentre = juce::jlimit(0.0, 127.0, rawCentre);
 
-        // Compute deltaVelCenter relative to original centre
-        int deltaVelCenter = currentCentre - initialCenterVel;
+        // [MAGNETIC ANCHOR] If we exceed the boundaries, pull the anchor with the mouse
+        // to prevent the cursor from "escaping" the sample.
+        if (rawCentre != clampedCentre) {
+          double overshoot = rawCentre - clampedCentre;
+          double pixelsPerVel = (double)parentHeight / 127.0;
+          initialScreenY -= (overshoot * pixelsPerVel);
+        }
 
-        // Only fire once per threshold crossing (guard against rapid re-fire)
-        if (!swapDispatched && std::abs(deltaVelCenter) > (initialVelHigh - initialVelLow) / 2 + 2) {
-          swapDispatched = true;
+        int deltaVelCenter = juce::roundToInt(clampedCentre - initialCenterVel);
+
+        // Fire swap request only if there's actual change
+        if (deltaVelCenter != 0) {
           if (onVerticalSwapRequest)
             onVerticalSwapRequest(deltaVelCenter, e.getScreenY());
-          // Component may be repositioned by performSwap but NOT destroyed.
-          // safeThis confirms we survived the call.
         }
         // No boundsChanged, no onBoundsChanged — purely informational drag
       } else {
@@ -466,11 +486,30 @@ void SampleRegion::mouseDoubleClick(const juce::MouseEvent &e) {
 // Resets the swap guard and anchors the drag reference to the new
 // velocity position, enabling continuous multi-swap in one mouse gesture.
 void SampleRegion::resetSwapState(int newMouseScreenY) {
-  swapDispatched = false;
-  initialVelLow    = currentMapping.velocityLow;
-  initialVelHigh   = currentMapping.velocityHigh;
-  initialCenterVel = (initialVelLow + initialVelHigh) / 2;
-  dragStartY       = newMouseScreenY;
+  int VL = currentMapping.velocityLow;
+  int VH = currentMapping.velocityHigh;
+  float width = (float)(VH - VL);
+  if (width < 1.0f) width = 1.0f;
+  
+  float newCenter = (float)(VL + VH) / 2.0f;
+  initialCenterVel = juce::roundToInt(newCenter);
+  
+  if (auto* parent = getParentComponent()) {
+    float h = (float)parent->getHeight();
+    float pixelsPerVelocity = h / 127.0f;
+    
+    // The logical velocity we want UNDER the mouse
+    float targetGripVel = (float)VL + normalizedGrip * width;
+    float logicalOffsetFromCenter = targetGripVel - (float)initialCenterVel;
+    
+    // initialScreenY is where 'initialCenterVel' is visually located.
+    // If targetGripVel is above center (offset > 0), then initialScreenY must be BELOW newMouseScreenY.
+    initialScreenY = (double)newMouseScreenY + (double)logicalOffsetFromCenter * (double)pixelsPerVelocity;
+  } else {
+    initialScreenY = (double)newMouseScreenY;
+  }
+  
+  dragStartY = newMouseScreenY; // Legacy support
 }
 
 } // namespace sotero

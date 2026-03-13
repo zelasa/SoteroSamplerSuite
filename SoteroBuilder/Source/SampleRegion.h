@@ -64,11 +64,13 @@ public:
   int dragStartY = 0;
   int initialVelHigh = 127;
   int initialVelLow = 0;
+  float normalizedGrip = 0.5f; // Relative Y position in range [0.0 (Bottom), 1.0 (Top)]
   bool isDetachedDrag = false;
   bool isAltDrag = false;
-  int initialCenterVel = 64; // centre of velocity range at drag start
+  double initialScreenX = 0.0;   // screen X at mouseDown, for absolute horizontal tracking
+  double initialScreenY = 0.0;   // screen Y at mouseDown, for absolute tracking
+  double initialCenterVel = 64.0; // centre of velocity range at drag start
   bool swapDispatched = false; // guard: fire swap only once per threshold crossing
-  int initialScreenX = 0;   // screen X at mouseDown, for absolute horizontal tracking
   int lastNoteOffset = 0;   // accumulated column offset since drag start
 
   juce::Rectangle<int> getTopHandleBounds() const;
