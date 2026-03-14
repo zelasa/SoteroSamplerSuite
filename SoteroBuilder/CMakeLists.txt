@@ -17,7 +17,8 @@ target_sources(SoteroBuilder PRIVATE
     Source/MainComponent.cpp
     Source/MainComponent.h
     Source/SampleRegion.cpp
-    Source/SampleRegion.h)
+    Source/SampleRegion.h
+    Source/LibraryController.cpp)
 
 target_include_directories(SoteroBuilder PRIVATE 
     Source

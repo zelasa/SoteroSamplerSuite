@@ -16,9 +16,9 @@ MainComponent::MainComponent()
   addAndMakeVisible(headerPanel);
 
   waveform1 =
-      std::make_unique<WaveformPanel>(juce::Colours::cyan, "MIC 1 - RESOURCE");
+      std::make_unique<WaveformWidget>(juce::Colours::cyan, "MIC 1 - RESOURCE");
   waveform2 =
-      std::make_unique<WaveformPanel>(juce::Colours::red, "MIC 2 - RESOURCE");
+      std::make_unique<WaveformWidget>(juce::Colours::red, "MIC 2 - RESOURCE");
   addAndMakeVisible(waveform1.get());
   addAndMakeVisible(waveform2.get());
 
@@ -32,135 +32,56 @@ MainComponent::MainComponent()
 
   // --- Sculpting Panel Wiring ---
   auto &sp = sculptingPanel;
-  sp.attackSlider.setRange(0.0, 5.0, 0.001);
-  sp.decaySlider.setRange(0.0, 5.0, 0.001);
-  sp.sustainSlider.setRange(0.0, 1.0, 0.01);
-  sp.releaseSlider.setRange(0.0, 5.0, 0.001);
-  sp.cutoffSlider.setRange(20.0, 20000.0, 1.0);
-  sp.cutoffSlider.setSkewFactorFromMidPoint(1000.0);
-  sp.resSlider.setRange(0.1, 1.0, 0.01);
 
-  auto updateADSRVisual = [this] {
-    if (activeMappingIndex < 0 ||
-        activeMappingIndex >= libraryData.mappings.size())
-      return;
-
-    auto &m = libraryData.mappings.getReference(activeMappingIndex);
-    sculptingPanel.adsrVisualizer.setParams(
-        (float)sculptingPanel.attackSlider.getValue(),
-        (float)sculptingPanel.decaySlider.getValue(),
-        (float)sculptingPanel.sustainSlider.getValue(),
-        (float)sculptingPanel.releaseSlider.getValue(), m.adsrAttackCurve,
-        m.adsrDecayCurve, m.adsrReleaseCurve,
-        1.0f, // Peak
-        m.adsrSustainTime);
+  sp.getADSR().onADSRChanged = [this](float a, float d, float s, float r) {
+    if (activeMappingIndex >= 0 && activeMappingIndex < libraryData.mappings.size()) {
+        auto &m = libraryData.mappings.getReference(activeMappingIndex);
+        m.adsrAttack = a;
+        m.adsrDecay = d;
+        m.adsrSustain = s;
+        m.adsrRelease = r;
+        rebuildSynth();
+    }
   };
 
-  // Attack
-  sp.attackSlider.setRange(0.001, 5.0, 0.001);
-  sp.attackSlider.onValueChange = [this, updateADSRVisual] {
-    sculptingPanel.attackInput.setText(
-        juce::String(sculptingPanel.attackSlider.getValue(), 3),
-        juce::dontSendNotification);
-    updateADSRVisual();
-  };
-  sp.attackInput.onReturnKey = [this] {
-    sculptingPanel.attackSlider.setValue(
-        sculptingPanel.attackInput.getText().getFloatValue(),
-        juce::sendNotification);
-  };
-  sp.adsrVisualizer.onAttackChange = [this](float val) {
-    sculptingPanel.attackSlider.setValue(val, juce::sendNotification);
+  sp.getFilter().onFilterChanged = [this](int type, float cutoff, float res) {
+    if (activeMappingIndex >= 0 && activeMappingIndex < libraryData.mappings.size()) {
+        auto &m = libraryData.mappings.getReference(activeMappingIndex);
+        m.filterType = type;
+        m.filterCutoff = cutoff;
+        m.filterResonance = res;
+        rebuildSynth();
+    }
   };
 
-  // Decay
-  sp.decaySlider.setRange(0.001, 5.0, 0.001);
-  sp.decaySlider.onValueChange = [this, updateADSRVisual] {
-    sculptingPanel.decayInput.setText(
-        juce::String(sculptingPanel.decaySlider.getValue(), 3),
-        juce::dontSendNotification);
-    updateADSRVisual();
-  };
-  sp.decayInput.onReturnKey = [this] {
-    sculptingPanel.decaySlider.setValue(
-        sculptingPanel.decayInput.getText().getFloatValue(),
-        juce::sendNotification);
-  };
-  sp.adsrVisualizer.onDecayChange = [this](float val) {
-    sculptingPanel.decaySlider.setValue(val, juce::sendNotification);
-  };
-
-  // Sustain
-  sp.sustainSlider.setRange(0.0, 1.0, 0.01);
-  sp.sustainSlider.onValueChange = [this, updateADSRVisual] {
-    sculptingPanel.sustainInput.setText(
-        juce::String(sculptingPanel.sustainSlider.getValue(), 2),
-        juce::dontSendNotification);
-    updateADSRVisual();
-  };
-  sp.sustainInput.onReturnKey = [this] {
-    sculptingPanel.sustainSlider.setValue(
-        sculptingPanel.sustainInput.getText().getFloatValue(),
-        juce::sendNotification);
-  };
-  sp.adsrVisualizer.onSustainChange = [this](float val) {
-    sculptingPanel.sustainSlider.setValue(val, juce::sendNotification);
-  };
-  sp.adsrVisualizer.onSustainTimeChange = [this](float val) {
-    if (activeMappingIndex >= 0 &&
-        activeMappingIndex < libraryData.mappings.size()) {
-      libraryData.mappings.getReference(activeMappingIndex).adsrSustainTime =
-          val;
+  // ADSR Slope/Visualizer specialized callbacks
+  sp.getADSR().getVisualizer().onAttackCurveChange = [this](float val) {
+    if (activeMappingIndex >= 0 && activeMappingIndex < libraryData.mappings.size()) {
+      libraryData.mappings.getReference(activeMappingIndex).adsrAttackCurve = val;
       rebuildSynth();
     }
   };
-
-  // Release
-  sp.releaseSlider.setRange(0.001, 5.0, 0.001);
-  sp.releaseSlider.onValueChange = [this, updateADSRVisual] {
-    sculptingPanel.releaseInput.setText(
-        juce::String(sculptingPanel.releaseSlider.getValue(), 3),
-        juce::dontSendNotification);
-    updateADSRVisual();
-  };
-  sp.releaseInput.onReturnKey = [this] {
-    sculptingPanel.releaseSlider.setValue(
-        sculptingPanel.releaseInput.getText().getFloatValue(),
-        juce::sendNotification);
-  };
-  sp.adsrVisualizer.onReleaseChange = [this](float val) {
-    if (activeMappingIndex >= 0 &&
-        activeMappingIndex < libraryData.mappings.size()) {
-      sculptingPanel.releaseSlider.setValue(val, juce::sendNotification);
-    }
-  };
-  sp.adsrVisualizer.onAttackCurveChange = [this](float val) {
-    if (activeMappingIndex >= 0 &&
-        activeMappingIndex < libraryData.mappings.size()) {
-      libraryData.mappings.getReference(activeMappingIndex).adsrAttackCurve =
-          val;
+  sp.getADSR().getVisualizer().onDecayCurveChange = [this](float val) {
+    if (activeMappingIndex >= 0 && activeMappingIndex < libraryData.mappings.size()) {
+      libraryData.mappings.getReference(activeMappingIndex).adsrDecayCurve = val;
       rebuildSynth();
     }
   };
-  sp.adsrVisualizer.onDecayCurveChange = [this](float val) {
-    if (activeMappingIndex >= 0 &&
-        activeMappingIndex < libraryData.mappings.size()) {
-      libraryData.mappings.getReference(activeMappingIndex).adsrDecayCurve =
-          val;
+  sp.getADSR().getVisualizer().onReleaseCurveChange = [this](float val) {
+    if (activeMappingIndex >= 0 && activeMappingIndex < libraryData.mappings.size()) {
+      libraryData.mappings.getReference(activeMappingIndex).adsrReleaseCurve = val;
       rebuildSynth();
     }
   };
-  sp.adsrVisualizer.onReleaseCurveChange = [this](float val) {
-    if (activeMappingIndex >= 0 &&
-        activeMappingIndex < libraryData.mappings.size()) {
-      libraryData.mappings.getReference(activeMappingIndex).adsrReleaseCurve =
-          val;
+  sp.getADSR().getVisualizer().onSustainTimeChange = [this](float val) {
+    if (activeMappingIndex >= 0 && activeMappingIndex < libraryData.mappings.size()) {
+      libraryData.mappings.getReference(activeMappingIndex).adsrSustainTime = val;
       rebuildSynth();
     }
   };
 
   // --- Project Controls Setup ---
-  headerPanel.loadBtn.onClick = [this] {
+  headerPanel.getLoadBtn().onClick = [this] {
     chooser = std::make_unique<juce::FileChooser>(
         "Select a Sotero Library...",
         juce::File::getSpecialLocation(juce::File::userHomeDirectory),
@@ -175,7 +96,7 @@ MainComponent::MainComponent()
     });
   };
 
-  headerPanel.saveBtn.onClick = [this] {
+  headerPanel.getSaveBtn().onClick = [this] {
     updateMetadataFromUI();
     chooser = std::make_unique<juce::FileChooser>(
         "Save Sotero Library...",
@@ -192,7 +113,7 @@ MainComponent::MainComponent()
     });
   };
 
-  headerPanel.newBtn.onClick = [this] {
+  headerPanel.getNewBtn().onClick = [this] {
     deselectAllRegions();
     libraryData = LibraryMetadata();
     libraryData.mappings.clear();
@@ -308,8 +229,8 @@ MainComponent::MainComponent()
 
   // Sync Global Header toggle to Layer 1 for now, or make it a "Master" toggle
   // that overrides
-  headerPanel.toPlayerToggle.onStateChange = [this] {
-    bool state = headerPanel.toPlayerToggle.getToggleState();
+  headerPanel.getToPlayerToggle().onStateChange = [this] {
+    bool state = headerPanel.getToPlayerToggle().getToggleState();
     mappingPanel.layer1->toPlayerToggle.setToggleState(state,
                                                        juce::sendNotification);
     mappingPanel.layer2->toPlayerToggle.setToggleState(state,
@@ -324,33 +245,33 @@ MainComponent::MainComponent()
   // --- Master FX Wiring ---
   auto &ap = *apvts;
   compModeAtt =
-      std::make_unique<ComboAtt>(ap, "masterComp", advancedPanel.compMode);
+      std::make_unique<ComboAtt>(ap, "masterComp", advancedPanel.getDynamics().getModeSelector());
   compThreshAtt =
-      std::make_unique<SliderAtt>(ap, "compThresh", advancedPanel.compThresh);
+      std::make_unique<SliderAtt>(ap, "compThresh", advancedPanel.getDynamics().getThresholdSlider());
   compRatioAtt =
-      std::make_unique<SliderAtt>(ap, "compRatio", advancedPanel.compRatio);
+      std::make_unique<SliderAtt>(ap, "compRatio", advancedPanel.getDynamics().getRatioSlider());
   compAttackAtt =
-      std::make_unique<SliderAtt>(ap, "compAttack", advancedPanel.compAttack);
+      std::make_unique<SliderAtt>(ap, "compAttack", advancedPanel.getDynamics().getAttackSlider());
   compReleaseAtt =
-      std::make_unique<SliderAtt>(ap, "compRelease", advancedPanel.compRelease);
+      std::make_unique<SliderAtt>(ap, "compRelease", advancedPanel.getDynamics().getReleaseSlider());
 
   revEnableAtt =
-      std::make_unique<ButtonAtt>(ap, "revEnable", advancedPanel.revEnable);
+      std::make_unique<ButtonAtt>(ap, "revEnable", advancedPanel.getRevEnable());
   revSizeAtt =
-      std::make_unique<SliderAtt>(ap, "revSize", advancedPanel.revSize);
-  revMixAtt = std::make_unique<SliderAtt>(ap, "revMix", advancedPanel.revMix);
+      std::make_unique<SliderAtt>(ap, "revSize", advancedPanel.getRevSize());
+  revMixAtt = std::make_unique<SliderAtt>(ap, "revMix", advancedPanel.getRevMix());
 
   toneAtt =
-      std::make_unique<SliderAtt>(ap, "masterTone", advancedPanel.toneSlider);
+      std::make_unique<SliderAtt>(ap, "masterTone", advancedPanel.getToneSlider());
   volAtt = std::make_unique<SliderAtt>(
-      ap, "masterVol", metadataPanel.volSlider); // Assuming added or reuse
+      ap, "masterVol", metadataPanel.getVolSlider()); // Assuming added or reuse
   pitchAtt = std::make_unique<SliderAtt>(
       ap, "masterPitch",
-      sculptingPanel.velSensSlider); // Reusing for now or adding
+      sculptingPanel.getVelSensSlider()); // Reusing for now or adding
 
   // --- Mode Button Logic ---
-  headerPanel.devModeBtn.onClick = [this] { setUIMode(UIMode::Developer); };
-  headerPanel.userModeBtn.onClick = [this] { setUIMode(UIMode::UserPlayer); };
+  headerPanel.getDevModeBtn().onClick = [this] { setUIMode(UIMode::Developer); };
+  headerPanel.getUserModeBtn().onClick = [this] { setUIMode(UIMode::UserPlayer); };
 
   updateGridUI();
 }
@@ -372,8 +293,8 @@ void MainComponent::setUIMode(UIMode mode) {
   // or we could show a distinct PerformanceView later. For now, we adjust
   // layout.
 
-  headerPanel.devModeBtn.setToggleState(isDev, juce::dontSendNotification);
-  headerPanel.userModeBtn.setToggleState(!isDev, juce::dontSendNotification);
+  headerPanel.getDevModeBtn().setToggleState(isDev, juce::dontSendNotification);
+  headerPanel.getUserModeBtn().setToggleState(!isDev, juce::dontSendNotification);
 
   resized();
 }
@@ -455,7 +376,7 @@ void MainComponent::getNextAudioBlock(
   auto &buffer = *bufferToFill.buffer;
 
   // --- EFFECT BYPASS (Pure Audition) ---
-  if (!headerPanel.toPlayerToggle.getToggleState()) {
+  if (!headerPanel.getToPlayerToggle().getToggleState()) {
     // Apply ONLY basic Master Gain
     float masterGain = juce::Decibels::decibelsToGain(
         (float)*apvts->getRawParameterValue("masterVol"));
@@ -634,11 +555,8 @@ void MainComponent::updateGridUI() {
     int colIndex = mapping.midiNote - baseNote;
 
     if (colIndex >= 0 && colIndex < 12) {
-      KeyColumn *col = nullptr;
-      if (mapping.micLayer == 0 && mappingPanel.layer1)
-        col = mappingPanel.layer1->columns[colIndex];
-      else if (mapping.micLayer == 1 && mappingPanel.layer2)
-        col = mappingPanel.layer2->columns[colIndex];
+      auto *col = (mapping.micLayer == 0 && mappingPanel.layer1) ? mappingPanel.layer1->columns[colIndex]
+                  : (mapping.micLayer == 1 && mappingPanel.layer2) ? mappingPanel.layer2->columns[colIndex] : nullptr;
 
       if (col == nullptr)
         continue;
@@ -681,50 +599,12 @@ void MainComponent::updateGridUI() {
         sculptingPanel.setEnabled(true);
         auto &m = libraryData.mappings.getReference(mIndex);
 
-        sculptingPanel.attackSlider.setValue(m.adsrAttack,
-                                             juce::dontSendNotification);
-        sculptingPanel.decaySlider.setValue(m.adsrDecay,
-                                            juce::dontSendNotification);
-        sculptingPanel.sustainSlider.setValue(m.adsrSustain,
-                                              juce::dontSendNotification);
-        sculptingPanel.releaseSlider.setValue(m.adsrRelease,
-                                              juce::dontSendNotification);
-
-        sculptingPanel.adsrVisualizer.setParams(
+        sculptingPanel.getADSR().setParams(
             m.adsrAttack, m.adsrDecay, m.adsrSustain, m.adsrRelease,
             m.adsrAttackCurve, m.adsrDecayCurve, m.adsrReleaseCurve, 1.0f,
             m.adsrSustainTime);
 
-        sculptingPanel.filterTypeSelector.setSelectedId(
-            m.filterType + 1, juce::dontSendNotification);
-        sculptingPanel.cutoffSlider.setValue(m.filterCutoff,
-                                             juce::dontSendNotification);
-        sculptingPanel.resSlider.setValue(m.filterResonance,
-                                          juce::dontSendNotification);
-
-        auto updateData = [this, mIndex]() {
-          if (mIndex >= 0 && mIndex < libraryData.mappings.size()) {
-            auto &ref = libraryData.mappings.getReference(mIndex);
-            ref.adsrAttack = (float)sculptingPanel.attackSlider.getValue();
-            ref.adsrDecay = (float)sculptingPanel.decaySlider.getValue();
-            ref.adsrSustain = (float)sculptingPanel.sustainSlider.getValue();
-            ref.adsrRelease = (float)sculptingPanel.releaseSlider.getValue();
-            ref.filterType =
-                sculptingPanel.filterTypeSelector.getSelectedId() - 1;
-            ref.filterCutoff = (float)sculptingPanel.cutoffSlider.getValue();
-            ref.filterResonance = (float)sculptingPanel.resSlider.getValue();
-            rebuildSynth();
-          }
-        };
-
-        sculptingPanel.attackSlider.onValueChange = updateData;
-        sculptingPanel.decaySlider.onValueChange = updateData;
-        sculptingPanel.sustainSlider.onValueChange = updateData;
-        sculptingPanel.releaseSlider.onValueChange = updateData;
-        sculptingPanel.filterTypeSelector.onChange = updateData;
-        sculptingPanel.cutoffSlider.onValueChange = updateData;
-        sculptingPanel.resSlider.onValueChange = updateData;
-        updateData(); // Apply initial values and rebuild synth
+        sculptingPanel.getFilter().setParams(m.filterType, m.filterCutoff, m.filterResonance);
         // Do NOT call updateGridUI() here as it destroys the very sliders we
         // are using! Instead, just repaint the regions to show the active state
         // if needed
@@ -876,7 +756,7 @@ void MainComponent::updateGridUI() {
         if (targetNote == oldNote) return;
 
         // Lambda to transfer a region between columns without destroying it
-        auto transferInPlace = [&](int mIdx, SampleRegion* reg, MappingPanel::LayerView* layerView, int oldN, int newN) -> bool {
+        auto transferInPlace = [&](int mIdx, SampleRegion* reg, MappingWidget::LayerView* layerView, int oldN, int newN) -> bool {
             int baseNote = (mappingPanel.currentOctave + 3) * 12;
             int oldColIdx = oldN - baseNote;
             int newColIdx = newN - baseNote;
@@ -911,14 +791,14 @@ void MainComponent::updateGridUI() {
 
         bool syncActive = mappingPanel.layerSyncLock.getToggleState();
         int otherIndex = (syncActive && dragCounterpartIndex != -1) ? dragCounterpartIndex : -1;
-        MappingPanel::LayerView* primaryLayer = (ref.micLayer == 0) ? mappingPanel.layer1.get() : mappingPanel.layer2.get();
+        MappingWidget::LayerView* primaryLayer = (ref.micLayer == 0) ? mappingPanel.layer1.get() : mappingPanel.layer2.get();
 
         bool moved = transferInPlace(mIndex, region, primaryLayer, oldNote, targetNote);
 
         if (moved && syncActive && otherIndex != -1) {
             auto& other = libraryData.mappings.getReference(otherIndex);
             int otherOld = other.midiNote;
-            MappingPanel::LayerView* otherLayer = (other.micLayer == 0) ? mappingPanel.layer1.get() : mappingPanel.layer2.get();
+            MappingWidget::LayerView* otherLayer = (other.micLayer == 0) ? mappingPanel.layer1.get() : mappingPanel.layer2.get();
             if (auto* otherReg = findRegionForIndex(otherIndex)) {
                 transferInPlace(otherIndex, otherReg, otherLayer, otherOld, targetNote);
             }
@@ -1067,12 +947,12 @@ void MainComponent::timerCallback() {
     }
   }
 
-  sculptingPanel.adsrVisualizer.setPlayheadTime(latestTime);
+  sculptingPanel.getADSR().getVisualizer().setPlayheadTime(latestTime);
 }
 
 void MainComponent::updateMetadataFromUI() {
-  libraryData.name = metadataPanel.nameEditor.getText();
-  libraryData.author = metadataPanel.authorEditor.getText();
+  libraryData.name = metadataPanel.getNameEditor().getText();
+  libraryData.author = metadataPanel.getAuthorEditor().getText();
 }
 
 void MainComponent::paint(juce::Graphics &g) {
@@ -1084,15 +964,12 @@ void MainComponent::paint(juce::Graphics &g) {
 void MainComponent::deselectAllRegions() {
   activeMappingIndex = -1;
   sculptingPanel.setEnabled(false);
-  sculptingPanel.adsrVisualizer.setPlayheadTime(-1.0f);
+  sculptingPanel.getADSR().getVisualizer().setPlayheadTime(-1.0f);
 
   // Reset ADSR visualizer and sliders to default
-  sculptingPanel.attackSlider.setValue(0.1, juce::dontSendNotification);
-  sculptingPanel.decaySlider.setValue(0.1, juce::dontSendNotification);
-  sculptingPanel.sustainSlider.setValue(1.0, juce::dontSendNotification);
-  sculptingPanel.releaseSlider.setValue(0.2, juce::dontSendNotification);
-  sculptingPanel.adsrVisualizer.setParams(0.1f, 0.1f, 1.0f, 0.2f, 0.0f, 0.0f,
+  sculptingPanel.getADSR().setParams(0.1f, 0.1f, 1.0f, 0.2f, 0.0f, 0.0f,
                                           0.0f, 1.0f, 0.5f);
+  sculptingPanel.getFilter().setParams(0, 20000.0f, 0.1f);
 
   if (mappingPanel.layer1) {
     for (auto *col : mappingPanel.layer1->columns) {
@@ -1127,8 +1004,8 @@ void MainComponent::loadSoteroLibrary(const juce::File &file) {
   if (imported.mappings.size() > 0) {
     currentLibraryFile = file;
     libraryData = imported;
-    metadataPanel.nameEditor.setText(libraryData.name);
-    metadataPanel.authorEditor.setText(libraryData.author);
+    metadataPanel.getNameEditor().setText(libraryData.name);
+    metadataPanel.getAuthorEditor().setText(libraryData.author);
 
     // Load artwork if present
     currentArtwork = juce::Image(); // Reset
@@ -1227,147 +1104,7 @@ void MainComponent::resized() {
   }
 }
 
-MainComponent::MetadataPanel::MetadataPanel() {
-  addAndMakeVisible(nameEditor);
-  addAndMakeVisible(authorEditor);
-  addAndMakeVisible(dateEditor);
-  addAndMakeVisible(infoEditor);
-  addAndMakeVisible(nameLabel);
-  addAndMakeVisible(authorLabel);
-  addAndMakeVisible(dateLabel);
-  addAndMakeVisible(infoLabel);
-  addAndMakeVisible(artworkDrop);
-  addAndMakeVisible(artworkLabel);
 
-  nameLabel.setText("LIBRARY NAME", juce::dontSendNotification);
-  nameLabel.setColour(juce::Label::textColourId, juce::Colours::cyan);
-  authorLabel.setText("AUTHOR", juce::dontSendNotification);
-  authorLabel.setColour(juce::Label::textColourId, juce::Colours::cyan);
-
-  artworkLabel.setJustificationType(juce::Justification::centred);
-  artworkLabel.setColour(juce::Label::textColourId, juce::Colours::grey);
-}
-
-void MainComponent::MetadataPanel::resized() {
-  auto r = getLocalBounds().reduced(5);
-
-  auto artworkArea = r.removeFromTop(120);
-  auto artSquare = artworkArea.removeFromLeft(120);
-  artworkDrop.setBounds(artSquare);
-  artworkLabel.setBounds(artSquare);
-
-  auto fields = artworkArea.reduced(10, 0);
-  nameLabel.setBounds(fields.removeFromTop(20));
-  nameEditor.setBounds(fields.removeFromTop(25));
-  fields.removeFromTop(5);
-  authorLabel.setBounds(fields.removeFromTop(20));
-  authorEditor.setBounds(fields.removeFromTop(30));
-
-  // Added Master Volume Slider to Metadata Panel for Player mode
-  volSlider.setBounds(r.removeFromBottom(50).reduced(20, 0));
-}
-
-void MainComponent::MetadataPanel::paint(juce::Graphics &g) {
-  g.setColour(juce::Colours::black.withAlpha(0.2f));
-  g.fillRoundedRectangle(getLocalBounds().toFloat(), 4.0f);
-  g.setColour(juce::Colours::white.withAlpha(0.1f));
-  g.drawRoundedRectangle(getLocalBounds().toFloat(), 4.0f, 1.0f);
-}
-
-void MainComponent::WaveformPanel::paint(juce::Graphics &g) {
-  auto r = getLocalBounds().reduced(2).toFloat();
-  g.setColour(bgColor.withAlpha(0.1f));
-  g.fillRoundedRectangle(r, 4.0f);
-  g.setColour(bgColor.withAlpha(0.3f));
-  g.drawRoundedRectangle(r, 4.0f, 1.0f);
-
-  g.setColour(juce::Colours::white.withAlpha(0.6f));
-  g.setFont(juce::Font(14.0f, juce::Font::bold));
-  g.drawText(title, getLocalBounds().removeFromTop(25).reduced(10, 0),
-             juce::Justification::left);
-
-  // Waveform placeholder logic
-  g.setColour(bgColor.withAlpha(0.5f));
-  auto waveR = getLocalBounds().reduced(10, 30);
-  g.drawHorizontalLine(waveR.getCentreY(), (float)waveR.getX(),
-                       (float)waveR.getRight());
-}
-
-void MainComponent::SculptingPanel::paint(juce::Graphics &g) {
-  auto r = getLocalBounds().reduced(5);
-  g.setColour(juce::Colour(0xff0a0a0a));
-  g.fillRoundedRectangle(r.toFloat(), 4.0f);
-}
-
-void MainComponent::WaveformPanel::resized() {
-  toPlayerToggle.setBounds(getWidth() - 100, 5, 90, 20);
-}
-
-void MainComponent::SculptingPanel::resized() {
-  auto r = getLocalBounds().reduced(5);
-  auto graphArea = r.removeFromTop(240); // Increased from 120
-  adsrVisualizer.setBounds(graphArea.reduced(5));
-
-  auto slidersArea = r;
-  float w = slidersArea.getWidth() / 4.0f;
-
-  auto row1 = slidersArea.removeFromTop(70);
-  auto aArea = row1.removeFromLeft(w).reduced(2);
-  attackSlider.setBounds(aArea.removeFromTop(aArea.getHeight() - 20));
-  attackInput.setBounds(aArea);
-
-  auto dArea = row1.removeFromLeft(w).reduced(2);
-  decaySlider.setBounds(dArea.removeFromTop(dArea.getHeight() - 20));
-  decayInput.setBounds(dArea);
-
-  auto sArea = row1.removeFromLeft(w).reduced(2);
-  sustainSlider.setBounds(sArea.removeFromTop(sArea.getHeight() - 20));
-  sustainInput.setBounds(sArea);
-
-  auto rArea = row1.reduced(2);
-  releaseSlider.setBounds(rArea.removeFromTop(rArea.getHeight() - 20));
-  releaseInput.setBounds(rArea);
-
-  auto row2 = slidersArea;
-  filterTypeSelector.setBounds(row2.removeFromLeft(w).reduced(2));
-  cutoffSlider.setBounds(row2.removeFromLeft(w).reduced(2));
-  resSlider.setBounds(row2.removeFromLeft(w).reduced(2));
-  velSensSlider.setBounds(row2.reduced(2));
-}
-
-void MainComponent::MappingPanel::resized() {
-  auto r = getLocalBounds().reduced(5);
-
-  // Bar at the bottom for controls
-  auto ctrlBar = r.removeFromBottom(25);
-  octaveSelector.setBounds(ctrlBar.removeFromLeft(125).reduced(2));
-  layerSyncLock.setBounds(ctrlBar.removeFromLeft(125).reduced(2));
-
-  int gap = 24;
-  auto layerArea = r;
-  int w = (layerArea.getWidth() - gap) / 2;
-
-  if (layer1)
-    layer1->setBounds(layerArea.removeFromLeft(w).reduced(2));
-
-  layerArea.removeFromLeft(gap);
-
-  if (layer2)
-    layer2->setBounds(layerArea.reduced(2));
-}
-
-void MainComponent::MappingPanel::updateOctave(int newOctave) {
-  currentOctave = newOctave;
-  int baseNote = (currentOctave + 3) * 12; // C3 is octave 0 internally (60)
-  if (layer1) {
-    for (int i = 0; i < 12; ++i)
-      layer1->columns[i]->noteNumber = baseNote + i;
-  }
-  if (layer2) {
-    for (int i = 0; i < 12; ++i)
-      layer2->columns[i]->noteNumber = baseNote + i;
-  }
-}
 
 void MainComponent::alignLayers() {
   for (int note = 0; note < 128; ++note) {
@@ -1438,7 +1175,7 @@ int MainComponent::findCounterpart(int mIndex) {
 
 // Calculates the pixel bounds that a region would occupy in its column
 // given a specific velocity range, mirroring KeyColumn::resized() logic.
-static juce::Rectangle<int> calcRegionBounds(const MainComponent::KeyColumn* col,
+static juce::Rectangle<int> calcRegionBounds(const KeyColumn* col,
                                               int velLow, int velHigh) noexcept {
   float h      = (float)col->getHeight();
   float yTop   = h * (1.0f - (velHigh / 127.0f));
@@ -1471,7 +1208,7 @@ void MainComponent::performSwap(int mIndexA, int mIndexB,
   // the real component is immediately at its final position.
   auto animateTo = [&](SampleRegion* r, int velLow, int velHigh) {
     if (r == nullptr) return;
-    if (auto* col = dynamic_cast<MainComponent::KeyColumn*>(r->getParentComponent())) {
+    if (auto* col = dynamic_cast<KeyColumn*>(r->getParentComponent())) {
       auto newBounds = calcRegionBounds(col, velLow, velHigh);
       juce::Desktop::getInstance().getAnimator().animateComponent(
           r, newBounds, 1.0f, 250 /*ms*/, false /*lerp real component*/, 0.0, 0.0);

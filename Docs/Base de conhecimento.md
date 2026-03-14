@@ -70,3 +70,8 @@
 - **frontmat.pdf**
 - **ch1.pdf** a **ch33.pdf** (Capítulos completos do guia)
 - **backmat.pdf**
+
+
+#Software Engineering Knowledgement base
+
+##https://www.computer.org/education/bodies-of-knowledge/software-engineering#evolving
