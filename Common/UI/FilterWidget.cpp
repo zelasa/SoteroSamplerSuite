@@ -1,11 +1,11 @@
 #include "FilterWidget.h"
+#include "SoteroLookAndFeel.h"
 
 namespace sotero {
 
 FilterWidget::FilterWidget() {
     addAndMakeVisible(titleLabel);
-    titleLabel.setFont(juce::Font(14.0f, juce::Font::bold));
-    titleLabel.setColour(juce::Label::textColourId, juce::Colours::orange);
+    titleLabel.setColour(juce::Label::textColourId, SoteroLookAndFeel::getYellowAccent());
 
     addAndMakeVisible(typeSelector);
     typeSelector.addItem("OFF", 1);
@@ -21,7 +21,6 @@ FilterWidget::FilterWidget() {
 
         l.setText(text, juce::dontSendNotification);
         l.setJustificationType(juce::Justification::centred);
-        l.setFont(10.0f);
         addAndMakeVisible(l);
 
         s.onValueChange = [this] {

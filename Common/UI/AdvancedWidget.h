@@ -1,7 +1,6 @@
-#pragma once
-
-#include <juce_gui_basics/juce_gui_basics.h>
+#include "SoteroLookAndFeel.h"
 #include "DynamicsWidget.h"
+#include <juce_gui_basics/juce_gui_basics.h>
 
 namespace sotero {
 
@@ -24,7 +23,11 @@ public:
         addAndMakeVisible(toneLabel);
 
         revGroup.setText("REVERB");
+        revGroup.setColour(juce::GroupComponent::textColourId, SoteroLookAndFeel::getYellowAccent());
+        
         toneGroup.setText("GLOBAL TONE");
+        toneGroup.setColour(juce::GroupComponent::textColourId, SoteroLookAndFeel::getYellowAccent());
+        
         toneLabel.setText("TONE", juce::dontSendNotification);
 
         auto setupSlider = [](juce::Slider &s, juce::String suffix) {
@@ -59,11 +62,11 @@ public:
     }
 
     void paint(juce::Graphics &g) override {
-        auto r = getLocalBounds().reduced(2);
-        g.setColour(juce::Colour(0xff0a0a0a));
-        g.fillRoundedRectangle(r.toFloat(), 4.0f);
-        g.setColour(juce::Colours::white.withAlpha(0.1f));
-        g.drawRoundedRectangle(r.toFloat(), 4.0f, 1.0f);
+        auto r = getLocalBounds().toFloat().reduced(1.0f);
+        g.setColour(SoteroLookAndFeel::getWidgetBackground());
+        g.fillRoundedRectangle(r, 4.0f);
+        g.setColour(juce::Colours::white.withAlpha(0.12f));
+        g.drawRoundedRectangle(r, 4.0f, 1.0f);
     }
 
     DynamicsWidget& getDynamics() { return dynamicsWidget; }

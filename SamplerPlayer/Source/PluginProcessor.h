@@ -2,11 +2,10 @@
 
 #include "../../Common/SoteroArchive.h"
 #include "../../Common/SoteroEngineInterface.h"
+#include "../../Common/SoteroEngine.h"
 #include "../../Common/SoteroLoopEngine.h"
 #include "SoteroSamplerVoice.h"
 #include <JuceHeader.h>
-
-// Unified Sound Engine Components
 
 class SamplerPlayerAudioProcessor : public juce::AudioProcessor,
                                     public sotero::ISoteroAudioEngine {
@@ -40,66 +39,37 @@ public:
   void getStateInformation(juce::MemoryBlock &destData) override;
   void setStateInformation(const void *data, int sizeInBytes) override;
 
-  juce::AudioProcessorValueTreeState &getAPVTS() override { return apvts; }
-  juce::AudioProcessorValueTreeState apvts;
+  // --- ISoteroAudioEngine --- all delegate to engine
+  juce::AudioProcessorValueTreeState &getAPVTS() override { return engine->getAPVTS(); }
+  juce::MidiKeyboardState &getKeyboardState() override { return engine->getKeyboardState(); }
+  float getLevelL() const override { return engine->getLevelL(); }
+  float getLevelR() const override { return engine->getLevelR(); }
+  juce::String getLibraryName() const override { return engine->getLibraryName(); }
+  juce::String getLibraryAuthor() const override { return engine->getLibraryAuthor(); }
+  juce::String getLibraryDescription() const override { return engine->getLibraryDescription(); }
+  juce::Image getLibraryArtwork() const override { return engine->getLibraryArtwork(); }
+  bool isLibraryLoaded() const override { return engine->isLibraryLoaded(); }
+  int getLastMidiNote() const override { return engine->getLastMidiNote(); }
+  int getLastMidiVelocity() const override { return engine->getLastMidiVelocity(); }
 
-  // Unified Sound Engine
-  juce::Synthesiser synth;
-  juce::AudioFormatManager formatManager;
+  void loadSoteroLibrary(const juce::File &file) override;
+  void auditionMappingStart(int mappingIndex, float velocity) override;
+  void auditionMappingStop(int mappingIndex) override;
 
-  float getLevelL() const override { return lastMasterLevelL.load(); }
-  float getLevelR() const override { return lastMasterLevelR.load(); }
-
-  juce::String getLibraryName() const override { return currentMetadata.name; }
-  juce::String getLibraryAuthor() const override {
-    return currentMetadata.author;
-  }
-  juce::String getLibraryDescription() const override {
-    return currentMetadata.description;
-  }
-  juce::Image getLibraryArtwork() const override { return currentArtwork; }
-  bool isLibraryLoaded() const override {
-    return currentLibraryFile.existsAsFile();
-  }
-
-  int getLastMidiNote() const override { return lastMidiNote.load(); }
-  int getLastMidiVelocity() const override { return lastMidiVelocity.load(); }
-  juce::MidiKeyboardState &getKeyboardState() override { return keyboardState; }
+  juce::File getCurrentLibraryFile() const { return currentLibraryFile; }
 
   // View management
   bool isPerformanceView() const { return currentView == 0; }
   void setView(int viewIndex) { currentView = viewIndex; }
 
-  bool loadTrackSample(int index, const juce::File &file);
-  void loadSoteroLibrary(const juce::File &file) override;
-  juce::File getCurrentLibraryFile() const { return currentLibraryFile; }
-
 private:
-  juce::File currentLibraryFile;
-  juce::dsp::ProcessSpec lastProcessSpec;
-  bool hasPrepared = false;
+  std::unique_ptr<sotero::SoteroEngine> engine;
   juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
 
-  sotero::LibraryMetadata currentMetadata;
-  juce::Image currentArtwork;
+  juce::File currentLibraryFile;
+  std::atomic<int> currentView{0};
 
-  std::atomic<int> lastMidiNote{-1};
-  std::atomic<int> lastMidiVelocity{-1};
-  std::atomic<int> currentView{0}; // 0: Performance, 1: Setup
-
-  juce::LinearSmoothedValue<float> smoothedGains[3];
-  juce::LinearSmoothedValue<float> smoothedPans[3];
-
-  // Effects
-  juce::dsp::Compressor<float> masterCompressor;
-  juce::dsp::Reverb masterReverb;
-  juce::dsp::Reverb::Parameters reverbParams;
-
-  juce::MidiKeyboardState keyboardState;
   sotero::SoteroLoopEngine loopEngine;
-
-  std::atomic<float> lastMasterLevelL{0.0f};
-  std::atomic<float> lastMasterLevelR{0.0f};
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SamplerPlayerAudioProcessor)
 };

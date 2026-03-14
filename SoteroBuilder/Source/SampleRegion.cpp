@@ -179,8 +179,10 @@ void SampleRegion::mouseDown(const juce::MouseEvent &e) {
 
   if (e.mods.isRightButtonDown() && e.mods.isShiftDown()) {
     currentDragMode = DragMode::Eraser;
-    if (onAudition && (e.mods.isCtrlDown() || e.mods.isCommandDown()))
-      onAudition(currentMapping);
+    if (onAudition && (e.mods.isCtrlDown() || e.mods.isCommandDown())) {
+      float normY = 1.0f - juce::jlimit(0.0f, 1.0f, (float)e.getPosition().y / (float)getHeight());
+      onAudition(currentMapping, normY);
+    }
     dragStartY = e.getScreenY();
     currentMapping.samplePath = "";
     repaint();
@@ -193,8 +195,10 @@ void SampleRegion::mouseDown(const juce::MouseEvent &e) {
     currentDragMode = DragMode::BottomHandle;
   } else {
     currentDragMode = DragMode::Body;
-    if (onAudition && (e.mods.isCtrlDown() || e.mods.isCommandDown()))
-      onAudition(currentMapping);
+    if (onAudition && (e.mods.isCtrlDown() || e.mods.isCommandDown())) {
+      float normY = 1.0f - juce::jlimit(0.0f, 1.0f, (float)e.getPosition().y / (float)getHeight());
+      onAudition(currentMapping, normY);
+    }
   }
 
   // Capture Alt key state and initial velocity center for swap detection

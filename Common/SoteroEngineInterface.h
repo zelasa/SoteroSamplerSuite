@@ -26,6 +26,10 @@ public:
   virtual juce::Image getLibraryArtwork() const = 0;
   virtual bool isLibraryLoaded() const = 0;
 
+  // Auditioning
+  virtual void auditionMappingStart(int mappingIndex, float velocity) = 0;
+  virtual void auditionMappingStop(int mappingIndex) = 0;
+
   virtual void loadSoteroLibrary(const juce::File &file) = 0;
 
   // Global monitoring

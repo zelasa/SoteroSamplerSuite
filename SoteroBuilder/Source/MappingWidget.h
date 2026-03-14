@@ -5,6 +5,7 @@
 #include <juce_audio_basics/juce_audio_basics.h>
 #include "SampleRegion.h"
 #include "../../Common/SoteroFormat.h"
+#include "../../Common/UI/SoteroLookAndFeel.h"
 
 namespace sotero {
 
@@ -148,7 +149,7 @@ public:
 
         void paint(juce::Graphics &g) override {
             auto r = getLocalBounds().toFloat();
-            g.setColour(juce::Colours::black.withAlpha(0.2f));
+            g.setColour(SoteroLookAndFeel::getWidgetBackground());
             g.fillRoundedRectangle(r, 4.0f);
             g.setColour(themeColor.withAlpha(0.3f));
             g.drawRoundedRectangle(r, 4.0f, 1.0f);
@@ -172,11 +173,11 @@ public:
     MappingWidget() {
         layerSyncLock.setTooltip("When ON, moving or resizing a sample in one "
                                  "layer will replicate to the other.");
-        layerSyncLock.setColour(juce::ToggleButton::textColourId, juce::Colours::orange);
+        layerSyncLock.setColour(juce::ToggleButton::textColourId, SoteroLookAndFeel::getOrangeAccent());
         addAndMakeVisible(layerSyncLock);
 
-        layer1 = std::make_unique<LayerView>(juce::Colours::cyan, "LAYER 1 (MIC 1)", 0);
-        layer2 = std::make_unique<LayerView>(juce::Colours::red, "LAYER 2 (MIC 2)", 1);
+        layer1 = std::make_unique<LayerView>(SoteroLookAndFeel::getLayer1Colour(), "LAYER 1 (MIC 1)", 0);
+        layer2 = std::make_unique<LayerView>(SoteroLookAndFeel::getLayer2Colour(), "LAYER 2 (MIC 2)", 1);
         
         addAndMakeVisible(layer1.get());
         addAndMakeVisible(layer2.get());

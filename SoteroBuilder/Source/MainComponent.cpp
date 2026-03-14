@@ -8,17 +8,15 @@ namespace sotero {
 
 // MainComponent implementation
 MainComponent::MainComponent()
-    : apvts(std::make_unique<juce::AudioProcessorValueTreeState>(
-          dummyProcessor, nullptr, "Parameters", createParameterLayout())) {
+    : engine(std::make_unique<SoteroEngine>()) {
+  setLookAndFeel(&lookAndFeel);
   libraryData.mappings.clear();
 
   // --- BUILDERUI Modular Panels ---
   addAndMakeVisible(headerPanel);
 
-  waveform1 =
-      std::make_unique<WaveformWidget>(juce::Colours::cyan, "MIC 1 - RESOURCE");
-  waveform2 =
-      std::make_unique<WaveformWidget>(juce::Colours::red, "MIC 2 - RESOURCE");
+  waveform1 = std::make_unique<WaveformWidget>(0);
+  waveform2 = std::make_unique<WaveformWidget>(1);
   addAndMakeVisible(waveform1.get());
   addAndMakeVisible(waveform2.get());
 
@@ -40,7 +38,21 @@ MainComponent::MainComponent()
         m.adsrDecay = d;
         m.adsrSustain = s;
         m.adsrRelease = r;
-        rebuildSynth();
+        
+        engine->updateSoundParameters(activeMappingIndex, m);
+
+        // Sync Logic
+        if (mappingPanel.layerSyncLock.getToggleState()) {
+            int counterpart = findCounterpart(activeMappingIndex);
+            if (counterpart >= 0) {
+                auto &mc = libraryData.mappings.getReference(counterpart);
+                mc.adsrAttack = a;
+                mc.adsrDecay = d;
+                mc.adsrSustain = s;
+                mc.adsrRelease = r;
+                engine->updateSoundParameters(counterpart, mc);
+            }
+        }
     }
   };
 
@@ -50,33 +62,85 @@ MainComponent::MainComponent()
         m.filterType = type;
         m.filterCutoff = cutoff;
         m.filterResonance = res;
-        rebuildSynth();
+        
+        engine->updateSoundParameters(activeMappingIndex, m);
+
+        if (mappingPanel.layerSyncLock.getToggleState()) {
+            int counterpart = findCounterpart(activeMappingIndex);
+            if (counterpart >= 0) {
+                auto &mc = libraryData.mappings.getReference(counterpart);
+                mc.filterType = type;
+                mc.filterCutoff = cutoff;
+                mc.filterResonance = res;
+                engine->updateSoundParameters(counterpart, mc);
+            }
+        }
     }
   };
 
   // ADSR Slope/Visualizer specialized callbacks
   sp.getADSR().getVisualizer().onAttackCurveChange = [this](float val) {
     if (activeMappingIndex >= 0 && activeMappingIndex < libraryData.mappings.size()) {
-      libraryData.mappings.getReference(activeMappingIndex).adsrAttackCurve = val;
-      rebuildSynth();
+      auto& m = libraryData.mappings.getReference(activeMappingIndex);
+      m.adsrAttackCurve = val;
+      engine->updateSoundParameters(activeMappingIndex, m);
+
+      if (mappingPanel.layerSyncLock.getToggleState()) {
+          int cp = findCounterpart(activeMappingIndex);
+          if (cp >= 0) {
+              auto& mc = libraryData.mappings.getReference(cp);
+              mc.adsrAttackCurve = val;
+              engine->updateSoundParameters(cp, mc);
+          }
+      }
     }
   };
   sp.getADSR().getVisualizer().onDecayCurveChange = [this](float val) {
     if (activeMappingIndex >= 0 && activeMappingIndex < libraryData.mappings.size()) {
-      libraryData.mappings.getReference(activeMappingIndex).adsrDecayCurve = val;
-      rebuildSynth();
+      auto& m = libraryData.mappings.getReference(activeMappingIndex);
+      m.adsrDecayCurve = val;
+      engine->updateSoundParameters(activeMappingIndex, m);
+
+      if (mappingPanel.layerSyncLock.getToggleState()) {
+          int cp = findCounterpart(activeMappingIndex);
+          if (cp >= 0) {
+              auto& mc = libraryData.mappings.getReference(cp);
+              mc.adsrDecayCurve = val;
+              engine->updateSoundParameters(cp, mc);
+          }
+      }
     }
   };
   sp.getADSR().getVisualizer().onReleaseCurveChange = [this](float val) {
     if (activeMappingIndex >= 0 && activeMappingIndex < libraryData.mappings.size()) {
-      libraryData.mappings.getReference(activeMappingIndex).adsrReleaseCurve = val;
-      rebuildSynth();
+      auto& m = libraryData.mappings.getReference(activeMappingIndex);
+      m.adsrReleaseCurve = val;
+      engine->updateSoundParameters(activeMappingIndex, m);
+
+      if (mappingPanel.layerSyncLock.getToggleState()) {
+          int cp = findCounterpart(activeMappingIndex);
+          if (cp >= 0) {
+              auto& mc = libraryData.mappings.getReference(cp);
+              mc.adsrReleaseCurve = val;
+              engine->updateSoundParameters(cp, mc);
+          }
+      }
     }
   };
   sp.getADSR().getVisualizer().onSustainTimeChange = [this](float val) {
     if (activeMappingIndex >= 0 && activeMappingIndex < libraryData.mappings.size()) {
-      libraryData.mappings.getReference(activeMappingIndex).adsrSustainTime = val;
-      rebuildSynth();
+      auto& m = libraryData.mappings.getReference(activeMappingIndex);
+      m.adsrSustainTime = val;
+      engine->updateSoundParameters(activeMappingIndex, m);
+
+      if (mappingPanel.layerSyncLock.getToggleState()) {
+          int cp = findCounterpart(activeMappingIndex);
+          if (cp >= 0) {
+              auto& mc = libraryData.mappings.getReference(cp);
+              mc.adsrSustainTime = val;
+              engine->updateSoundParameters(cp, mc);
+          }
+      }
     }
   };
 
@@ -196,19 +260,14 @@ MainComponent::MainComponent()
 
   if (mappingPanel.layer1 && mappingPanel.layer1->keyboard) {
     mappingPanel.layer1->keyboard->onKeyPress = [this](int note) {
-      synth.noteOn(1, note + (mappingPanel.currentOctave * 12), 0.8f);
+      engine->getSynth().noteOn(1, note + (mappingPanel.currentOctave * 12), 0.8f);
     };
   }
   if (mappingPanel.layer2 && mappingPanel.layer2->keyboard) {
     mappingPanel.layer2->keyboard->onKeyPress = [this](int note) {
-      synth.noteOn(1, note + (mappingPanel.currentOctave * 12), 0.8f);
+      engine->getSynth().noteOn(1, note + (mappingPanel.currentOctave * 12), 0.8f);
     };
   }
-
-  // --- Audio Setup ---
-  formatManager.registerBasicFormats();
-  for (int i = 0; i < 16; ++i)
-    synth.addVoice(new sotero::SoteroSamplerVoice());
 
   // --- TO PLAYER Toggles Wiring (Independent Layers) ---
   auto updateLayerBypass = [this](int layerIdx) {
@@ -243,7 +302,7 @@ MainComponent::MainComponent()
   setSize(1100, 850);
 
   // --- Master FX Wiring ---
-  auto &ap = *apvts;
+  auto &ap = engine->getAPVTS();
   compModeAtt =
       std::make_unique<ComboAtt>(ap, "masterComp", advancedPanel.getDynamics().getModeSelector());
   compThreshAtt =
@@ -300,28 +359,15 @@ void MainComponent::setUIMode(UIMode mode) {
 }
 
 MainComponent::~MainComponent() {
+  setLookAndFeel(nullptr);
   deviceManager.removeMidiInputDeviceCallback({}, this);
   shutdownAudio();
 }
 
 void MainComponent::prepareToPlay(int samplesPerBlockExpected,
                                   double sampleRate) {
-  juce::dsp::ProcessSpec spec;
-  spec.sampleRate = sampleRate;
-  spec.maximumBlockSize = samplesPerBlockExpected;
-  spec.numChannels = 2; // Stereo
-
-  synth.setCurrentPlaybackSampleRate(sampleRate);
   midiCollector.reset(sampleRate);
-
-  masterCompressor.prepare(spec);
-  masterReverb.prepare(spec);
-  masterToneFilter.prepare(spec);
-
-  for (int i = 0; i < synth.getNumVoices(); ++i) {
-    if (auto *v = dynamic_cast<sotero::SoteroSamplerVoice *>(synth.getVoice(i)))
-      v->prepare(spec);
-  }
+  engine->prepare(sampleRate, samplesPerBlockExpected);
 }
 
 void MainComponent::getNextAudioBlock(
@@ -332,125 +378,8 @@ void MainComponent::getNextAudioBlock(
   midiCollector.removeNextBlockOfMessages(incomingMidi,
                                           bufferToFill.numSamples);
 
-  // Process Midi Keyboard State
-  keyboardState.processNextMidiBuffer(incomingMidi, 0, bufferToFill.numSamples,
-                                      true);
-
-  // Velocity Curve & Midi Tracking
-  int curveType = (int)*apvts->getRawParameterValue("velocityCurve");
-  juce::MidiBuffer specializedMessages;
-  for (const auto metadata : incomingMidi) {
-    auto msg = metadata.getMessage();
-    if (msg.isNoteOn()) {
-      lastMidiNote.store(msg.getNoteNumber());
-      lastMidiVelocity.store(msg.getVelocity());
-
-      float normalizedVel = (float)msg.getVelocity() / 127.0f;
-      if (curveType == 0)
-        normalizedVel = std::sqrt(normalizedVel);
-      else if (curveType == 2)
-        normalizedVel = normalizedVel * normalizedVel;
-
-      int velocity = juce::jlimit(1, 127, (int)(normalizedVel * 127.0f));
-      specializedMessages.addEvent(
-          juce::MidiMessage::noteOn(msg.getChannel(), msg.getNoteNumber(),
-                                    (juce::uint8)velocity),
-          metadata.samplePosition);
-    } else {
-      specializedMessages.addEvent(msg, metadata.samplePosition);
-    }
-  }
-
-  // --- Master Parameters ---
-  float masterPitch = *apvts->getRawParameterValue("masterPitch");
-  for (int i = 0; i < synth.getNumVoices(); ++i) {
-    if (auto *v = dynamic_cast<sotero::SoteroSamplerVoice *>(synth.getVoice(i)))
-      v->setMasterPitch(masterPitch);
-  }
-
-  // --- Audio Processing ---
-  synth.renderNextBlock(*bufferToFill.buffer, specializedMessages,
-                        bufferToFill.startSample, bufferToFill.numSamples);
-
-  // Apply Effects
-  auto &buffer = *bufferToFill.buffer;
-
-  // --- EFFECT BYPASS (Pure Audition) ---
-  if (!headerPanel.getToPlayerToggle().getToggleState()) {
-    // Apply ONLY basic Master Gain
-    float masterGain = juce::Decibels::decibelsToGain(
-        (float)*apvts->getRawParameterValue("masterVol"));
-    buffer.applyGain(bufferToFill.startSample, bufferToFill.numSamples,
-                     masterGain);
-
-    if (bufferToFill.numSamples > 0) {
-      lastLevelL.store(buffer.getMagnitude(0, bufferToFill.startSample,
-                                           bufferToFill.numSamples));
-      lastLevelR.store(buffer.getNumChannels() > 1
-                           ? buffer.getMagnitude(1, bufferToFill.startSample,
-                                                 bufferToFill.numSamples)
-                           : lastLevelL.load());
-    }
-    return;
-  }
-
-  int compType = (int)*apvts->getRawParameterValue("masterComp");
-  if (compType > 0) {
-    masterCompressor.setThreshold(*apvts->getRawParameterValue("compThresh"));
-    masterCompressor.setRatio(*apvts->getRawParameterValue("compRatio"));
-    masterCompressor.setAttack(*apvts->getRawParameterValue("compAttack"));
-    masterCompressor.setRelease(*apvts->getRawParameterValue("compRelease"));
-
-    juce::dsp::AudioBlock<float> block(buffer, bufferToFill.startSample);
-    juce::dsp::ProcessContextReplacing<float> context(block);
-    masterCompressor.process(context);
-  }
-
-  bool revEnabled = (bool)*apvts->getRawParameterValue("revEnable");
-  if (revEnabled) {
-    reverbParams.roomSize = *apvts->getRawParameterValue("revSize");
-    reverbParams.wetLevel = *apvts->getRawParameterValue("revMix");
-    reverbParams.dryLevel = 1.0f - (reverbParams.wetLevel * 0.5f);
-    masterReverb.setParameters(reverbParams);
-
-    juce::dsp::AudioBlock<float> block(buffer, bufferToFill.startSample);
-    juce::dsp::ProcessContextReplacing<float> context(block);
-    masterReverb.process(context);
-  }
-
-  // Master Tone Filter
-  float masterTone = *apvts->getRawParameterValue("masterTone");
-  if (std::abs(masterTone) > 0.05f) {
-    if (masterTone < 0) {
-      masterToneFilter.setType(juce::dsp::StateVariableTPTFilterType::lowpass);
-      float freq =
-          juce::jmap(std::abs(masterTone), 0.0f, 1.0f, 20000.0f, 400.0f);
-      masterToneFilter.setCutoffFrequency(freq);
-    } else {
-      masterToneFilter.setType(juce::dsp::StateVariableTPTFilterType::highpass);
-      float freq = juce::jmap(masterTone, 0.0f, 1.0f, 20.0f, 3000.0f);
-      masterToneFilter.setCutoffFrequency(freq);
-    }
-    juce::dsp::AudioBlock<float> block(buffer, bufferToFill.startSample);
-    juce::dsp::ProcessContextReplacing<float> context(block);
-    masterToneFilter.process(context);
-  }
-
-  // Master Gain
-  float masterGain = juce::Decibels::decibelsToGain(
-      (float)*apvts->getRawParameterValue("masterVol"));
-  buffer.applyGain(bufferToFill.startSample, bufferToFill.numSamples,
-                   masterGain);
-
-  // Track Levels
-  if (bufferToFill.numSamples > 0) {
-    lastLevelL.store(buffer.getMagnitude(0, bufferToFill.startSample,
-                                         bufferToFill.numSamples));
-    lastLevelR.store(buffer.getNumChannels() > 1
-                         ? buffer.getMagnitude(1, bufferToFill.startSample,
-                                               bufferToFill.numSamples)
-                         : lastLevelL.load());
-  }
+  // We still use the collector here, but let the engine do the heavy lifting
+  engine->process(*bufferToFill.buffer, incomingMidi);
 }
 
 void MainComponent::handleIncomingMidiMessage(
@@ -462,7 +391,6 @@ void MainComponent::releaseResources() {}
 
 void MainComponent::rebuildSynth() {
   // 1. Prepare all readers and sounds OFF-LOCK in a background thread
-  // We use a lambda to do the heavy lifting
   auto buildTask = [this]() {
     juce::ReferenceCountedArray<juce::SynthesiserSound> newSounds;
 
@@ -470,20 +398,21 @@ void MainComponent::rebuildSynth() {
     if (currentLibraryFile.existsAsFile())
       stream = std::make_unique<juce::FileInputStream>(currentLibraryFile);
 
-    for (const auto &m : libraryData.mappings) {
+    for (int mIndex = 0; mIndex < libraryData.mappings.size(); ++mIndex) {
+      auto &m = libraryData.mappings.getReference(mIndex);
       if (m.samplePath.isNotEmpty()) {
         std::unique_ptr<juce::AudioFormatReader> reader;
 
         juce::File file(m.samplePath);
         if (file.existsAsFile()) {
-          reader.reset(formatManager.createReaderFor(file));
+          reader.reset(engine->getFormatManager().createReaderFor(file));
         } else if (stream != nullptr && stream->openedOk()) {
           auto data =
               sotero::SoteroArchive::extractResource(*stream, m.samplePath);
           if (data.getSize() > 0) {
             auto memStream =
                 std::make_unique<juce::MemoryInputStream>(data, true);
-            reader.reset(formatManager.createReaderFor(std::move(memStream)));
+            reader.reset(engine->getFormatManager().createReaderFor(std::move(memStream)));
           }
         }
 
@@ -495,7 +424,8 @@ void MainComponent::rebuildSynth() {
               !mappingPanel.layer1->toPlayerToggle.getToggleState();
           bool bypassLayer2 =
               !mappingPanel.layer2->toPlayerToggle.getToggleState();
-          bool isBypassed = (m.micLayer == 0) ? bypassLayer1 : bypassLayer2;
+          bool isBypassed =
+              (m.micLayer == 0 && bypassLayer1) || (m.micLayer == 1 && bypassLayer2);
 
           newSounds.add(new sotero::SoteroSamplerSound(
               m.samplePath, *reader, range, m.midiNote, 0.01, 0.1, 10.0,
@@ -505,17 +435,18 @@ void MainComponent::rebuildSynth() {
               m.adsrSustain, m.adsrRelease, m.adsrAttackCurve, m.adsrDecayCurve,
               m.adsrReleaseCurve, m.filterType, m.filterCutoff,
               m.filterResonance, libraryData.enableADSR && !isBypassed,
-              libraryData.enableFilter && !isBypassed, m.adsrSustainTime));
+              libraryData.enableFilter && !isBypassed, m.adsrSustainTime, mIndex));
         }
       }
     }
 
     // 2. Quickly swap sounds inside the lock on the Message Thread
     juce::MessageManager::callAsync([this, newSounds]() {
-      const juce::ScopedLock sl(synthLock);
-      synth.clearSounds();
-      for (auto *s : newSounds)
-        synth.addSound(s);
+      engine->clearSounds();
+      for (auto *s : newSounds) {
+        if (auto* ss = dynamic_cast<sotero::SoteroSamplerSound*>(s))
+            engine->addSound(ss);
+      }
     });
   };
 
@@ -525,15 +456,13 @@ void MainComponent::rebuildSynth() {
 
 void MainComponent::auditionSample(const juce::String &path, int midiNote,
                                    int velocity) {
-  const juce::ScopedLock sl(synthLock);
   // Synth note on will trigger the sounds already loaded in rebuildSynth
-  synth.noteOn(1, midiNote, (float)velocity / 127.0f);
+  engine->getSynth().noteOn(1, midiNote, (float)velocity / 127.0f);
 }
 
 void MainComponent::auditionSampleOff(int midiNote) {
-  const juce::ScopedLock sl(synthLock);
   // Synth note off ensures the ADSR enters release phase and frees polyphony
-  synth.noteOff(1, midiNote, 0.0f, true);
+  engine->getSynth().noteOff(1, midiNote, 0.0f, true);
 }
 
 void MainComponent::updateGridUI() {
@@ -564,12 +493,16 @@ void MainComponent::updateGridUI() {
       col->addRegion(mapping, mIndex);
       auto *region = col->regions.getLast();
 
-      region->onAudition = [this](const KeyMapping &m) {
-        auditionSample(m.samplePath, m.midiNote,
-                       (m.velocityLow + m.velocityHigh) / 2);
+      region->onAudition = [this, mIndex](const KeyMapping &m, float clickNormalY) {
+        // Map click Y position (0=bottom=soft, 1=top=loud) to the sample's velocity range
+        float velLow  = m.velocityLow  / 127.0f;
+        float velHigh = m.velocityHigh / 127.0f;
+        float velocity = juce::jlimit(velLow, velHigh, 
+                                      velLow + clickNormalY * (velHigh - velLow));
+        engine->auditionMappingStart(mIndex, velocity);
       };
-      region->onAuditionEnd = [this](const KeyMapping &m) {
-        auditionSampleOff(m.midiNote);
+      region->onAuditionEnd = [this, mIndex](const KeyMapping &m) {
+        engine->auditionMappingStop(mIndex);
       };
 
       region->onDragStart = [this, mIndex](bool stickyTop, bool stickyBottom) {
@@ -897,7 +830,7 @@ void MainComponent::updateGridUI() {
 }
 
 void MainComponent::timerCallback() {
-  const juce::ScopedLock sl(synthLock);
+  const juce::ScopedLock sl(engine->getLock());
   float latestTime = -1.0f;
   uint32_t latestTrigger = 0;
 
@@ -905,6 +838,7 @@ void MainComponent::timerCallback() {
       activeMappingIndex < libraryData.mappings.size()) {
     auto &m = libraryData.mappings.getReference(activeMappingIndex);
 
+    auto& synth = engine->getSynth();
     for (int i = 0; i < synth.getNumVoices(); ++i) {
       if (auto *v = dynamic_cast<SoteroSamplerVoice *>(synth.getVoice(i))) {
         // We only care about voices that are currently active (not Idle)
@@ -1025,41 +959,6 @@ void MainComponent::loadSoteroLibrary(const juce::File &file) {
   }
 }
 
-juce::AudioProcessorValueTreeState::ParameterLayout
-MainComponent::createParameterLayout() {
-  std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
-  params.push_back(std::make_unique<juce::AudioParameterInt>(
-      "midiChannel", "Midi Channel", 0, 16, 0));
-  params.push_back(std::make_unique<juce::AudioParameterInt>(
-      "velocityCurve", "Velocity Curve", 0, 2, 1));
-  params.push_back(std::make_unique<juce::AudioParameterInt>(
-      "masterComp", "Master Compressor Mode", 0, 3, 0));
-  params.push_back(std::make_unique<juce::AudioParameterFloat>(
-      "compThresh", "Threshold", -60.0f, 0.0f, -20.0f));
-  params.push_back(std::make_unique<juce::AudioParameterFloat>(
-      "compRatio", "Ratio", 1.0f, 10.0f, 3.0f));
-  params.push_back(std::make_unique<juce::AudioParameterFloat>(
-      "compAttack", "Attack", 1.0f, 100.0f, 20.0f));
-  params.push_back(std::make_unique<juce::AudioParameterFloat>(
-      "compRelease", "Release", 10.0f, 500.0f, 100.0f));
-  params.push_back(std::make_unique<juce::AudioParameterBool>(
-      "revEnable", "Reverb Enable", false));
-  params.push_back(std::make_unique<juce::AudioParameterInt>(
-      "revType", "Reverb Type", 0, 3, 0));
-  params.push_back(std::make_unique<juce::AudioParameterFloat>(
-      "revSize", "Room Size", 0.0f, 1.0f, 0.5f));
-  params.push_back(std::make_unique<juce::AudioParameterFloat>(
-      "revMix", "Mix", 0.0f, 1.0f, 0.3f));
-  params.push_back(std::make_unique<juce::AudioParameterFloat>(
-      "masterVol", "Master Volume", -60.0f, 6.0f, 0.0f));
-  params.push_back(std::make_unique<juce::AudioParameterFloat>(
-      "pan0", "Master Pan", -1.0f, 1.0f, 0.0f));
-  params.push_back(std::make_unique<juce::AudioParameterInt>(
-      "masterPitch", "Master Pitch", -12, 12, 0));
-  params.push_back(std::make_unique<juce::AudioParameterFloat>(
-      "masterTone", "Master Tone", -1.0f, 1.0f, 0.0f));
-  return {params.begin(), params.end()};
-}
 
 void MainComponent::resized() {
   auto r = getLocalBounds();

@@ -12,7 +12,6 @@ ADSRWidget::ADSRWidget() {
 
         l.setText(text, juce::dontSendNotification);
         l.setJustificationType(juce::Justification::centred);
-        l.setFont(10.0f);
         addAndMakeVisible(l);
 
         s.onValueChange = [this] {

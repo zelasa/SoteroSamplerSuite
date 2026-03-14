@@ -129,14 +129,14 @@ public:
           mapping.micLayer = m->getIntAttribute("micLayer", 0);
 
           // Sculpting
-          mapping.adsrAttack = (float)m->getDoubleAttribute("adsrA", 0.01);
+          mapping.adsrAttack = (float)m->getDoubleAttribute("adsrA", 0.0);
           mapping.adsrDecay = (float)m->getDoubleAttribute("adsrD", 0.1);
           mapping.adsrSustain = (float)m->getDoubleAttribute("adsrS", 1.0);
           mapping.adsrRelease = (float)m->getDoubleAttribute("adsrR", 0.1);
           mapping.adsrSustainTime = (float)m->getDoubleAttribute("adsrST", 0.5);
           mapping.filterType = m->getIntAttribute("fType", 0);
           mapping.filterCutoff = (float)m->getDoubleAttribute("fCut", 20000.0);
-          mapping.filterResonance = (float)m->getDoubleAttribute("fRes", 1.0);
+          mapping.filterResonance = (float)m->getDoubleAttribute("fRes", 0.707);
 
           metadata.mappings.add(mapping);
         }

@@ -44,7 +44,7 @@ public:
   std::function<void(const KeyMapping &)> onDragFinished;
   std::function<void(const KeyMapping &)> onClear;
   std::function<void()> onErase;
-  std::function<void(const KeyMapping &)> onAudition;
+  std::function<void(const KeyMapping &, float clickNormalY)> onAudition;
   std::function<void(const KeyMapping &)> onAuditionEnd;
   std::function<void()> onSelect;
   std::function<void(int, bool)> onRequestMove; // delta notes, isAltDown (horizontal drag)

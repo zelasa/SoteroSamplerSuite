@@ -1,11 +1,11 @@
 #include "DynamicsWidget.h"
+#include "SoteroLookAndFeel.h"
 
 namespace sotero {
 
 DynamicsWidget::DynamicsWidget() {
     addAndMakeVisible(titleLabel);
-    titleLabel.setFont(juce::Font(14.0f, juce::Font::bold));
-    titleLabel.setColour(juce::Label::textColourId, juce::Colours::orange);
+    titleLabel.setColour(juce::Label::textColourId, SoteroLookAndFeel::getYellowAccent());
 
     addAndMakeVisible(compMode);
     compMode.addItem("OFF", 1);
@@ -22,7 +22,6 @@ DynamicsWidget::DynamicsWidget() {
 
         l.setText(text, juce::dontSendNotification);
         l.setJustificationType(juce::Justification::centred);
-        l.setFont(9.0f);
         addAndMakeVisible(l);
     };
 

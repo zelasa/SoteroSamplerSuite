@@ -1,5 +1,4 @@
-#pragma once
-
+#include "SoteroLookAndFeel.h"
 #include <juce_gui_basics/juce_gui_basics.h>
 #include <functional>
 
@@ -25,25 +24,14 @@ public:
 
         titleLabel.setFont(juce::Font(22.0f, juce::Font::bold));
         titleLabel.setJustificationType(juce::Justification::centred);
-        titleLabel.setColour(juce::Label::textColourId, juce::Colours::yellow);
+        titleLabel.setColour(juce::Label::textColourId, SoteroLookAndFeel::getYellowAccent());
 
-        versionLabel.setFont(juce::Font(14.0f));
         versionLabel.setJustificationType(juce::Justification::centredLeft);
         versionLabel.setColour(juce::Label::textColourId, juce::Colours::grey);
 
         toPlayerToggle.setColour(juce::ToggleButton::textColourId, juce::Colours::grey);
 
-        // Styling buttons
-        auto setupBtn = [](juce::TextButton& b) {
-            b.setConnectedEdges(juce::Button::ConnectedOnLeft | juce::Button::ConnectedOnRight | 
-                                juce::Button::ConnectedOnTop | juce::Button::ConnectedOnBottom);
-        };
-        setupBtn(devModeBtn);
-        setupBtn(userModeBtn);
-        setupBtn(saveBtn);
-        setupBtn(loadBtn);
-        setupBtn(newBtn);
-        setupBtn(closeBtn);
+        // Buttons will now use the LookAndFeel drawButtonBackground
     }
 
     void resized() override {

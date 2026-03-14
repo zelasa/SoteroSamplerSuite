@@ -1,5 +1,4 @@
-#pragma once
-
+#include "SoteroLookAndFeel.h"
 #include <juce_gui_basics/juce_gui_basics.h>
 
 namespace sotero {
@@ -33,22 +32,14 @@ public:
         volSlider.setTextValueSuffix(" dB");
 
         nameLabel.setText("LIBRARY NAME", juce::dontSendNotification);
-        nameLabel.setColour(juce::Label::textColourId, juce::Colours::cyan);
+        nameLabel.setColour(juce::Label::textColourId, SoteroLookAndFeel::getLayer1Colour());
         authorLabel.setText("AUTHOR", juce::dontSendNotification);
-        authorLabel.setColour(juce::Label::textColourId, juce::Colours::cyan);
+        authorLabel.setColour(juce::Label::textColourId, SoteroLookAndFeel::getLayer1Colour());
 
         artworkLabel.setJustificationType(juce::Justification::centred);
         artworkLabel.setColour(juce::Label::textColourId, juce::Colours::grey);
         
-        // Setup editors
-        auto setupEditor = [](juce::TextEditor& e) {
-            e.setColour(juce::TextEditor::backgroundColourId, juce::Colours::black.withAlpha(0.2f));
-            e.setColour(juce::TextEditor::outlineColourId, juce::Colours::white.withAlpha(0.1f));
-        };
-        setupEditor(nameEditor);
-        setupEditor(authorEditor);
-        setupEditor(dateEditor);
-        setupEditor(infoEditor);
+        // Editors will now use global LookAndFeel defaults
     }
 
     void paint(juce::Graphics& g) override {

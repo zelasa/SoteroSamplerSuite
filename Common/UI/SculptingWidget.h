@@ -1,8 +1,7 @@
-#pragma once
-
-#include <juce_gui_basics/juce_gui_basics.h>
+#include "../../Common/UI/SoteroLookAndFeel.h"
 #include "ADSRWidget.h"
 #include "FilterWidget.h"
+#include <juce_gui_basics/juce_gui_basics.h>
 
 namespace sotero {
 
@@ -19,6 +18,8 @@ public:
         addAndMakeVisible(velSensSlider);
         
         title.setText("SCULPTING TOOLS", juce::dontSendNotification);
+        title.setColour(juce::Label::textColourId, SoteroLookAndFeel::getYellowAccent());
+        
         velSensSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
         velSensSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 15);
     }
@@ -27,21 +28,21 @@ public:
         auto r = getLocalBounds().reduced(10);
         title.setBounds(r.removeFromTop(25));
         
-        auto adsrArea = r.removeFromLeft(r.getWidth() * 0.6f).reduced(5);
+        auto adsrArea = r.removeFromLeft(r.getWidth() * 0.61f).reduced(5); // Adjusted slightly
         adsrWidget.setBounds(adsrArea);
         
-        auto filterArea = r.removeFromTop(r.getHeight() * 0.7f).reduced(5);
+        auto filterArea = r.removeFromTop(r.getHeight() * 0.65f).reduced(5);
         filterWidget.setBounds(filterArea);
         
-        velSensSlider.setBounds(r.reduced(5));
+        velSensSlider.setBounds(r.reduced(10, 5));
     }
 
     void paint(juce::Graphics &g) override {
-        auto r = getLocalBounds().reduced(2);
-        g.setColour(juce::Colour(0xff0a0a0a));
-        g.fillRoundedRectangle(r.toFloat(), 4.0f);
-        g.setColour(juce::Colours::white.withAlpha(0.1f));
-        g.drawRoundedRectangle(r.toFloat(), 4.0f, 1.0f);
+        auto r = getLocalBounds().toFloat().reduced(1.0f);
+        g.setColour(SoteroLookAndFeel::getWidgetBackground());
+        g.fillRoundedRectangle(r, 4.0f);
+        g.setColour(juce::Colours::white.withAlpha(0.12f));
+        g.drawRoundedRectangle(r, 4.0f, 1.0f);
     }
 
     ADSRWidget& getADSR() { return adsrWidget; }

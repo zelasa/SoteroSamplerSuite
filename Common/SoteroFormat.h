@@ -68,7 +68,7 @@ struct KeyMapping {
 
   int filterType = 0; // 0 = None, 1 = LP, 2 = HP, 3 = BP
   float filterCutoff = 20000.0f;
-  float filterResonance = 1.0f;
+  float filterResonance = 0.707f;
 };
 
 /** Metadata for a MIDI Loop slot */

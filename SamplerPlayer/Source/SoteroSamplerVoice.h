@@ -24,15 +24,15 @@ public:
                      float ac = 0.0f, float dc = 0.0f, float rc = 0.0f,
                      int fType = 0, float fCut = 20000.0f, float fRes = 1.0f,
                      bool eAdsr = true, bool eFilter = true,
-                     float vSustain = 0.5f)
+                     float vSustain = 0.5f, int sourceMappingIndex = -1)
       : juce::SamplerSound(name, source, midiNotes, midiRootNote,
                            attackTimeSecs, releaseTimeSecs,
                            maxSampleLengthSecs),
         chokeGroupId(chokeGroup), velocityLow(vLow), velocityHigh(vHigh),
         sampleStart(start), sampleEnd(end), fadeIn(fIn), fadeOut(fOut),
         volumeMultiplier(vol), fineTuneCents(fineTune), micLayer(micLayer),
-        midiRootNote(midiRootNote), filterType(fType), filterCutoff(fCut),
-        filterResonance(fRes) {
+        sourceMappingIndex(sourceMappingIndex), midiRootNote(midiRootNote),
+        filterType(fType), filterCutoff(fCut), filterResonance(fRes) {
 
     sampleRate = source.sampleRate;
     adsrParams.attack = a;
@@ -64,12 +64,13 @@ public:
   float volumeMultiplier = 1.0f;
   float fineTuneCents = 0.0f;
   int micLayer = 0;
+  int sourceMappingIndex = -1;
 
   sotero::CurvedADSR::Parameters adsrParams;
 
   // Filter parameters (Foundation)
   float filterCutoff = 20000.0f;
-  float filterResonance = 0.1f;
+  float filterResonance = 0.707f;
   int filterType = 0; // 0: Bypass, 1: LowPass, 2: HighPass, 3: BandPass
 
   // Master Bypasses
