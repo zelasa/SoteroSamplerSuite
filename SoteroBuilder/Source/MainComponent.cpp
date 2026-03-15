@@ -3,17 +3,26 @@
 #include "../../SamplerPlayer/Source/SoteroSamplerVoice.h"
 #include "BinaryData.h"
 #include <thread>
+#include "../../Common/UI/LoopMainControls.h"
 
 namespace sotero {
 
 // MainComponent implementation
 MainComponent::MainComponent()
-    : engine(std::make_unique<SoteroEngine>()) {
+    : engine(std::make_unique<SoteroEngine>()),
+      libraryData(engine->getMetadata()) {
   setLookAndFeel(&lookAndFeel);
   libraryData.mappings.clear();
 
   // --- BUILDERUI Modular Panels ---
   addAndMakeVisible(headerPanel);
+  headerPanel.getLoopsBtn().onClick = [this] {
+      auto* popup = new LoopMainControls(*engine);
+      popup->setSize(400, 300);
+      juce::CallOutBox::launchAsynchronously(std::unique_ptr<juce::Component>(popup), 
+                                             headerPanel.getLoopsBtn().getScreenBounds(), 
+                                             nullptr);
+  };
 
   waveform1 = std::make_unique<WaveformWidget>(0);
   waveform2 = std::make_unique<WaveformWidget>(1);
@@ -31,13 +40,14 @@ MainComponent::MainComponent()
   // --- Sculpting Panel Wiring ---
   auto &sp = sculptingPanel;
 
-  sp.getADSR().onADSRChanged = [this](float a, float d, float s, float r) {
+  sp.getADSR().onADSRChanged = [this](float a, float d, float s, float r, float sTime) {
     if (activeMappingIndex >= 0 && activeMappingIndex < libraryData.mappings.size()) {
         auto &m = libraryData.mappings.getReference(activeMappingIndex);
         m.adsrAttack = a;
         m.adsrDecay = d;
         m.adsrSustain = s;
         m.adsrRelease = r;
+        m.adsrSustainTime = sTime;
         
         engine->updateSoundParameters(activeMappingIndex, m);
 
@@ -50,6 +60,7 @@ MainComponent::MainComponent()
                 mc.adsrDecay = d;
                 mc.adsrSustain = s;
                 mc.adsrRelease = r;
+                mc.adsrSustainTime = sTime;
                 engine->updateSoundParameters(counterpart, mc);
             }
         }
@@ -270,31 +281,38 @@ MainComponent::MainComponent()
   }
 
   // --- TO PLAYER Toggles Wiring (Independent Layers) ---
-  auto updateLayerBypass = [this](int layerIdx) {
-    bool isEnabled = (layerIdx == 0)
-                         ? mappingPanel.layer1->toPlayerToggle.getToggleState()
-                         : mappingPanel.layer2->toPlayerToggle.getToggleState();
-
-    // Header toggle shows an "overall" state (e.g., ON if ANY is ON, or just
-    // syncs if preferred) User requested independent clicking, so we just
-    // trigger rebuild.
-    rebuildSynth();
+  mappingPanel.layer1->toPlayerToggle.onStateChange = [this] {
+    bool state = mappingPanel.layer1->toPlayerToggle.getToggleState();
+    if (waveform1) waveform1->getToPlayerToggle().setToggleState(state, juce::dontSendNotification);
+    engine->setLayerBypass(0, !state);
+  };
+  mappingPanel.layer2->toPlayerToggle.onStateChange = [this] {
+    bool state = mappingPanel.layer2->toPlayerToggle.getToggleState();
+    if (waveform2) waveform2->getToPlayerToggle().setToggleState(state, juce::dontSendNotification);
+    engine->setLayerBypass(1, !state);
   };
 
-  mappingPanel.layer1->toPlayerToggle.onStateChange =
-      [this, updateLayerBypass] { updateLayerBypass(0); };
-  mappingPanel.layer2->toPlayerToggle.onStateChange =
-      [this, updateLayerBypass] { updateLayerBypass(1); };
+  if (waveform1) {
+      waveform1->getToPlayerToggle().onStateChange = [this] {
+          mappingPanel.layer1->toPlayerToggle.setToggleState(waveform1->getToPlayerToggle().getToggleState(), juce::sendNotification);
+      };
+  }
+  if (waveform2) {
+      waveform2->getToPlayerToggle().onStateChange = [this] {
+          mappingPanel.layer2->toPlayerToggle.setToggleState(waveform2->getToPlayerToggle().getToggleState(), juce::sendNotification);
+      };
+  }
 
-  // Sync Global Header toggle to Layer 1 for now, or make it a "Master" toggle
-  // that overrides
   headerPanel.getToPlayerToggle().onStateChange = [this] {
     bool state = headerPanel.getToPlayerToggle().getToggleState();
-    mappingPanel.layer1->toPlayerToggle.setToggleState(state,
-                                                       juce::sendNotification);
-    mappingPanel.layer2->toPlayerToggle.setToggleState(state,
-                                                       juce::sendNotification);
+    mappingPanel.layer1->toPlayerToggle.setToggleState(state, juce::sendNotification);
+    mappingPanel.layer2->toPlayerToggle.setToggleState(state, juce::sendNotification);
   };
+
+  // Initial Sync: UI starts unchecked, Engine now starts bypassed=true.
+  // Explicitly trigger a refresh just in case.
+  engine->setLayerBypass(0, true);
+  engine->setLayerBypass(1, true);
 
   setAudioChannels(0, 2);
   lastBrowseDirectory =
@@ -390,68 +408,7 @@ void MainComponent::handleIncomingMidiMessage(
 void MainComponent::releaseResources() {}
 
 void MainComponent::rebuildSynth() {
-  // 1. Prepare all readers and sounds OFF-LOCK in a background thread
-  auto buildTask = [this]() {
-    juce::ReferenceCountedArray<juce::SynthesiserSound> newSounds;
-
-    std::unique_ptr<juce::FileInputStream> stream;
-    if (currentLibraryFile.existsAsFile())
-      stream = std::make_unique<juce::FileInputStream>(currentLibraryFile);
-
-    for (int mIndex = 0; mIndex < libraryData.mappings.size(); ++mIndex) {
-      auto &m = libraryData.mappings.getReference(mIndex);
-      if (m.samplePath.isNotEmpty()) {
-        std::unique_ptr<juce::AudioFormatReader> reader;
-
-        juce::File file(m.samplePath);
-        if (file.existsAsFile()) {
-          reader.reset(engine->getFormatManager().createReaderFor(file));
-        } else if (stream != nullptr && stream->openedOk()) {
-          auto data =
-              sotero::SoteroArchive::extractResource(*stream, m.samplePath);
-          if (data.getSize() > 0) {
-            auto memStream =
-                std::make_unique<juce::MemoryInputStream>(data, true);
-            reader.reset(engine->getFormatManager().createReaderFor(std::move(memStream)));
-          }
-        }
-
-        if (reader != nullptr) {
-          juce::BigInteger range;
-          range.setBit(m.midiNote);
-
-          bool bypassLayer1 =
-              !mappingPanel.layer1->toPlayerToggle.getToggleState();
-          bool bypassLayer2 =
-              !mappingPanel.layer2->toPlayerToggle.getToggleState();
-          bool isBypassed =
-              (m.micLayer == 0 && bypassLayer1) || (m.micLayer == 1 && bypassLayer2);
-
-          newSounds.add(new sotero::SoteroSamplerSound(
-              m.samplePath, *reader, range, m.midiNote, 0.01, 0.1, 10.0,
-              m.chokeGroup, m.velocityLow, m.velocityHigh, m.sampleStart,
-              m.sampleEnd, m.fadeIn, m.fadeOut, m.volumeMultiplier,
-              m.fineTuneCents, m.micLayer, m.adsrAttack, m.adsrDecay,
-              m.adsrSustain, m.adsrRelease, m.adsrAttackCurve, m.adsrDecayCurve,
-              m.adsrReleaseCurve, m.filterType, m.filterCutoff,
-              m.filterResonance, libraryData.enableADSR && !isBypassed,
-              libraryData.enableFilter && !isBypassed, m.adsrSustainTime, mIndex));
-        }
-      }
-    }
-
-    // 2. Quickly swap sounds inside the lock on the Message Thread
-    juce::MessageManager::callAsync([this, newSounds]() {
-      engine->clearSounds();
-      for (auto *s : newSounds) {
-        if (auto* ss = dynamic_cast<sotero::SoteroSamplerSound*>(s))
-            engine->addSound(ss);
-      }
-    });
-  };
-
-  // Launch the task on a background thread
-  std::thread(buildTask).detach();
+  engine->rebuildSynth();
 }
 
 void MainComponent::auditionSample(const juce::String &path, int midiNote,
@@ -933,30 +890,12 @@ void MainComponent::loadSoteroLibrary(const juce::File &file) {
     return;
 
   deselectAllRegions();
+  engine->loadSoteroLibrary(file);
 
-  auto imported = sotero::SoteroArchive::readMetadata(file);
-  if (imported.mappings.size() > 0) {
-    currentLibraryFile = file;
-    libraryData = imported;
-    metadataPanel.getNameEditor().setText(libraryData.name);
-    metadataPanel.getAuthorEditor().setText(libraryData.author);
+  metadataPanel.getNameEditor().setText(libraryData.name);
+  metadataPanel.getAuthorEditor().setText(libraryData.author);
 
-    // Load artwork if present
-    currentArtwork = juce::Image(); // Reset
-    if (libraryData.artworkPath.isNotEmpty()) {
-      auto artData =
-          sotero::SoteroArchive::extractResource(file, libraryData.artworkPath);
-      if (artData.getSize() > 0) {
-        currentArtwork = juce::ImageFileFormat::loadFrom(artData.getData(),
-                                                         artData.getSize());
-      }
-    }
-
-    // Updated to use modular sculptingPanel
-    // (Note: libraryData.enableADSR etc. will be mapped to UI in Phase 7)
-    updateGridUI();
-    rebuildSynth();
-  }
+  updateGridUI();
 }
 
 

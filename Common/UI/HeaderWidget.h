@@ -20,6 +20,7 @@ public:
         addAndMakeVisible(newBtn);
         addAndMakeVisible(closeBtn);
         addAndMakeVisible(toPlayerToggle);
+        addAndMakeVisible(loopsBtn);
         addAndMakeVisible(versionLabel);
 
         titleLabel.setFont(juce::Font(22.0f, juce::Font::bold));
@@ -58,6 +59,9 @@ public:
 
         // Toggle
         toPlayerToggle.setBounds(r.removeFromRight(100).reduced(2));
+        
+        // Loops Button
+        loopsBtn.setBounds(r.removeFromRight(100).reduced(2));
     }
 
     // Public access to components for wiring (or use callbacks)
@@ -68,6 +72,7 @@ public:
     juce::TextButton& getNewBtn() { return newBtn; }
     juce::TextButton& getCloseBtn() { return closeBtn; }
     juce::ToggleButton& getToPlayerToggle() { return toPlayerToggle; }
+    juce::TextButton& getLoopsBtn() { return loopsBtn; }
 
     void setTitle(const juce::String& text) { titleLabel.setText(text, juce::dontSendNotification); }
     void setVersion(const juce::String& text) { versionLabel.setText(text, juce::dontSendNotification); }
@@ -77,6 +82,7 @@ private:
     juce::TextButton devModeBtn{"DEVELOPER"}, userModeBtn{"USER PLAYER"};
     juce::TextButton saveBtn{"SAVE"}, loadBtn{"LOAD"}, newBtn{"NEW"}, closeBtn{"CLOSE"};
     juce::ToggleButton toPlayerToggle{"TO PLAYER"};
+    juce::TextButton loopsBtn{"LOOPS"};
     juce::Label versionLabel{"Version", "v0.4.0"};
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(HeaderWidget)

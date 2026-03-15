@@ -50,7 +50,7 @@ void SamplerPlayerAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
   double bpm = getPlayHead() != nullptr
                    ? (*getPlayHead()->getPosition()).getBpm().orFallback(120.0)
                    : 120.0;
-  loopEngine.processBlock(buffer, midiMessages, bpm);
+  engine->setBpm(bpm);
 
   // Delegate all synth + effects processing to the engine
   engine->process(buffer, midiMessages);
@@ -135,6 +135,14 @@ void SamplerPlayerAudioProcessor::auditionMappingStart(int mappingIndex, float v
 
 void SamplerPlayerAudioProcessor::auditionMappingStop(int mappingIndex) {
   engine->auditionMappingStop(mappingIndex);
+}
+
+void SamplerPlayerAudioProcessor::triggerLoop(int slotIndex, bool shouldPlay) {
+    engine->triggerLoop(slotIndex, shouldPlay);
+}
+
+void SamplerPlayerAudioProcessor::setLoopCancellationMode(bool active) {
+    engine->setLoopCancellationMode(active);
 }
 
 juce::AudioProcessor *JUCE_CALLTYPE createPluginFilter() {

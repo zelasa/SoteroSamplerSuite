@@ -55,6 +55,10 @@ public:
   void loadSoteroLibrary(const juce::File &file) override;
   void auditionMappingStart(int mappingIndex, float velocity) override;
   void auditionMappingStop(int mappingIndex) override;
+  
+  void triggerLoop(int slotIndex, bool shouldPlay) override;
+  void setLoopCancellationMode(bool active) override;
+  void setBpm(double bpm) override { engine->setBpm(bpm); }
 
   juce::File getCurrentLibraryFile() const { return currentLibraryFile; }
 
@@ -69,7 +73,6 @@ private:
   juce::File currentLibraryFile;
   std::atomic<int> currentView{0};
 
-  sotero::SoteroLoopEngine loopEngine;
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SamplerPlayerAudioProcessor)
 };

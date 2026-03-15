@@ -78,7 +78,7 @@ private:
 
   // --- Data ---
   LibraryController libraryController;
-  LibraryMetadata libraryData;
+  LibraryMetadata& libraryData;
   juce::Image currentArtwork;
   int activeMappingIndex = -1;
   juce::File lastBrowseDirectory;

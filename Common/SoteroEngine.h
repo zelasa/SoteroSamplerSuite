@@ -4,6 +4,9 @@
 #include "../../SamplerPlayer/Source/SoteroSamplerVoice.h"
 #include "SoteroMetadata.h"
 #include "SoteroEngineInterface.h"
+#include "SoteroFormat.h"
+#include "SoteroArchive.h"
+#include "SoteroLoopEngine.h"
 #include <cmath>
 
 namespace sotero {
@@ -103,8 +106,97 @@ public:
     bool isLibraryLoaded() const override { return libraryLoaded; }
     int getLastMidiNote() const override { return lastMidiNote.load(); }
     int getLastMidiVelocity() const override { return lastMidiVelocity.load(); }
+    LibraryMetadata& getMetadata() { return currentMetadata; }
     
-    void loadSoteroLibrary(const juce::File& file) override { (void)file; }
+    void setBpm(double bpm) override { lastBpm.store(bpm); }
+    
+    void loadSoteroLibrary(const juce::File& file) override {
+        const juce::ScopedLock sl(synthLock);
+        currentLibraryFile = file;
+        currentMetadata = SoteroArchive::readMetadata(file);
+        
+        currentLibName = currentMetadata.name;
+        currentLibAuthor = currentMetadata.author;
+        currentLibDesc = currentMetadata.description;
+        
+        // Handle Artwork
+        if (currentMetadata.artworkPath.isNotEmpty()) {
+            auto data = SoteroArchive::extractResource(file, currentMetadata.artworkPath);
+            if (data.getSize() > 0)
+                currentArtwork = juce::ImageFileFormat::loadFrom(data.getData(), data.getSize());
+        }
+        
+        libraryLoaded = true;
+        loopEngine.setLoops(currentMetadata.loops, file);
+        rebuildSynth();
+    }
+
+    void rebuildSynth() {
+        const juce::ScopedLock sl(synthLock);
+        juce::ReferenceCountedArray<juce::SynthesiserSound> newSounds;
+
+        std::unique_ptr<juce::FileInputStream> stream;
+        if (currentLibraryFile.existsAsFile())
+            stream = std::make_unique<juce::FileInputStream>(currentLibraryFile);
+
+        for (int mIndex = 0; mIndex < currentMetadata.mappings.size(); ++mIndex) {
+            auto &m = currentMetadata.mappings.getReference(mIndex);
+            if (m.samplePath.isNotEmpty()) {
+                std::unique_ptr<juce::AudioFormatReader> reader;
+
+                juce::File file(m.samplePath);
+                if (file.existsAsFile()) {
+                    reader.reset(formatManager.createReaderFor(file));
+                } else if (stream != nullptr && stream->openedOk()) {
+                    auto data = SoteroArchive::extractResource(*stream, m.samplePath);
+                    if (data.getSize() > 0) {
+                        auto memStream = std::make_unique<juce::MemoryInputStream>(data, true);
+                        reader.reset(formatManager.createReaderFor(std::move(memStream)));
+                    }
+                }
+
+                if (reader != nullptr) {
+                    juce::BigInteger range;
+                    range.setBit(m.midiNote);
+
+                    bool isBypassed = (m.micLayer == 0 && layer1Bypassed) || (m.micLayer == 1 && layer2Bypassed);
+
+                    newSounds.add(new sotero::SoteroSamplerSound(
+                        m.samplePath, *reader, range, m.midiNote, 0.01, 0.1, 10.0,
+                        m.chokeGroup, m.velocityLow, m.velocityHigh, m.sampleStart,
+                        m.sampleEnd, m.fadeIn, m.fadeOut, m.volumeMultiplier,
+                        m.fineTuneCents, m.micLayer, m.adsrAttack, m.adsrDecay,
+                        m.adsrSustain, m.adsrRelease, m.adsrAttackCurve, m.adsrDecayCurve,
+                        m.adsrReleaseCurve, m.filterType, m.filterCutoff,
+                        m.filterResonance, currentMetadata.enableADSR && !isBypassed,
+                        currentMetadata.enableFilter && !isBypassed, m.adsrSustainTime, mIndex));
+                }
+            }
+        }
+
+        synth.clearSounds();
+        for (auto *s : newSounds) {
+            if (auto* ss = dynamic_cast<sotero::SoteroSamplerSound*>(s))
+                synth.addSound(ss);
+        }
+    }
+
+    void setLayerBypass(int layerIdx, bool bypassed) {
+        const juce::ScopedLock sl(synthLock);
+        if (layerIdx == 0) layer1Bypassed = bypassed;
+        else if (layerIdx == 1) layer2Bypassed = bypassed;
+        rebuildSynth();
+    }
+
+    void triggerLoop(int slotIndex, bool shouldPlay) override {
+        const juce::ScopedLock sl(synthLock);
+        loopEngine.triggerLoop(slotIndex, shouldPlay);
+    }
+
+    void setLoopCancellationMode(bool active) override {
+        const juce::ScopedLock sl(synthLock);
+        loopEngine.setCancellationMode(active);
+    }
 
     void auditionMappingStart(int mappingIndex, float velocity) override {
         const juce::ScopedLock sl(synthLock);
@@ -165,6 +257,10 @@ public:
         }
 
         const juce::ScopedLock sl(synthLock);
+
+        // --- Loop Engine Processing ---
+        loopEngine.processBlock(buffer, midiMessages, lastBpm.load(), spec.sampleRate);
+
         synth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
 
         // Master FX Chain
@@ -333,7 +429,13 @@ private:
     std::atomic<int> lastMidiNote{-1}, lastMidiVelocity{-1};
     juce::String currentLibName, currentLibAuthor, currentLibDesc;
     juce::Image currentArtwork;
+    juce::File currentLibraryFile;
+    LibraryMetadata currentMetadata;
     bool libraryLoaded = false;
+    bool layer1Bypassed = true;
+    bool layer2Bypassed = true;
+    std::atomic<double> lastBpm{120.0};
+    sotero::SoteroLoopEngine loopEngine;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SoteroEngine)
 };

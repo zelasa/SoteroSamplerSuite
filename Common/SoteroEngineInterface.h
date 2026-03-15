@@ -35,6 +35,11 @@ public:
   // Global monitoring
   virtual int getLastMidiNote() const = 0;
   virtual int getLastMidiVelocity() const = 0;
+
+  // MIDI Loop Engine
+  virtual void triggerLoop(int slotIndex, bool shouldPlay) = 0;
+  virtual void setLoopCancellationMode(bool active) = 0;
+  virtual void setBpm(double bpm) = 0;
 };
 
 } // namespace sotero

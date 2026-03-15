@@ -61,6 +61,9 @@ public:
       m->setAttribute("adsrD", (double)mapping.adsrDecay);
       m->setAttribute("adsrS", (double)mapping.adsrSustain);
       m->setAttribute("adsrR", (double)mapping.adsrRelease);
+      m->setAttribute("adsrAC", (double)mapping.adsrAttackCurve);
+      m->setAttribute("adsrDC", (double)mapping.adsrDecayCurve);
+      m->setAttribute("adsrRC", (double)mapping.adsrReleaseCurve);
       m->setAttribute("adsrST", (double)mapping.adsrSustainTime);
       m->setAttribute("fType", mapping.filterType);
       m->setAttribute("fCut", (double)mapping.filterCutoff);
@@ -133,6 +136,9 @@ public:
           mapping.adsrDecay = (float)m->getDoubleAttribute("adsrD", 0.1);
           mapping.adsrSustain = (float)m->getDoubleAttribute("adsrS", 1.0);
           mapping.adsrRelease = (float)m->getDoubleAttribute("adsrR", 0.1);
+          mapping.adsrAttackCurve = (float)m->getDoubleAttribute("adsrAC", 0.0);
+          mapping.adsrDecayCurve = (float)m->getDoubleAttribute("adsrDC", 0.0);
+          mapping.adsrReleaseCurve = (float)m->getDoubleAttribute("adsrRC", 0.0);
           mapping.adsrSustainTime = (float)m->getDoubleAttribute("adsrST", 0.5);
           mapping.filterType = m->getIntAttribute("fType", 0);
           mapping.filterCutoff = (float)m->getDoubleAttribute("fCut", 20000.0);

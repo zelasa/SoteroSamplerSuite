@@ -46,6 +46,21 @@ public:
     repaint();
   }
 
+  float getAttack() const { return attack; }
+  float getDecay() const { return decay; }
+  float getSustain() const { return sustain; }
+  float getRelease() const { return release; }
+  float getAttackCurve() const { return attackCurve; }
+  float getDecayCurve() const { return decayCurve; }
+  float getReleaseCurve() const { return releaseCurve; }
+  float getSustainTime() const { return sustainTime; }
+
+  void updateADSR(float a, float d, float s, float r, float sTime) {
+    if (draggingIndex != -1) return;
+    attack = a; decay = d; sustain = s; release = r; sustainTime = sTime;
+    repaint();
+  }
+
   void paint(juce::Graphics &g) override {
     auto bounds = getLocalBounds().toFloat();
     auto r = bounds.reduced(30.0f, 20.0f);
@@ -249,11 +264,9 @@ public:
     // Mapping logic
     if (draggingIndex == 1) { // Attack Node
       attack = juce::jlimit(0.001f, dragMaxT, dragStartValues.a + dx);
-      peakLevel = juce::jlimit(0.0f, 1.0f, dragStartValues.peak + dy);
+      peakLevel = 1.0f; // LOCKED: Attack is always 100% volume
       if (onAttackChange)
         onAttackChange(attack);
-      if (onPeakLevelChange)
-        onPeakLevelChange(peakLevel);
     } else if (draggingIndex == 2) { // Decay Node
       decay = juce::jlimit(0.001f, dragMaxT, dragStartValues.d + dx);
       sustain = juce::jlimit(0.0f, 1.0f, dragStartValues.s + dy);
